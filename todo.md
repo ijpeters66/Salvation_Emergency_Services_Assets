@@ -60,20 +60,20 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 3. Technical Foundation
 
-- [ ] Create or verify the Next.js app.
-- [ ] Use TypeScript.
-- [ ] Use Tailwind CSS.
-- [ ] Use shadcn/ui or the agreed component system.
-- [ ] Add ESLint.
-- [ ] Add Prettier.
-- [ ] Add Vitest.
-- [ ] Add Playwright.
-- [ ] Add project scripts for linting, tests, build, and dev server.
+- [x] Create or verify the Next.js app.
+- [x] Use TypeScript.
+- [x] Use Tailwind CSS.
+- [x] Use shadcn/ui or the agreed component system.
+- [x] Add ESLint.
+- [x] Add Prettier.
+- [x] Add Vitest.
+- [x] Add Playwright.
+- [x] Add project scripts for linting, tests, build, and dev server.
 - [ ] Add environment variable validation.
 - [ ] Add a safe health route.
-- [ ] Add a consistent app shell.
-- [ ] Add mobile-friendly navigation.
-- [ ] Add desktop-friendly navigation.
+- [x] Add a consistent app shell.
+- [x] Add mobile-friendly navigation.
+- [x] Add desktop-friendly navigation.
 - [ ] Add protected route structure.
 - [ ] Add error boundaries where appropriate.
 - [ ] Add loading states.
@@ -134,20 +134,20 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 6. Navigation and App Shell
 
-- [ ] Add Dashboard route.
-- [ ] Add Locations route.
-- [ ] Add Assets route.
-- [ ] Add Consumables route.
-- [ ] Add Deployments route.
-- [ ] Add Maintenance route.
-- [ ] Add Reports route.
-- [ ] Add Settings route.
+- [x] Add Dashboard route.
+- [x] Add Locations route.
+- [x] Add Assets route.
+- [x] Add Consumables route.
+- [x] Add Deployments route.
+- [x] Add Maintenance route.
+- [x] Add Reports route.
+- [x] Add Settings route.
 - [ ] Add Audit Trail route for admins.
 - [ ] Add QR scan entry point.
 - [ ] Add clear active navigation state.
 - [ ] Add mobile navigation drawer.
-- [ ] Add tablet-friendly layout.
-- [ ] Add desktop sidebar layout.
+- [x] Add tablet-friendly layout.
+- [x] Add desktop sidebar layout.
 - [ ] Confirm navigation is usable with touch.
 - [ ] Confirm key workflows can be reached in two clicks or less.
 
@@ -552,7 +552,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 25. Testing
 
-- [ ] Add unit tests for shared utilities.
+- [x] Add unit tests for shared utilities.
 - [ ] Add unit tests for validation logic.
 - [ ] Add unit tests for status transitions.
 - [ ] Add unit tests for FIFO calculations.
@@ -560,7 +560,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Add unit tests for audit payload construction.
 - [ ] Add integration tests for database operations where practical.
 - [ ] Add RLS policy tests where practical.
-- [ ] Add Playwright smoke test for dashboard.
+- [x] Add Playwright smoke test for dashboard.
 - [ ] Add Playwright test for login redirect.
 - [ ] Add Playwright test for location CRUD.
 - [ ] Add Playwright test for asset CRUD.
@@ -570,10 +570,10 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Add Playwright test for reports route.
 - [ ] Add mobile viewport tests.
 - [ ] Add offline behaviour tests where practical.
-- [ ] Run lint before handoff.
-- [ ] Run unit tests before handoff.
+- [x] Run lint before handoff.
+- [x] Run unit tests before handoff.
 - [ ] Run Playwright tests before handoff.
-- [ ] Run production build before handoff.
+- [x] Run production build before handoff.
 
 ## 26. Data Migration
 

@@ -16,3 +16,5 @@ client_brief/rendered_pages/
 client_brief/*.pdf
 ~$*.docx
 **/~$*.docx
+playwright-report/
+test-results/
