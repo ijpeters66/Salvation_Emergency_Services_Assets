@@ -94,15 +94,15 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Set up Supabase browser client.
 - [x] Set up Supabase server client.
 - [ ] Define database naming conventions.
-- [ ] Create migration workflow.
-- [ ] Create user profile table.
-- [ ] Create role table.
-- [ ] Create permission table.
-- [ ] Create role_permission table.
-- [ ] Create audit_log table.
-- [ ] Enable Row Level Security on all tables.
-- [ ] Add RLS policies for system admins.
-- [ ] Add RLS policies for ordinary users.
+- [x] Create migration workflow.
+- [x] Create user profile table.
+- [x] Create role table.
+- [x] Create permission table.
+- [x] Create role_permission table.
+- [x] Create audit_log table.
+- [x] Enable Row Level Security on all tables.
+- [x] Add RLS policies for system admins.
+- [x] Add RLS policies for ordinary users.
 - [ ] Add created_at and updated_at fields where needed.
 - [ ] Add created_by and updated_by fields where needed.
 - [ ] Add archived_at or soft-delete fields where needed.
@@ -110,7 +110,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Add indexes for QR lookup fields.
 - [ ] Add indexes for reporting queries.
 - [ ] Add database comments for important business rules.
-- [ ] Generate or maintain TypeScript database types.
+- [x] Generate or maintain TypeScript database types.
 - [ ] Test key RLS policies.
 
 ## 5. Authentication and Roles
@@ -557,7 +557,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Add unit tests for status transitions.
 - [ ] Add unit tests for FIFO calculations.
 - [ ] Add unit tests for stock movement calculations.
-- [ ] Add unit tests for audit payload construction.
+- [x] Add unit tests for audit payload construction.
 - [ ] Add integration tests for database operations where practical.
 - [ ] Add RLS policy tests where practical.
 - [x] Add Playwright smoke test for dashboard.
@@ -599,7 +599,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 27. Security, Privacy, and Reliability
 
-- [ ] Confirm no secrets are committed.
+- [x] Confirm no secrets are committed.
 - [x] Confirm environment variables are documented.
 - [ ] Confirm RLS is enabled on all relevant tables.
 - [ ] Confirm ordinary users cannot access admin-only data.
