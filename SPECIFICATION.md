@@ -433,6 +433,42 @@ Support configurable:
 - Filters Applied
 - Page Numbers
 
+### Branding Reference
+The following values were extracted from the live Salvation Army Australia website on 10 June 2026 and should be used as the starting point for the application theme, document exports, and report styling. Confirm final brand usage with the client before production release.
+
+#### Colours
+- Primary red / shield red: `#EF3E42`
+- Site primary action red: `#E12D3C`
+- Button red: `#E63241`
+- Dark heading red: `#B51623`
+- Deep navy: `#003450`
+- Alternate navy: `#003350`
+- Link blue: `#007FAF`
+- Dark grey text: `#4B4B4B`
+- Near-black text: `#191919`
+- Light grey background: `#F4F4F4`
+- White: `#FFFFFF`
+
+#### Typography
+- Base/root web font: `Roboto, sans-serif`
+- Primary brand/site font family: `SlateStd`
+- Common SlateStd variants used on the website:
+  - `SlateStd-Medium`
+  - `SlateStd-Light`
+  - `SlateStd-Bold`
+  - `SlateStd-BoldCondensed`
+  - `SlateStd-bk`
+- Fallback fonts: `Arial`, `Helvetica`, `Arial Narrow`, `sans-serif`
+- Adobe Typekit also loads `playfair-display`, but it appears to be a secondary or special-use font rather than the main interface font.
+
+#### Recommended App Theme Usage
+- Use `#E12D3C` as the main action/accent colour.
+- Use `#003450` for navy headers, report accents, and high-trust operational UI elements.
+- Use `#4B4B4B` or `#191919` for body text.
+- Use `#F4F4F4` for quiet panel, table, and report backgrounds.
+- Use `SlateStd-BoldCondensed` for branded headings where the font is licensed and available; otherwise use `Arial Narrow` or a suitable condensed sans-serif fallback.
+- Use `Roboto` or `Arial` for body/interface text.
+
 ### Reports
 
 #### Assets
