@@ -69,8 +69,8 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add Vitest.
 - [x] Add Playwright.
 - [x] Add project scripts for linting, tests, build, and dev server.
-- [ ] Add environment variable validation.
-- [ ] Add a safe health route.
+- [x] Add environment variable validation.
+- [x] Add a safe health route.
 - [x] Add a consistent app shell.
 - [x] Add mobile-friendly navigation.
 - [x] Add desktop-friendly navigation.
@@ -91,8 +91,8 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 - [ ] Create Supabase project or confirm existing project.
 - [ ] Set up local environment variables.
-- [ ] Set up Supabase browser client.
-- [ ] Set up Supabase server client.
+- [x] Set up Supabase browser client.
+- [x] Set up Supabase server client.
 - [ ] Define database naming conventions.
 - [ ] Create migration workflow.
 - [ ] Create user profile table.
@@ -553,7 +553,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 ## 25. Testing
 
 - [x] Add unit tests for shared utilities.
-- [ ] Add unit tests for validation logic.
+- [x] Add unit tests for validation logic.
 - [ ] Add unit tests for status transitions.
 - [ ] Add unit tests for FIFO calculations.
 - [ ] Add unit tests for stock movement calculations.
@@ -600,7 +600,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 ## 27. Security, Privacy, and Reliability
 
 - [ ] Confirm no secrets are committed.
-- [ ] Confirm environment variables are documented.
+- [x] Confirm environment variables are documented.
 - [ ] Confirm RLS is enabled on all relevant tables.
 - [ ] Confirm ordinary users cannot access admin-only data.
 - [ ] Confirm deleted/archived records are handled safely.
