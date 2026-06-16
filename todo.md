@@ -74,7 +74,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add a consistent app shell.
 - [x] Add mobile-friendly navigation.
 - [x] Add desktop-friendly navigation.
-- [ ] Add protected route structure.
+- [x] Add protected route structure.
 - [ ] Add error boundaries where appropriate.
 - [ ] Add loading states.
 - [ ] Add empty states.
@@ -115,19 +115,19 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 5. Authentication and Roles
 
-- [ ] Implement login.
-- [ ] Implement logout.
-- [ ] Protect app routes.
-- [ ] Keep `/login` public.
-- [ ] Keep `/health` public if required.
-- [ ] Load current user profile.
-- [ ] Load current user role.
-- [ ] Show current user email.
-- [ ] Show current user role.
-- [ ] Restrict Settings to system admins.
-- [ ] Restrict Audit Trail to system admins.
-- [ ] Confirm ordinary users can access operational modules.
-- [ ] Confirm unauthenticated users are redirected to login.
+- [x] Implement login.
+- [x] Implement logout.
+- [x] Protect app routes.
+- [x] Keep `/login` public.
+- [x] Keep `/health` public if required.
+- [x] Load current user profile.
+- [x] Load current user role.
+- [x] Show current user email.
+- [x] Show current user role.
+- [x] Restrict Settings to system admins.
+- [x] Restrict Audit Trail to system admins.
+- [x] Confirm ordinary users can access operational modules.
+- [x] Confirm unauthenticated users are redirected to login.
 - [ ] Confirm auth works on mobile.
 - [ ] Confirm session refresh works.
 - [ ] Confirm auth errors have plain-language messages.
@@ -142,7 +142,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add Maintenance route.
 - [x] Add Reports route.
 - [x] Add Settings route.
-- [ ] Add Audit Trail route for admins.
+- [x] Add Audit Trail route for admins.
 - [ ] Add QR scan entry point.
 - [ ] Add clear active navigation state.
 - [ ] Add mobile navigation drawer.

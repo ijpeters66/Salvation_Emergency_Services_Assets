@@ -1,14 +1,20 @@
 import Link from "next/link";
-import { QrCode, ShieldCheck } from "lucide-react";
+import { LogOut, QrCode, ShieldCheck, UserRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { appNavItems } from "@/lib/navigation";
+import { logoutAction } from "@/app/login/actions";
+import { getCurrentUserContext } from "@/lib/auth";
+import { getProfileLabel, getRoleAwareNavItems } from "@/lib/auth-state";
 
 type AppShellProps = {
   children: React.ReactNode;
 };
 
-export function AppShell({ children }: AppShellProps) {
+export async function AppShell({ children }: AppShellProps) {
+  const user = await getCurrentUserContext();
+  const profileLabel = getProfileLabel(user);
+  const navItems = getRoleAwareNavItems(user?.role ?? "user");
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-white">
@@ -27,9 +33,27 @@ export function AppShell({ children }: AppShellProps) {
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/login">Login</Link>
-            </Button>
+            <div className="hidden min-w-0 items-center gap-2 rounded-md border border-[var(--border)] px-3 py-2 sm:flex">
+              <UserRound className="size-4 shrink-0 text-[var(--brand-red)]" aria-hidden="true" />
+              <span className="min-w-0">
+                <span className="block max-w-44 truncate text-xs font-medium text-[var(--ink)]">
+                  {profileLabel.primary}
+                </span>
+                <span className="block text-xs text-[var(--muted)]">{profileLabel.secondary}</span>
+              </span>
+            </div>
+            {user ? (
+              <form action={logoutAction}>
+                <Button type="submit" variant="outline" size="sm" aria-label="Logout">
+                  <LogOut className="size-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </form>
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
             <Button asChild size="sm">
               <Link href="/dashboard">
                 <QrCode className="size-4" aria-hidden="true" />
@@ -43,7 +67,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[17rem_1fr]">
         <aside className="border-b border-[var(--border)] bg-white lg:border-b-0 lg:border-r">
           <nav aria-label="Main navigation" className="grid gap-1 p-3 lg:sticky lg:top-16">
-            {appNavItems.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
 
               return (

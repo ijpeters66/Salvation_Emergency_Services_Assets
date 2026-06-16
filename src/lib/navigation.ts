@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  FileClock,
   Gauge,
   MapPinned,
   Package,
@@ -15,48 +16,63 @@ export const appNavItems = [
     href: "/dashboard",
     icon: Gauge,
     description: "Operational overview, alerts, and recent activity.",
+    adminOnly: false,
   },
   {
     title: "Locations",
     href: "/locations",
     icon: MapPinned,
     description: "Warehouses, storage facilities, and temporary deployment sites.",
+    adminOnly: false,
   },
   {
     title: "Assets",
     href: "/assets",
     icon: Package,
     description: "Individual non-consumable assets, QR codes, status, and history.",
+    adminOnly: false,
   },
   {
     title: "Consumables",
     href: "/consumables",
     icon: PackageCheck,
     description: "Batch stock, quantities on hand, FIFO issuing, and thresholds.",
+    adminOnly: false,
   },
   {
     title: "Deployments",
     href: "/deployments",
     icon: Truck,
     description: "Operational deployments, assigned assets, and issued consumables.",
+    adminOnly: false,
   },
   {
     title: "Maintenance",
     href: "/maintenance",
     icon: Wrench,
     description: "Schedules, service records, compliance dates, and reminders.",
+    adminOnly: false,
   },
   {
     title: "Reports",
     href: "/reports",
     icon: BarChart3,
     description: "Asset, stock, deployment, maintenance, audit, and export views.",
+    adminOnly: false,
   },
   {
     title: "Settings",
     href: "/settings",
     icon: Settings,
     description: "Users, categories, movement reasons, and system configuration.",
+    adminOnly: true,
+  },
+  {
+    title: "Audit",
+    href: "/audit",
+    icon: FileClock,
+    description: "Review system activity, record changes, and compliance evidence.",
+    adminOnly: true,
   },
 ] as const;
 
@@ -95,6 +111,11 @@ export const modulePlaceholders = {
     eyebrow: "System administration",
     title: "Settings",
     summary: "Configure users, roles, categories, thresholds, and system defaults.",
+  },
+  audit: {
+    eyebrow: "Audit trail",
+    title: "Audit",
+    summary: "Review system activity, record changes, and compliance evidence.",
   },
 } as const;
 
