@@ -175,56 +175,56 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 8. Asset Categories
 
-- [ ] Create asset category table.
+- [x] Create asset category table.
 - [ ] Add create/edit/archive category workflows.
 - [ ] Support category-specific labels if needed.
-- [ ] Confirm categories are admin-managed.
-- [ ] Confirm archived categories remain visible on historical assets.
+- [x] Confirm categories are admin-managed.
+- [x] Confirm archived categories remain visible on historical assets.
 - [ ] Add category audit logging.
-- [ ] Add category tests.
+- [x] Add category tests.
 
 ## 9. Asset Management
 
-- [ ] Create asset table.
-- [ ] Add unique asset ID.
-- [ ] Add QR code field.
-- [ ] Add asset name.
-- [ ] Add category.
-- [ ] Add description.
-- [ ] Add serial number.
-- [ ] Add make.
-- [ ] Add model.
-- [ ] Add purchase date.
-- [ ] Add purchase cost.
-- [ ] Add replacement value.
-- [ ] Add current value.
-- [ ] Add current location.
-- [ ] Add status.
+- [x] Create asset table.
+- [x] Add unique asset ID.
+- [x] Add QR code field.
+- [x] Add asset name.
+- [x] Add category.
+- [x] Add description.
+- [x] Add serial number.
+- [x] Add make.
+- [x] Add model.
+- [x] Add purchase date.
+- [x] Add purchase cost.
+- [x] Add replacement value.
+- [x] Add current value.
+- [x] Add current location.
+- [x] Add status.
 - [ ] Add parent asset assignment.
 - [ ] Add assigned deployment.
-- [ ] Add notes.
+- [x] Add notes.
 - [ ] Add photo/document support.
-- [ ] Add asset list.
-- [ ] Add asset detail page.
-- [ ] Add asset create form.
-- [ ] Add asset edit form.
-- [ ] Add asset archive action.
-- [ ] Add asset filters.
-- [ ] Add asset search.
+- [x] Add asset list.
+- [x] Add asset detail page.
+- [x] Add asset create form.
+- [x] Add asset edit form.
+- [x] Add asset archive action.
+- [x] Add asset filters.
+- [x] Add asset search.
 - [ ] Add asset status workflow.
-- [ ] Support Available status.
-- [ ] Support Deployed status.
-- [ ] Support In Transit status.
-- [ ] Support Under Maintenance status.
-- [ ] Support Damaged status.
-- [ ] Support Retired status.
-- [ ] Support Lost/Stolen status.
+- [x] Support Available status.
+- [x] Support Deployed status.
+- [x] Support In Transit status.
+- [x] Support Under Maintenance status.
+- [x] Support Damaged status.
+- [x] Support Retired status.
+- [x] Support Lost/Stolen status.
 - [ ] Add status change audit logging.
 - [ ] Add location change audit logging.
-- [ ] Add asset value change audit logging.
-- [ ] Add asset tests.
-- [ ] Confirm duplicate asset IDs are blocked.
-- [ ] Confirm QR lookup finds the correct asset.
+- [x] Add asset value change audit logging.
+- [x] Add asset tests.
+- [x] Confirm duplicate asset IDs are blocked.
+- [x] Confirm QR lookup finds the correct asset.
 - [ ] Confirm retired assets stay visible in historical reports.
 
 ## 10. Parent and Child Asset Relationships

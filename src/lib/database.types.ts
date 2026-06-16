@@ -30,6 +30,111 @@ export type Database = {
         };
         Relationships: [];
       };
+      asset: {
+        Row: {
+          id: string;
+          unique_asset_id: string;
+          qr_code_value: string;
+          asset_name: string;
+          category_id: string;
+          description: string | null;
+          serial_number: string | null;
+          make: string | null;
+          model: string | null;
+          purchase_date: string | null;
+          purchase_cost: number | null;
+          replacement_value: number | null;
+          current_value: number | null;
+          current_location_id: string;
+          status: string;
+          notes: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          unique_asset_id: string;
+          qr_code_value: string;
+          asset_name: string;
+          category_id: string;
+          description?: string | null;
+          serial_number?: string | null;
+          make?: string | null;
+          model?: string | null;
+          purchase_date?: string | null;
+          purchase_cost?: number | null;
+          replacement_value?: number | null;
+          current_value?: number | null;
+          current_location_id: string;
+          status: string;
+          notes?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          unique_asset_id?: string;
+          qr_code_value?: string;
+          asset_name?: string;
+          category_id?: string;
+          description?: string | null;
+          serial_number?: string | null;
+          make?: string | null;
+          model?: string | null;
+          purchase_date?: string | null;
+          purchase_cost?: number | null;
+          replacement_value?: number | null;
+          current_value?: number | null;
+          current_location_id?: string;
+          status?: string;
+          notes?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
+      asset_category: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: string;
