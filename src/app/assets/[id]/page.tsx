@@ -4,15 +4,24 @@ import { ArrowLeft, Archive, History, PencilLine, Route } from "lucide-react";
 
 import {
   archiveAssetAction,
+  assignChildAssetAction,
   recordAssetMovementAction,
+  unassignChildAssetAction,
   updateAssetAction,
 } from "@/app/assets/actions";
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
+import { getAssignableChildAssets } from "@/lib/assets/assignment";
 import { getMovementReasons } from "@/lib/assets/movement";
-import { getAssetById, listAssetCategories, listAssetMovements } from "@/lib/assets/server";
+import {
+  getAssetById,
+  listAssetAssignments,
+  listAssetCategories,
+  listAssetMovements,
+  listAssets,
+} from "@/lib/assets/server";
 import { assetStatusLabels } from "@/lib/assets/validation";
 import { assetStatuses } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
@@ -62,14 +71,26 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     notFound();
   }
 
-  const [categories, locationRows, movements] = await Promise.all([
+  const [categories, locationRows, movements, assignments, allAssets] = await Promise.all([
     listAssetCategories(isAdmin, role),
     listLocations(false, role),
     listAssetMovements(id),
+    listAssetAssignments(id),
+    listAssets({}, role),
   ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
   const locationById = new Map(locations.map((location) => [location.value, location.label]));
+  const assetById = new Map(allAssets.map((item) => [item.id, item]));
+  const activeParentAssignment = assignments.find(
+    (assignment) => assignment.child_asset_id === id && !assignment.unassigned_at,
+  );
+  const activeChildAssignments = assignments.filter(
+    (assignment) => assignment.parent_asset_id === id && !assignment.unassigned_at,
+  );
+  const assignableChildren = getAssignableChildAssets(asset, allAssets).filter(
+    (item) => !activeChildAssignments.some((assignment) => assignment.child_asset_id === item.id),
+  );
   const statusMessage = getParam(query.statusMessage);
 
   return (
@@ -230,6 +251,136 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
               <Button type="submit">Record movement</Button>
             </div>
           </form>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Parent asset</h2>
+            {activeParentAssignment ? (
+              <div className="mt-4 rounded-md border border-[var(--border)] p-4">
+                <p className="font-medium text-[var(--ink)]">
+                  {assetById.get(activeParentAssignment.parent_asset_id)?.asset_name ??
+                    "Unknown parent"}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Assigned {dateTime(activeParentAssignment.assigned_at)}
+                </p>
+                <form action={unassignChildAssetAction} className="mt-3">
+                  <input name="assetId" type="hidden" value={asset.id} />
+                  <input name="assignmentId" type="hidden" value={activeParentAssignment.id} />
+                  <Button type="submit" variant="outline" size="sm">
+                    Remove parent
+                  </Button>
+                </form>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                This asset is not currently assigned to a parent asset.
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Child assets</h2>
+            {activeChildAssignments.length > 0 ? (
+              <ul className="mt-4 grid gap-3">
+                {activeChildAssignments.map((assignment) => {
+                  const child = assetById.get(assignment.child_asset_id);
+
+                  return (
+                    <li
+                      className="rounded-md border border-[var(--border)] p-4"
+                      key={assignment.id}
+                    >
+                      <p className="font-medium text-[var(--ink)]">
+                        {child?.asset_name ?? "Unknown child"}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        {child?.unique_asset_id ?? assignment.child_asset_id}
+                      </p>
+                      <form action={unassignChildAssetAction} className="mt-3">
+                        <input name="assetId" type="hidden" value={asset.id} />
+                        <input name="assignmentId" type="hidden" value={assignment.id} />
+                        <Button type="submit" variant="outline" size="sm">
+                          Remove child
+                        </Button>
+                      </form>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                No active child assets are assigned.
+              </p>
+            )}
+
+            <form action={assignChildAssetAction} className="mt-5 grid gap-3">
+              <input name="parentAssetId" type="hidden" value={asset.id} />
+              <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                Assign child asset
+                <select
+                  className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                  name="childAssetId"
+                  required
+                >
+                  <option value="">Choose asset</option>
+                  {assignableChildren.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.asset_name} ({child.unique_asset_id})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                Notes
+                <input
+                  className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                  name="notes"
+                />
+              </label>
+              <div>
+                <Button type="submit" disabled={assignableChildren.length === 0}>
+                  Assign child
+                </Button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Assignment history</h2>
+          {assignments.length > 0 ? (
+            <ol className="mt-4 grid gap-3">
+              {assignments.map((assignment) => {
+                const isParent = assignment.parent_asset_id === id;
+                const relatedAsset = assetById.get(
+                  isParent ? assignment.child_asset_id : assignment.parent_asset_id,
+                );
+
+                return (
+                  <li className="rounded-md border border-[var(--border)] p-4" key={assignment.id}>
+                    <p className="font-medium text-[var(--ink)]">
+                      {isParent ? "Child" : "Parent"}: {relatedAsset?.asset_name ?? "Unknown asset"}
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      Assigned {dateTime(assignment.assigned_at)}
+                      {assignment.unassigned_at
+                        ? `; removed ${dateTime(assignment.unassigned_at)}`
+                        : "; active"}
+                    </p>
+                    {assignment.notes ? (
+                      <p className="mt-2 text-sm text-[var(--foreground)]">{assignment.notes}</p>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              No assignment history has been recorded for this asset.
+            </p>
+          )}
         </section>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">

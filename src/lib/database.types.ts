@@ -102,6 +102,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      asset_assignment: {
+        Row: {
+          id: string;
+          parent_asset_id: string;
+          child_asset_id: string;
+          assigned_at: string;
+          unassigned_at: string | null;
+          assigned_by: string;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          parent_asset_id: string;
+          child_asset_id: string;
+          assigned_at?: string;
+          unassigned_at?: string | null;
+          assigned_by: string;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          parent_asset_id?: string;
+          child_asset_id?: string;
+          assigned_at?: string;
+          unassigned_at?: string | null;
+          assigned_by?: string;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
       asset_category: {
         Row: {
           id: string;

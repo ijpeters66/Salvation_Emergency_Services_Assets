@@ -100,4 +100,42 @@ describe("asset movement service", () => {
       }),
     );
   });
+
+  it("moves active child assets when parent location changes", async () => {
+    const dependencies = {
+      ...createDependencies(),
+      getActiveChildAssets: vi.fn(async () =>
+        ok([
+          {
+            ...asset,
+            id: "child-asset-1",
+            unique_asset_id: "RADIO-001",
+            current_location_id: "location-1",
+            status: "available",
+          },
+        ]),
+      ),
+    };
+
+    await recordAssetMovement(dependencies, {
+      asset,
+      toLocationId: "location-2",
+      toStatus: "available",
+      reason: "Location correction",
+      notes: null,
+      userId: "user-1",
+    });
+
+    expect(dependencies.getActiveChildAssets).toHaveBeenCalledWith("asset-1");
+    expect(dependencies.updateAsset).toHaveBeenCalledWith("child-asset-1", {
+      current_location_id: "location-2",
+      updated_by: "user-1",
+    });
+    expect(dependencies.writeAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionType: "asset.child_movement",
+        recordId: "child-asset-1",
+      }),
+    );
+  });
 });

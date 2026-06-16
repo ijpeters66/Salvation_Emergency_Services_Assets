@@ -4,12 +4,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getCurrentUserContext } from "@/lib/auth";
+import { assignChildAsset, unassignChildAsset } from "@/lib/assets/assignment";
 import { recordAssetMovement } from "@/lib/assets/movement";
 import { archiveAssetRecord, createAssetRecord, updateAssetRecord } from "@/lib/assets/service";
 import {
   createSupabaseAssetDependencies,
+  getAssetAssignmentById,
   getAssetById,
   getCurrentSupabaseUserId,
+  listActiveAssignmentEdges,
 } from "@/lib/assets/server";
 import { parseAssetFormData } from "@/lib/assets/validation";
 import { isAssetStatus } from "@/lib/domain-types";
@@ -142,6 +145,62 @@ export async function recordAssetMovementAction(formData: FormData) {
   revalidatePath("/assets");
   revalidatePath(`/assets/${id}`);
   redirect(`/assets/${id}?statusMessage=movement-recorded`);
+}
+
+export async function assignChildAssetAction(formData: FormData) {
+  const parentAssetId = String(formData.get("parentAssetId") ?? "");
+  const childAssetId = String(formData.get("childAssetId") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const context = await getMutationContext();
+
+  if (!parentAssetId || !childAssetId || !context) {
+    redirectToAssets("validation-error");
+  }
+
+  const activeAssignments = await listActiveAssignmentEdges();
+  const result = await assignChildAsset(context.dependencies, {
+    parentAssetId,
+    childAssetId,
+    notes,
+    userId: context.userId,
+    activeAssignments,
+  });
+
+  if (!result.ok) {
+    redirect(`/assets/${parentAssetId}?statusMessage=assignment-error`);
+  }
+
+  revalidatePath("/assets");
+  revalidatePath(`/assets/${parentAssetId}`);
+  revalidatePath(`/assets/${childAssetId}`);
+  redirect(`/assets/${parentAssetId}?statusMessage=assigned`);
+}
+
+export async function unassignChildAssetAction(formData: FormData) {
+  const assetId = String(formData.get("assetId") ?? "");
+  const assignmentId = String(formData.get("assignmentId") ?? "");
+  const context = await getMutationContext();
+
+  if (!assetId || !assignmentId || !context) {
+    redirectToAssets("validation-error");
+  }
+
+  const assignment = await getAssetAssignmentById(assignmentId);
+
+  if (!assignment) {
+    redirect(`/assets/${assetId}?statusMessage=assignment-error`);
+  }
+
+  const result = await unassignChildAsset(context.dependencies, assignment, context.userId);
+
+  if (!result.ok) {
+    redirect(`/assets/${assetId}?statusMessage=assignment-error`);
+  }
+
+  revalidatePath("/assets");
+  revalidatePath(`/assets/${assetId}`);
+  revalidatePath(`/assets/${assignment.child_asset_id}`);
+  redirect(`/assets/${assetId}?statusMessage=unassigned`);
 }
 
 export async function archiveAssetAction(formData: FormData) {

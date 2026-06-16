@@ -21,6 +21,7 @@ export type AssetMovementDependencies = {
   insertMovement(payload: AssetMovementInsert): Promise<AppResult<AssetMovementRow>>;
   updateAsset(id: string, payload: AssetUpdate): Promise<AppResult<AssetRow>>;
   writeAuditLog(input: AuditLogInput): Promise<AppResult<unknown>>;
+  getActiveChildAssets?(parentAssetId: string): Promise<AppResult<AssetRow[]>>;
 };
 
 const movementReasons = [
@@ -98,6 +99,57 @@ export async function recordAssetMovement(
       reason: input.reason,
     },
   });
+
+  if (input.asset.current_location_id !== input.toLocationId && dependencies.getActiveChildAssets) {
+    const childResult = await dependencies.getActiveChildAssets(input.asset.id);
+
+    if (childResult.ok) {
+      for (const childAsset of childResult.data) {
+        if (childAsset.current_location_id === input.toLocationId) {
+          continue;
+        }
+
+        const childMovement = await dependencies.insertMovement({
+          asset_id: childAsset.id,
+          from_location_id: childAsset.current_location_id,
+          to_location_id: input.toLocationId,
+          from_status: childAsset.status,
+          to_status: childAsset.status,
+          reason: "Automatic child movement",
+          notes: `Moved with parent asset ${input.asset.unique_asset_id}.`,
+          created_by: input.userId,
+        });
+
+        if (!childMovement.ok) {
+          return childMovement;
+        }
+
+        const childUpdate = await dependencies.updateAsset(childAsset.id, {
+          current_location_id: input.toLocationId,
+          updated_by: input.userId,
+        });
+
+        if (!childUpdate.ok) {
+          return childUpdate;
+        }
+
+        await dependencies.writeAuditLog({
+          userId: input.userId,
+          actionType: "asset.child_movement",
+          recordType: "asset",
+          recordId: childAsset.id,
+          oldValue: {
+            current_location_id: childAsset.current_location_id,
+          },
+          newValue: {
+            movement_id: childMovement.data.id,
+            current_location_id: input.toLocationId,
+            parent_asset_id: input.asset.id,
+          },
+        });
+      }
+    }
+  }
 
   return ok({
     asset: assetResult.data,

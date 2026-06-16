@@ -200,7 +200,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add current value.
 - [x] Add current location.
 - [x] Add status.
-- [ ] Add parent asset assignment.
+- [x] Add parent asset assignment.
 - [ ] Add assigned deployment.
 - [x] Add notes.
 - [ ] Add photo/document support.
@@ -229,19 +229,19 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 10. Parent and Child Asset Relationships
 
-- [ ] Create assignment model for parent/child assets.
-- [ ] Prevent circular parent/child relationships.
-- [ ] Allow assigning a generator to a trailer.
-- [ ] Allow assigning a radio kit to a truck.
-- [ ] Allow assigning a first aid kit to a ute.
-- [ ] Show child assets on parent asset detail page.
-- [ ] Show parent asset on child asset detail page.
-- [ ] Record assignment history.
-- [ ] Move child assets automatically when parent asset moves.
-- [ ] Confirm automatic movement creates audit records.
-- [ ] Confirm users can detach child assets.
-- [ ] Confirm detaching child assets records history.
-- [ ] Add parent/child tests.
+- [x] Create assignment model for parent/child assets.
+- [x] Prevent circular parent/child relationships.
+- [x] Allow assigning a generator to a trailer.
+- [x] Allow assigning a radio kit to a truck.
+- [x] Allow assigning a first aid kit to a ute.
+- [x] Show child assets on parent asset detail page.
+- [x] Show parent asset on child asset detail page.
+- [x] Record assignment history.
+- [x] Move child assets automatically when parent asset moves.
+- [x] Confirm automatic movement creates audit records.
+- [x] Confirm users can detach child assets.
+- [x] Confirm detaching child assets records history.
+- [x] Add parent/child tests.
 
 ## 11. Consumable Categories
 

@@ -1,5 +1,6 @@
 import { writeAuditLog } from "@/lib/audit-log";
 import type { AssetMovementInsert } from "@/lib/assets/movement";
+import type { AssetAssignmentInsert, AssetAssignmentUpdate } from "@/lib/assets/assignment";
 import type { AssetInsert, AssetUpdate } from "@/lib/assets/service";
 import type { AssetStatus, UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
@@ -108,6 +109,65 @@ export async function listAssetMovements(assetId: string) {
   return data;
 }
 
+export async function listAssetAssignments(assetId: string) {
+  if (!getPublicEnvStatus().configured) {
+    return [];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("asset_assignment")
+    .select("*")
+    .or(`parent_asset_id.eq.${assetId},child_asset_id.eq.${assetId}`)
+    .order("assigned_at", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return data;
+}
+
+export async function getAssetAssignmentById(id: string) {
+  if (!getPublicEnvStatus().configured) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("asset_assignment")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+}
+
+export async function listActiveAssignmentEdges() {
+  if (!getPublicEnvStatus().configured) {
+    return [];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("asset_assignment")
+    .select("parent_asset_id, child_asset_id")
+    .is("unassigned_at", null);
+
+  if (error) {
+    return [];
+  }
+
+  return data.map((assignment) => ({
+    parentAssetId: assignment.parent_asset_id,
+    childAssetId: assignment.child_asset_id,
+  }));
+}
+
 export async function getCurrentSupabaseUserId() {
   if (!getPublicEnvStatus().configured) {
     return null;
@@ -153,6 +213,61 @@ export function createSupabaseAssetDependencies() {
       const { data, error } = await supabase
         .from("asset_movement")
         .insert(payload)
+        .select("*")
+        .single();
+
+      if (error) {
+        return err(error.message);
+      }
+
+      return ok(data);
+    },
+    async getActiveChildAssets(parentAssetId: string) {
+      const supabase = await createSupabaseServerClient();
+      const { data: assignments, error: assignmentError } = await supabase
+        .from("asset_assignment")
+        .select("child_asset_id")
+        .eq("parent_asset_id", parentAssetId)
+        .is("unassigned_at", null);
+
+      if (assignmentError) {
+        return err(assignmentError.message);
+      }
+
+      const childIds = assignments.map((assignment) => assignment.child_asset_id);
+
+      if (childIds.length === 0) {
+        return ok([]);
+      }
+
+      const { data, error } = await supabase.from("asset").select("*").in("id", childIds);
+
+      if (error) {
+        return err(error.message);
+      }
+
+      return ok(data);
+    },
+    async insertAssignment(payload: AssetAssignmentInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("asset_assignment")
+        .insert(payload)
+        .select("*")
+        .single();
+
+      if (error) {
+        return err(error.message);
+      }
+
+      return ok(data);
+    },
+    async updateAssignment(id: string, payload: AssetAssignmentUpdate) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("asset_assignment")
+        .update(payload)
+        .eq("id", id)
         .select("*")
         .single();
 
