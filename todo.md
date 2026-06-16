@@ -211,7 +211,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add asset archive action.
 - [x] Add asset filters.
 - [x] Add asset search.
-- [ ] Add asset status workflow.
+- [x] Add asset status workflow.
 - [x] Support Available status.
 - [x] Support Deployed status.
 - [x] Support In Transit status.
@@ -219,8 +219,8 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Support Damaged status.
 - [x] Support Retired status.
 - [x] Support Lost/Stolen status.
-- [ ] Add status change audit logging.
-- [ ] Add location change audit logging.
+- [x] Add status change audit logging.
+- [x] Add location change audit logging.
 - [x] Add asset value change audit logging.
 - [x] Add asset tests.
 - [x] Confirm duplicate asset IDs are blocked.

@@ -135,6 +135,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      asset_movement: {
+        Row: {
+          id: string;
+          asset_id: string;
+          from_location_id: string | null;
+          to_location_id: string | null;
+          from_status: string | null;
+          to_status: string;
+          reason: string;
+          notes: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          asset_id: string;
+          from_location_id?: string | null;
+          to_location_id?: string | null;
+          from_status?: string | null;
+          to_status: string;
+          reason: string;
+          notes?: string | null;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          asset_id?: string;
+          from_location_id?: string | null;
+          to_location_id?: string | null;
+          from_status?: string | null;
+          to_status?: string;
+          reason?: string;
+          notes?: string | null;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           id: string;

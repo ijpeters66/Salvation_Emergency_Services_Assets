@@ -1,4 +1,5 @@
 import { writeAuditLog } from "@/lib/audit-log";
+import type { AssetMovementInsert } from "@/lib/assets/movement";
 import type { AssetInsert, AssetUpdate } from "@/lib/assets/service";
 import type { AssetStatus, UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
@@ -88,6 +89,25 @@ export async function getAssetById(id: string) {
   return data;
 }
 
+export async function listAssetMovements(assetId: string) {
+  if (!getPublicEnvStatus().configured) {
+    return [];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("asset_movement")
+    .select("*")
+    .eq("asset_id", assetId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return data;
+}
+
 export async function getCurrentSupabaseUserId() {
   if (!getPublicEnvStatus().configured) {
     return null;
@@ -119,6 +139,20 @@ export function createSupabaseAssetDependencies() {
         .from("asset")
         .update(payload)
         .eq("id", id)
+        .select("*")
+        .single();
+
+      if (error) {
+        return err(error.message);
+      }
+
+      return ok(data);
+    },
+    async insertMovement(payload: AssetMovementInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("asset_movement")
+        .insert(payload)
         .select("*")
         .single();
 
