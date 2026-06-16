@@ -77,12 +77,12 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add protected route structure.
 - [ ] Add error boundaries where appropriate.
 - [ ] Add loading states.
-- [ ] Add empty states.
-- [ ] Add form validation patterns.
-- [ ] Add consistent date/time formatting.
+- [x] Add empty states.
+- [x] Add form validation patterns.
+- [x] Add consistent date/time formatting.
 - [ ] Add currency formatting for asset and stock values.
 - [ ] Add reusable status badges.
-- [ ] Add reusable table patterns.
+- [x] Add reusable table patterns.
 - [ ] Add reusable filters.
 - [ ] Add reusable export actions.
 - [ ] Add reusable confirmation dialogs for destructive or archive actions.
@@ -103,15 +103,15 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Enable Row Level Security on all tables.
 - [x] Add RLS policies for system admins.
 - [x] Add RLS policies for ordinary users.
-- [ ] Add created_at and updated_at fields where needed.
-- [ ] Add created_by and updated_by fields where needed.
-- [ ] Add archived_at or soft-delete fields where needed.
-- [ ] Add indexes for common filters.
+- [x] Add created_at and updated_at fields where needed.
+- [x] Add created_by and updated_by fields where needed.
+- [x] Add archived_at or soft-delete fields where needed.
+- [x] Add indexes for common filters.
 - [ ] Add indexes for QR lookup fields.
 - [ ] Add indexes for reporting queries.
 - [ ] Add database comments for important business rules.
 - [x] Generate or maintain TypeScript database types.
-- [ ] Test key RLS policies.
+- [x] Test key RLS policies.
 
 ## 5. Authentication and Roles
 
@@ -153,25 +153,25 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 7. Locations
 
-- [ ] Create location table.
-- [ ] Support warehouses.
-- [ ] Support storage facilities.
-- [ ] Support temporary deployment locations.
-- [ ] Add location create form.
-- [ ] Add location edit form.
-- [ ] Add location archive action.
-- [ ] Add location list.
+- [x] Create location table.
+- [x] Support warehouses.
+- [x] Support storage facilities.
+- [x] Support temporary deployment locations.
+- [x] Add location create form.
+- [x] Add location edit form.
+- [x] Add location archive action.
+- [x] Add location list.
 - [ ] Add location detail page.
 - [ ] Show assets at a location.
 - [ ] Show consumables at a location.
 - [ ] Show stock thresholds by location.
 - [ ] Add location filters.
 - [ ] Add location search.
-- [ ] Add location audit logging.
-- [ ] Add location RLS policies.
-- [ ] Add location tests.
-- [ ] Confirm archived locations do not appear in ordinary selection lists.
-- [ ] Confirm archived locations remain available for historical reports.
+- [x] Add location audit logging.
+- [x] Add location RLS policies.
+- [x] Add location tests.
+- [x] Confirm archived locations do not appear in ordinary selection lists.
+- [x] Confirm archived locations remain available for historical reports.
 
 ## 8. Asset Categories
 

@@ -69,6 +69,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      location: {
+        Row: {
+          id: string;
+          name: string;
+          type: string;
+          address: string | null;
+          state: string;
+          notes: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          type: string;
+          address?: string | null;
+          state?: string;
+          notes?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          type?: string;
+          address?: string | null;
+          state?: string;
+          notes?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
       permission: {
         Row: {
           id: string;
