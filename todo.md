@@ -316,19 +316,19 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 14. Stock Thresholds and Alerts
 
-- [ ] Create stock threshold table.
-- [ ] Set threshold by consumable and location.
-- [ ] Show current stock level.
-- [ ] Show minimum stock level.
-- [ ] Show low-stock alert.
-- [ ] Show out-of-stock alert.
+- [x] Create stock threshold table.
+- [x] Set threshold by consumable and location.
+- [x] Show current stock level.
+- [x] Show minimum stock level.
+- [x] Show low-stock alert.
+- [x] Show out-of-stock alert.
 - [ ] Add dashboard alert tile.
 - [ ] Add low-stock report.
-- [ ] Add threshold create/edit workflow.
-- [ ] Add threshold audit logging.
-- [ ] Add threshold tests.
-- [ ] Confirm archived locations do not create active alerts.
-- [ ] Confirm archived consumables do not create active alerts.
+- [x] Add threshold create/edit workflow.
+- [x] Add threshold audit logging.
+- [x] Add threshold tests.
+- [x] Confirm archived locations do not create active alerts.
+- [x] Confirm archived consumables do not create active alerts.
 
 ## 15. Plant and Fleet
 

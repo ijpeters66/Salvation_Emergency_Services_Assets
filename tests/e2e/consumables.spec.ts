@@ -11,3 +11,7 @@ test.skip("issuing stock updates quantity and history with mocked Supabase", asy
 test.skip("FIFO issue flow with mocked Supabase", async () => {
   // Requires a server-action aware Supabase test double or a disposable test database.
 });
+
+test.skip("low-stock alert appears after stock issue with mocked Supabase", async () => {
+  // Requires a server-action aware Supabase test double or a disposable test database.
+});

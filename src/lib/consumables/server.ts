@@ -5,6 +5,7 @@ import type {
   ConsumableItemInsert,
 } from "@/lib/consumables/service";
 import type { StockMovementInsert } from "@/lib/consumables/stock-movement";
+import type { StockThresholdInsert } from "@/lib/consumables/thresholds";
 import type { UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
@@ -34,6 +35,17 @@ export async function listConsumableItems(includeArchived: boolean, role: UserRo
   if (!includeArchived || role !== "system_admin") query = query.is("archived_at", null);
   const { data, error } = await query;
   return error ? [] : data;
+}
+
+export async function getConsumableItemById(id: string) {
+  if (!getPublicEnvStatus().configured) return null;
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("consumable_item")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  return error ? null : data;
 }
 
 export async function listConsumableBatches(filters: ConsumableFilters, role: UserRole) {
@@ -91,6 +103,16 @@ export async function listStockMovements(batchId: string) {
   return error ? [] : data;
 }
 
+export async function listStockThresholds() {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("stock_threshold")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  return error ? [] : data;
+}
+
 export async function getCurrentSupabaseUserId() {
   if (!getPublicEnvStatus().configured) return null;
   const supabase = await createSupabaseServerClient();
@@ -135,6 +157,15 @@ export function createSupabaseConsumableDependencies() {
       const { data, error } = await supabase
         .from("stock_movement")
         .insert(payload)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async upsertThreshold(payload: StockThresholdInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("stock_threshold")
+        .upsert(payload, { onConflict: "consumable_item_id,location_id" })
         .select("*")
         .single();
       return error ? err(error.message) : ok(data);

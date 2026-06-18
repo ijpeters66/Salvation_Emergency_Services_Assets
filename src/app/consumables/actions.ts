@@ -18,6 +18,7 @@ import {
 } from "@/lib/consumables/server";
 import { issueConsumablesFifo } from "@/lib/consumables/fifo";
 import { recordStockMovement } from "@/lib/consumables/stock-movement";
+import { upsertStockThresholdRecord } from "@/lib/consumables/thresholds";
 import {
   parseConsumableBatchFormData,
   parseConsumableItemFormData,
@@ -182,6 +183,32 @@ export async function issueConsumablesFifoAction(formData: FormData) {
   redirect(
     `/consumables?statusMessage=fifo-issued&issuedSummary=${encodeURIComponent(issuedSummary)}`,
   );
+}
+
+export async function upsertStockThresholdAction(formData: FormData) {
+  const consumableItemId = String(formData.get("consumableItemId") ?? "");
+  const locationId = String(formData.get("locationId") ?? "");
+  const minimumQuantity = Number(formData.get("minimumQuantity") ?? 0);
+  const context = await getMutationContext();
+
+  if (!consumableItemId || !locationId || minimumQuantity < 0 || !context) {
+    redirectToConsumables("validation-error");
+  }
+
+  const result = await upsertStockThresholdRecord(context.dependencies, {
+    consumableItemId,
+    locationId,
+    minimumQuantity,
+    userId: context.userId,
+  });
+
+  if (!result.ok) {
+    redirectToConsumables("save-error");
+  }
+
+  revalidatePath("/consumables");
+  revalidatePath(`/consumables/items/${consumableItemId}`);
+  redirect(`/consumables/items/${consumableItemId}?statusMessage=threshold-saved`);
 }
 
 export async function archiveConsumableBatchAction(formData: FormData) {

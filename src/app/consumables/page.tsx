@@ -15,8 +15,10 @@ import {
   listConsumableBatches,
   listConsumableCategories,
   listConsumableItems,
+  listStockThresholds,
 } from "@/lib/consumables/server";
 import { calculateBatchValue } from "@/lib/consumables/service";
+import { buildStockAlerts } from "@/lib/consumables/thresholds";
 import { getPublicEnvStatus } from "@/lib/env";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
@@ -60,14 +62,15 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
 
-  const [categories, items, locationRows, rawBatches] = user
+  const [categories, items, locationRows, rawBatches, thresholds] = user
     ? await Promise.all([
         listConsumableCategories(includeArchived, role),
         listConsumableItems(includeArchived, role),
         listLocations(false, role),
         listConsumableBatches({ locationId, search, lowQuantity, includeArchived }, role),
+        listStockThresholds(),
       ])
-    : [[], [], [], []];
+    : [[], [], [], [], []];
 
   const locations = toLocationOptions(locationRows);
   const itemById = new Map(items.map((item) => [item.id, item]));
@@ -76,6 +79,9 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   const batches = categoryId
     ? rawBatches.filter((batch) => itemById.get(batch.item_id)?.category_id === categoryId)
     : rawBatches;
+  const stockAlerts = buildStockAlerts(thresholds, rawBatches).filter(
+    (alert) => alert.status !== "normal",
+  );
 
   return (
     <AppShell>
@@ -119,6 +125,38 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             ) : null}
           </p>
         ) : null}
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Stock alerts</h2>
+          {stockAlerts.length > 0 ? (
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {stockAlerts.map((alert) => {
+                const item = itemById.get(alert.threshold.consumable_item_id);
+                const alertLocation = locationById.get(alert.threshold.location_id);
+
+                return (
+                  <Link
+                    className="rounded-md border border-[var(--border)] p-4 hover:bg-[var(--surface)]"
+                    href={`/consumables/items/${alert.threshold.consumable_item_id}`}
+                    key={alert.threshold.id}
+                  >
+                    <span className="block text-sm font-semibold text-[var(--ink)]">
+                      {item?.name ?? "Unknown item"} at {alertLocation ?? "Unknown location"}
+                    </span>
+                    <span className="mt-1 block text-sm text-[var(--muted)]">
+                      {alert.status === "out_of_stock" ? "Out of stock" : "Low stock"}:{" "}
+                      {alert.currentQuantity} on hand, minimum {alert.threshold.minimum_quantity}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              No low-stock or out-of-stock threshold alerts are active.
+            </p>
+          )}
+        </section>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">
@@ -330,7 +368,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                         <td className="px-5 py-4">
                           <Link
                             className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
-                            href={`/consumables/${batch.id}`}
+                            href={`/consumables/items/${item?.id ?? batch.item_id}`}
                           >
                             {item?.name ?? "Unknown item"}
                           </Link>

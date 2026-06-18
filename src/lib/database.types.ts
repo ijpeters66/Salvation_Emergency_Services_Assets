@@ -522,6 +522,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      stock_threshold: {
+        Row: {
+          id: string;
+          consumable_item_id: string;
+          location_id: string;
+          minimum_quantity: number;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          consumable_item_id: string;
+          location_id: string;
+          minimum_quantity: number;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          consumable_item_id?: string;
+          location_id?: string;
+          minimum_quantity?: number;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
