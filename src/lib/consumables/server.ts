@@ -56,6 +56,19 @@ export async function listConsumableBatches(filters: ConsumableFilters, role: Us
   return filters.categoryId ? data : data;
 }
 
+export async function listIssueEligibleBatches(itemId: string, locationId: string) {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("consumable_batch")
+    .select("*")
+    .eq("item_id", itemId)
+    .eq("location_id", locationId)
+    .is("archived_at", null)
+    .gt("quantity_on_hand", 0);
+  return error ? [] : data;
+}
+
 export async function getConsumableBatchById(id: string) {
   if (!getPublicEnvStatus().configured) return null;
   const supabase = await createSupabaseServerClient();

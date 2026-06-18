@@ -5,6 +5,7 @@ import {
   archiveConsumableBatchAction,
   createConsumableBatchAction,
   createConsumableItemAction,
+  issueConsumablesFifoAction,
 } from "@/app/consumables/actions";
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
@@ -32,6 +33,8 @@ const statusMessages: Record<string, string> = {
   "validation-error": "Check the consumable details and try again.",
   "auth-error": "You need an active signed-in session to change consumables.",
   "save-error": "The consumable record could not be saved.",
+  "fifo-issued": "Consumables issued.",
+  "fifo-error": "There is not enough eligible stock for that FIFO issue.",
 };
 
 function getParam(value: string | string[] | undefined) {
@@ -53,6 +56,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   const search = getParam(params.search) ?? "";
   const lowQuantity = getParam(params.lowQuantity) === "1";
   const statusMessage = getParam(params.statusMessage);
+  const issuedSummary = getParam(params.issuedSummary);
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
 
@@ -108,8 +112,91 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
         {message ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             {message}
+            {issuedSummary ? (
+              <span className="mt-1 block text-[var(--muted)]">
+                Issued batches: {issuedSummary}
+              </span>
+            ) : null}
           </p>
         ) : null}
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
+            <PackageCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Issue consumables</h2>
+          </div>
+          <form action={issueConsumablesFifoAction} className="mt-4 grid gap-3 md:grid-cols-3">
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Item
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="itemId"
+                required
+              >
+                <option value="">Choose item</option>
+                {items.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Location
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="locationId"
+                required
+              >
+                <option value="">Choose location</option>
+                {locations.map((location) => (
+                  <option key={location.value} value={location.value}>
+                    {location.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Quantity
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                min="1"
+                name="quantity"
+                required
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
+              Reason
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="reason"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Notes
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="notes"
+              />
+            </label>
+            <details className="rounded-md border border-[var(--border)] p-3 text-sm text-[var(--muted)] md:col-span-3">
+              <summary className="cursor-pointer font-medium text-[var(--ink)]">
+                Confirmation summary
+              </summary>
+              <p className="mt-2 leading-6">
+                The system will issue from the earliest expiring eligible batches first, then from
+                the oldest received batches, and will stop if stock is insufficient.
+              </p>
+            </details>
+            <div className="md:col-span-3">
+              <Button type="submit" disabled={items.length === 0 || locations.length === 0}>
+                Issue consumables
+              </Button>
+            </div>
+          </form>
+        </section>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">

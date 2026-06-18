@@ -14,7 +14,9 @@ import {
   createSupabaseConsumableDependencies,
   getConsumableBatchById,
   getCurrentSupabaseUserId,
+  listIssueEligibleBatches,
 } from "@/lib/consumables/server";
+import { issueConsumablesFifo } from "@/lib/consumables/fifo";
 import { recordStockMovement } from "@/lib/consumables/stock-movement";
 import {
   parseConsumableBatchFormData,
@@ -144,6 +146,42 @@ export async function recordStockMovementAction(formData: FormData) {
   revalidatePath("/consumables");
   revalidatePath(`/consumables/${batchId}`);
   redirect(`/consumables/${batchId}?statusMessage=movement-recorded`);
+}
+
+export async function issueConsumablesFifoAction(formData: FormData) {
+  const itemId = String(formData.get("itemId") ?? "");
+  const locationId = String(formData.get("locationId") ?? "");
+  const quantity = Number(formData.get("quantity") ?? 0);
+  const reason = String(formData.get("reason") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const context = await getMutationContext();
+
+  if (!itemId || !locationId || !quantity || !reason || !context) {
+    redirectToConsumables("validation-error");
+  }
+
+  const batches = await listIssueEligibleBatches(itemId, locationId);
+  const result = await issueConsumablesFifo(context.dependencies, batches, {
+    itemId,
+    locationId,
+    quantity,
+    reason,
+    notes,
+    userId: context.userId,
+  });
+
+  if (!result.ok) {
+    redirectToConsumables("fifo-error");
+  }
+
+  const issuedSummary = result.data
+    .map((item) => `${item.batchLotNumber}:${item.quantity}`)
+    .join(",");
+
+  revalidatePath("/consumables");
+  redirect(
+    `/consumables?statusMessage=fifo-issued&issuedSummary=${encodeURIComponent(issuedSummary)}`,
+  );
 }
 
 export async function archiveConsumableBatchAction(formData: FormData) {

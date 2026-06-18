@@ -305,8 +305,8 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add stock movement ledger view.
 - [ ] Add stock movement filters.
 - [ ] Add stock movement export.
-- [ ] Implement FIFO issuing.
-- [ ] Confirm FIFO draws from oldest eligible batch first.
+- [x] Implement FIFO issuing.
+- [x] Confirm FIFO draws from oldest eligible batch first.
 - [ ] Confirm transfer updates source and destination stock.
 - [x] Confirm returns update correct batch/location.
 - [x] Confirm write-offs reduce stock correctly.
