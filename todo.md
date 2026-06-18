@@ -245,43 +245,43 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 11. Consumable Categories
 
-- [ ] Create consumable category table.
+- [x] Create consumable category table.
 - [ ] Add create/edit/archive category workflows.
-- [ ] Confirm categories are admin-managed.
-- [ ] Confirm archived categories remain visible on historical records.
+- [x] Confirm categories are admin-managed.
+- [x] Confirm archived categories remain visible on historical records.
 - [ ] Add category audit logging.
-- [ ] Add category tests.
+- [x] Add category tests.
 
 ## 12. Consumable Batches
 
-- [ ] Create consumable item or batch table.
-- [ ] Add item name.
-- [ ] Add category.
-- [ ] Add batch/lot number.
-- [ ] Add quantity received.
-- [ ] Add quantity on hand.
-- [ ] Add unit cost.
-- [ ] Add replacement cost.
-- [ ] Add total batch value calculation.
-- [ ] Add date received.
-- [ ] Add supplier/donor.
-- [ ] Add optional expiry date.
-- [ ] Add location.
-- [ ] Add QR code field.
+- [x] Create consumable item or batch table.
+- [x] Add item name.
+- [x] Add category.
+- [x] Add batch/lot number.
+- [x] Add quantity received.
+- [x] Add quantity on hand.
+- [x] Add unit cost.
+- [x] Add replacement cost.
+- [x] Add total batch value calculation.
+- [x] Add date received.
+- [x] Add supplier/donor.
+- [x] Add optional expiry date.
+- [x] Add location.
+- [x] Add QR code field.
 - [ ] Add documents/photos.
-- [ ] Add batch list.
-- [ ] Add batch detail page.
-- [ ] Add batch create form.
-- [ ] Add batch edit form.
-- [ ] Add batch archive action.
-- [ ] Add consumable filters.
-- [ ] Add consumable search.
-- [ ] Add batch traceability view.
-- [ ] Add consumable audit logging.
-- [ ] Add consumable tests.
-- [ ] Confirm quantity on hand cannot go below zero.
-- [ ] Confirm total value updates correctly.
-- [ ] Confirm expired or near-expiry batches can be identified.
+- [x] Add batch list.
+- [x] Add batch detail page.
+- [x] Add batch create form.
+- [x] Add batch edit form.
+- [x] Add batch archive action.
+- [x] Add consumable filters.
+- [x] Add consumable search.
+- [x] Add batch traceability view.
+- [x] Add consumable audit logging.
+- [x] Add consumable tests.
+- [x] Confirm quantity on hand cannot go below zero.
+- [x] Confirm total value updates correctly.
+- [x] Confirm expired or near-expiry batches can be identified.
 
 ## 13. Stock Movements
 

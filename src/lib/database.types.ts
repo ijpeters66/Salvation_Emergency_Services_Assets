@@ -243,6 +243,135 @@ export type Database = {
         };
         Relationships: [];
       };
+      consumable_category: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      consumable_item: {
+        Row: {
+          id: string;
+          name: string;
+          category_id: string;
+          description: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          category_id: string;
+          description?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          category_id?: string;
+          description?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
+      consumable_batch: {
+        Row: {
+          id: string;
+          item_id: string;
+          batch_lot_number: string;
+          quantity_received: number;
+          quantity_on_hand: number;
+          unit_cost: number | null;
+          replacement_cost: number | null;
+          date_received: string;
+          supplier_donor: string | null;
+          expiry_date: string | null;
+          location_id: string;
+          qr_code_value: string;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          item_id: string;
+          batch_lot_number: string;
+          quantity_received: number;
+          quantity_on_hand: number;
+          unit_cost?: number | null;
+          replacement_cost?: number | null;
+          date_received: string;
+          supplier_donor?: string | null;
+          expiry_date?: string | null;
+          location_id: string;
+          qr_code_value: string;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          item_id?: string;
+          batch_lot_number?: string;
+          quantity_received?: number;
+          quantity_on_hand?: number;
+          unit_cost?: number | null;
+          replacement_cost?: number | null;
+          date_received?: string;
+          supplier_donor?: string | null;
+          expiry_date?: string | null;
+          location_id?: string;
+          qr_code_value?: string;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
       location: {
         Row: {
           id: string;
