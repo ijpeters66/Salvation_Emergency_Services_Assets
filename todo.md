@@ -351,7 +351,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 ## 16. Planned Maintenance
 
 - [x] Create maintenance schedule table.
-- [ ] Create maintenance record table.
+- [x] Create maintenance record table.
 - [x] Add maintenance type.
 - [x] Add service interval by date.
 - [x] Add service interval by odometer.
@@ -361,16 +361,16 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add service provider.
 - [x] Add reminder threshold.
 - [x] Add maintenance status.
-- [ ] Add maintenance record date.
-- [ ] Add service type.
-- [ ] Add service description.
-- [ ] Add maintenance cost.
-- [ ] Add supplier/provider.
-- [ ] Add odometer/hour reading.
+- [x] Add maintenance record date.
+- [x] Add service type.
+- [x] Add service description.
+- [x] Add maintenance cost.
+- [x] Add supplier/provider.
+- [x] Add odometer/hour reading.
 - [ ] Add documents/invoices.
 - [ ] Add photos.
-- [ ] Add notes.
-- [ ] Add recorded by.
+- [x] Add notes.
+- [x] Add recorded by.
 - [x] Show maintenance due soon alerts.
 - [x] Show overdue maintenance alerts.
 - [ ] Show registration expiry alerts.

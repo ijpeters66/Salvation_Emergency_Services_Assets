@@ -414,6 +414,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      maintenance_record: {
+        Row: {
+          id: string;
+          asset_id: string;
+          maintenance_schedule_id: string | null;
+          date: string;
+          service_type: string;
+          description: string;
+          cost: number;
+          supplier_provider: string;
+          odometer_hour_reading: number | null;
+          notes: string | null;
+          attachment_metadata: Json[];
+          recorded_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          asset_id: string;
+          maintenance_schedule_id?: string | null;
+          date: string;
+          service_type: string;
+          description: string;
+          cost?: number;
+          supplier_provider: string;
+          odometer_hour_reading?: number | null;
+          notes?: string | null;
+          attachment_metadata?: Json[];
+          recorded_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          asset_id?: string;
+          maintenance_schedule_id?: string | null;
+          date?: string;
+          service_type?: string;
+          description?: string;
+          cost?: number;
+          supplier_provider?: string;
+          odometer_hour_reading?: number | null;
+          notes?: string | null;
+          attachment_metadata?: Json[];
+          recorded_by?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       maintenance_schedule: {
         Row: {
           id: string;

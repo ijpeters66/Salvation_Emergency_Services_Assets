@@ -9,7 +9,10 @@ import {
   unassignChildAssetAction,
   updateAssetAction,
 } from "@/app/assets/actions";
-import { upsertMaintenanceScheduleAction } from "@/app/maintenance/actions";
+import {
+  createMaintenanceRecordAction,
+  upsertMaintenanceScheduleAction,
+} from "@/app/maintenance/actions";
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -30,7 +33,7 @@ import { assetStatuses } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
-import { listMaintenanceSchedules } from "@/lib/maintenance/server";
+import { listMaintenanceRecords, listMaintenanceSchedules } from "@/lib/maintenance/server";
 
 export const dynamic = "force-dynamic";
 
@@ -76,16 +79,25 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     notFound();
   }
 
-  const [categories, locationRows, movements, assignments, allAssets, plantDetails, schedules] =
-    await Promise.all([
-      listAssetCategories(isAdmin, role),
-      listLocations(false, role),
-      listAssetMovements(id),
-      listAssetAssignments(id),
-      listAssets({}, role),
-      getPlantDetailsByAssetId(id),
-      listMaintenanceSchedules(id),
-    ]);
+  const [
+    categories,
+    locationRows,
+    movements,
+    assignments,
+    allAssets,
+    plantDetails,
+    schedules,
+    maintenanceRecords,
+  ] = await Promise.all([
+    listAssetCategories(isAdmin, role),
+    listLocations(false, role),
+    listAssetMovements(id),
+    listAssetAssignments(id),
+    listAssets({}, role),
+    getPlantDetailsByAssetId(id),
+    listMaintenanceSchedules(id),
+    listMaintenanceRecords(id),
+  ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
   const locationById = new Map(locations.map((location) => [location.value, location.label]));
@@ -103,6 +115,8 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
   const plantAlerts = getPlantExpiryAlerts(plantDetails);
   const currentMaintenanceReading =
     plantDetails?.odometer_reading ?? plantDetails?.hour_meter_reading ?? null;
+  const scheduleById = new Map(schedules.map((schedule) => [schedule.id, schedule]));
+  const totalMaintenanceCost = maintenanceRecords.reduce((total, record) => total + record.cost, 0);
 
   return (
     <AppShell>
@@ -464,6 +478,139 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
               <Button type="submit">Add schedule</Button>
             </div>
           </form>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Maintenance records</h2>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Total recorded cost:{" "}
+            <span className="font-semibold text-[var(--ink)]">{money(totalMaintenanceCost)}</span>
+          </p>
+
+          <form
+            action={createMaintenanceRecordAction}
+            className="mt-5 grid gap-4 border-t border-[var(--border)] pt-5 md:grid-cols-3"
+          >
+            <input name="assetId" type="hidden" value={asset.id} />
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Linked schedule
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="maintenanceScheduleId"
+              >
+                <option value="">None</option>
+                {schedules.map((schedule) => (
+                  <option key={schedule.id} value={schedule.id}>
+                    {schedule.maintenance_type}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Date
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="date"
+                type="date"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Service type
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="serviceType"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
+              Description
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="description"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Cost
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="cost"
+                step="0.01"
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Supplier/provider
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="supplierProvider"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Odometer/hour reading
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="odometerHourReading"
+                step="0.1"
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Notes
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="notes"
+              />
+            </label>
+            <div className="md:col-span-3">
+              <Button type="submit">Record maintenance</Button>
+            </div>
+          </form>
+
+          {maintenanceRecords.length > 0 ? (
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
+                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Date</th>
+                    <th className="px-4 py-3 font-semibold">Schedule</th>
+                    <th className="px-4 py-3 font-semibold">Service</th>
+                    <th className="px-4 py-3 font-semibold">Provider</th>
+                    <th className="px-4 py-3 font-semibold">Cost</th>
+                    <th className="px-4 py-3 font-semibold">Reading</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {maintenanceRecords.map((record) => (
+                    <tr key={record.id}>
+                      <td className="px-4 py-3 text-[var(--ink)]">{record.date}</td>
+                      <td className="px-4 py-3 text-[var(--muted)]">
+                        {record.maintenance_schedule_id
+                          ? (scheduleById.get(record.maintenance_schedule_id)?.maintenance_type ??
+                            "Linked schedule")
+                          : "None"}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted)]">
+                        <span className="font-medium text-[var(--ink)]">{record.service_type}</span>
+                        <span className="block">{record.description}</span>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted)]">{record.supplier_provider}</td>
+                      <td className="px-4 py-3 text-[var(--muted)]">{money(record.cost)}</td>
+                      <td className="px-4 py-3 text-[var(--muted)]">
+                        {record.odometer_hour_reading ?? "Not recorded"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+              No maintenance records have been logged for this asset.
+            </p>
+          )}
         </section>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
