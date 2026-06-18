@@ -12,12 +12,15 @@ import {
 } from "@/lib/consumables/service";
 import {
   createSupabaseConsumableDependencies,
+  getConsumableBatchById,
   getCurrentSupabaseUserId,
 } from "@/lib/consumables/server";
+import { recordStockMovement } from "@/lib/consumables/stock-movement";
 import {
   parseConsumableBatchFormData,
   parseConsumableItemFormData,
 } from "@/lib/consumables/validation";
+import { isStockMovementType } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 
 function redirectToConsumables(status: string): never {
@@ -85,10 +88,16 @@ export async function updateConsumableBatchAction(formData: FormData) {
   const context = await getMutationContext();
   if (!context) redirectToConsumables("auth-error");
 
+  const existingBatch = await getConsumableBatchById(id);
+  if (!existingBatch) redirectToConsumables("save-error");
+
   const result = await updateConsumableBatchRecord(
     context.dependencies,
     id,
-    parsed.data,
+    {
+      ...parsed.data,
+      quantityOnHand: existingBatch.quantity_on_hand,
+    },
     context.userId,
   );
   if (!result.ok) redirectToConsumables("save-error");
@@ -96,6 +105,45 @@ export async function updateConsumableBatchAction(formData: FormData) {
   revalidatePath("/consumables");
   revalidatePath(`/consumables/${id}`);
   redirect(`/consumables/${id}?statusMessage=updated`);
+}
+
+export async function recordStockMovementAction(formData: FormData) {
+  const batchId = String(formData.get("batchId") ?? "");
+  const movementType = String(formData.get("movementType") ?? "");
+  const quantity = Number(formData.get("quantity") ?? 0);
+  const fromLocationId = String(formData.get("fromLocationId") ?? "") || null;
+  const toLocationId = String(formData.get("toLocationId") ?? "") || null;
+  const reason = String(formData.get("reason") ?? "").trim();
+  const relatedDeploymentId = String(formData.get("relatedDeploymentId") ?? "") || null;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const context = await getMutationContext();
+
+  if (!batchId || !isStockMovementType(movementType) || !quantity || !reason || !context) {
+    redirectToConsumables("validation-error");
+  }
+
+  const batch = await getConsumableBatchById(batchId);
+  if (!batch) redirectToConsumables("save-error");
+
+  const result = await recordStockMovement(context.dependencies, {
+    batch,
+    movementType,
+    quantity,
+    fromLocationId,
+    toLocationId,
+    reason,
+    relatedDeploymentId,
+    notes,
+    userId: context.userId,
+  });
+
+  if (!result.ok) {
+    redirect(`/consumables/${batchId}?statusMessage=movement-error`);
+  }
+
+  revalidatePath("/consumables");
+  revalidatePath(`/consumables/${batchId}`);
+  redirect(`/consumables/${batchId}?statusMessage=movement-recorded`);
 }
 
 export async function archiveConsumableBatchAction(formData: FormData) {

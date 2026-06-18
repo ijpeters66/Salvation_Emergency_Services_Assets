@@ -480,6 +480,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      stock_movement: {
+        Row: {
+          id: string;
+          consumable_batch_id: string;
+          movement_type: string;
+          quantity: number;
+          from_location_id: string | null;
+          to_location_id: string | null;
+          reason: string;
+          related_deployment_id: string | null;
+          notes: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          consumable_batch_id: string;
+          movement_type: string;
+          quantity: number;
+          from_location_id?: string | null;
+          to_location_id?: string | null;
+          reason: string;
+          related_deployment_id?: string | null;
+          notes?: string | null;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          consumable_batch_id?: string;
+          movement_type?: string;
+          quantity?: number;
+          from_location_id?: string | null;
+          to_location_id?: string | null;
+          reason?: string;
+          related_deployment_id?: string | null;
+          notes?: string | null;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

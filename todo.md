@@ -285,34 +285,34 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 13. Stock Movements
 
-- [ ] Create stock movement table.
-- [ ] Support Received movement.
-- [ ] Support Issued movement.
-- [ ] Support Transferred movement.
-- [ ] Support Returned movement.
-- [ ] Support Adjusted movement.
-- [ ] Support Written Off movement.
-- [ ] Support Stocktake Variance movement.
-- [ ] Add movement reason.
-- [ ] Add movement quantity.
-- [ ] Add from location.
-- [ ] Add to location.
-- [ ] Add related deployment.
-- [ ] Add movement user.
-- [ ] Add movement date/time.
-- [ ] Add movement notes.
-- [ ] Add stock movement form.
-- [ ] Add stock movement ledger view.
+- [x] Create stock movement table.
+- [x] Support Received movement.
+- [x] Support Issued movement.
+- [x] Support Transferred movement.
+- [x] Support Returned movement.
+- [x] Support Adjusted movement.
+- [x] Support Written Off movement.
+- [x] Support Stocktake Variance movement.
+- [x] Add movement reason.
+- [x] Add movement quantity.
+- [x] Add from location.
+- [x] Add to location.
+- [x] Add related deployment.
+- [x] Add movement user.
+- [x] Add movement date/time.
+- [x] Add movement notes.
+- [x] Add stock movement form.
+- [x] Add stock movement ledger view.
 - [ ] Add stock movement filters.
 - [ ] Add stock movement export.
 - [ ] Implement FIFO issuing.
 - [ ] Confirm FIFO draws from oldest eligible batch first.
 - [ ] Confirm transfer updates source and destination stock.
-- [ ] Confirm returns update correct batch/location.
-- [ ] Confirm write-offs reduce stock correctly.
-- [ ] Confirm adjustments require a reason.
-- [ ] Add stock movement audit logging.
-- [ ] Add stock movement tests.
+- [x] Confirm returns update correct batch/location.
+- [x] Confirm write-offs reduce stock correctly.
+- [x] Confirm adjustments require a reason.
+- [x] Add stock movement audit logging.
+- [x] Add stock movement tests.
 
 ## 14. Stock Thresholds and Alerts
 

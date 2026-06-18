@@ -5,13 +5,19 @@ type BatchFieldsProps = {
   batch?: ConsumableBatchRow;
   items: ConsumableItemRow[];
   locations: LocationOption[];
+  lockQuantityOnHand?: boolean;
 };
 
 function numberValue(value: number | null | undefined) {
   return value == null ? "" : String(value);
 }
 
-export function BatchFields({ batch, items, locations }: BatchFieldsProps) {
+export function BatchFields({
+  batch,
+  items,
+  locations,
+  lockQuantityOnHand = false,
+}: BatchFieldsProps) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
@@ -59,6 +65,7 @@ export function BatchFields({ batch, items, locations }: BatchFieldsProps) {
           defaultValue={batch?.quantity_on_hand ?? 0}
           min="0"
           name="quantityOnHand"
+          readOnly={lockQuantityOnHand}
           required
           type="number"
         />

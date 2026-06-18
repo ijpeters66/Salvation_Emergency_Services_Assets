@@ -4,6 +4,7 @@ import type {
   ConsumableBatchUpdate,
   ConsumableItemInsert,
 } from "@/lib/consumables/service";
+import type { StockMovementInsert } from "@/lib/consumables/stock-movement";
 import type { UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
@@ -66,6 +67,17 @@ export async function getConsumableBatchById(id: string) {
   return error ? null : data;
 }
 
+export async function listStockMovements(batchId: string) {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("stock_movement")
+    .select("*")
+    .eq("consumable_batch_id", batchId)
+    .order("created_at", { ascending: false });
+  return error ? [] : data;
+}
+
 export async function getCurrentSupabaseUserId() {
   if (!getPublicEnvStatus().configured) return null;
   const supabase = await createSupabaseServerClient();
@@ -101,6 +113,15 @@ export function createSupabaseConsumableDependencies() {
         .from("consumable_batch")
         .update(payload)
         .eq("id", id)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async insertStockMovement(payload: StockMovementInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("stock_movement")
+        .insert(payload)
         .select("*")
         .single();
       return error ? err(error.message) : ok(data);

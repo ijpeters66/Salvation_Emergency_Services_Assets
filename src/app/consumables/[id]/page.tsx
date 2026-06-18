@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Archive, PencilLine } from "lucide-react";
+import { ArrowLeft, Archive, History, PencilLine, Plus } from "lucide-react";
 
 import {
   archiveConsumableBatchAction,
+  recordStockMovementAction,
   updateConsumableBatchAction,
 } from "@/app/consumables/actions";
 import { BatchFields } from "@/app/consumables/batch-form";
@@ -14,8 +15,11 @@ import {
   getConsumableBatchById,
   listConsumableCategories,
   listConsumableItems,
+  listStockMovements,
 } from "@/lib/consumables/server";
 import { calculateBatchValue } from "@/lib/consumables/service";
+import { stockMovementLabels } from "@/lib/consumables/stock-movement";
+import { stockMovementTypes } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
 
@@ -29,6 +33,16 @@ function money(value: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(value);
 }
 
+function dateTime(value: string) {
+  return new Intl.DateTimeFormat("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 export default async function BatchDetailPage({ params }: BatchDetailPageProps) {
   const { id } = await params;
   const user = await getCurrentUserContext();
@@ -37,10 +51,11 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
   const batch = await getConsumableBatchById(id);
   if (!batch) notFound();
 
-  const [categories, items, locationRows] = await Promise.all([
+  const [categories, items, locationRows, movements] = await Promise.all([
     listConsumableCategories(isAdmin, role),
     listConsumableItems(isAdmin, role),
     listLocations(false, role),
+    listStockMovements(id),
   ]);
   const locations = toLocationOptions(locationRows);
   const item = items.find((candidate) => candidate.id === batch.item_id);
@@ -126,12 +141,153 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">
+            <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Record stock movement</h2>
+          </div>
+          <form action={recordStockMovementAction} className="mt-4 grid gap-3 md:grid-cols-2">
+            <input name="batchId" type="hidden" value={batch.id} />
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Movement type
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="movementType"
+                required
+              >
+                {stockMovementTypes.map((movementType) => (
+                  <option key={movementType} value={movementType}>
+                    {stockMovementLabels[movementType]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Quantity
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                min="1"
+                name="quantity"
+                required
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              From location
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                defaultValue={batch.location_id}
+                name="fromLocationId"
+              >
+                <option value="">None</option>
+                {locations.map((candidate) => (
+                  <option key={candidate.value} value={candidate.value}>
+                    {candidate.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              To location
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="toLocationId"
+              >
+                <option value="">None</option>
+                {locations.map((candidate) => (
+                  <option key={candidate.value} value={candidate.value}>
+                    {candidate.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Reason
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="reason"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Related deployment
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="relatedDeploymentId"
+                placeholder="Optional deployment ID"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
+              Notes
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+                name="notes"
+              />
+            </label>
+            <div className="md:col-span-2">
+              <Button type="submit">Record movement</Button>
+            </div>
+          </form>
+        </section>
+
+        <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+          <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
+            <History className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Stock movement ledger</h2>
+          </div>
+          {movements.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
+                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                  <tr>
+                    <th className="px-5 py-3 font-semibold">Date</th>
+                    <th className="px-5 py-3 font-semibold">Type</th>
+                    <th className="px-5 py-3 font-semibold">Qty</th>
+                    <th className="px-5 py-3 font-semibold">From</th>
+                    <th className="px-5 py-3 font-semibold">To</th>
+                    <th className="px-5 py-3 font-semibold">Reason</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {movements.map((movement) => (
+                    <tr key={movement.id}>
+                      <td className="px-5 py-4 text-[var(--muted)]">
+                        {dateTime(movement.created_at)}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--muted)]">
+                        {stockMovementLabels[
+                          movement.movement_type as keyof typeof stockMovementLabels
+                        ] ?? movement.movement_type}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--muted)]">{movement.quantity}</td>
+                      <td className="px-5 py-4 text-[var(--muted)]">
+                        {locations.find(
+                          (candidate) => candidate.value === movement.from_location_id,
+                        )?.label ?? "None"}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--muted)]">
+                        {locations.find((candidate) => candidate.value === movement.to_location_id)
+                          ?.label ?? "None"}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--muted)]">{movement.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
+              No stock movements have been recorded for this batch yet.
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
             <PencilLine className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Edit batch</h2>
           </div>
           <form action={updateConsumableBatchAction} className="mt-4 grid gap-4">
             <input name="id" type="hidden" value={batch.id} />
-            <BatchFields batch={batch} items={items} locations={locations} />
+            <BatchFields batch={batch} items={items} locations={locations} lockQuantityOnHand />
             <div>
               <Button type="submit">Save changes</Button>
             </div>
