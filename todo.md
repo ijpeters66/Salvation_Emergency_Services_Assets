@@ -381,18 +381,18 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 17. Deployments
 
-- [ ] Create deployment table.
-- [ ] Define deployment statuses.
-- [ ] Add deployment name.
-- [ ] Add deployment type/reason.
-- [ ] Add start date/time.
-- [ ] Add end date/time.
-- [ ] Add deployment location.
-- [ ] Add notes.
-- [ ] Add deployment list.
-- [ ] Add deployment detail page.
-- [ ] Add deployment create form.
-- [ ] Add deployment edit form.
+- [x] Create deployment table.
+- [x] Define deployment statuses.
+- [x] Add deployment name.
+- [x] Add deployment type/reason.
+- [x] Add start date/time.
+- [x] Add end date/time.
+- [x] Add deployment location.
+- [x] Add notes.
+- [x] Add deployment list.
+- [x] Add deployment detail page.
+- [x] Add deployment create form.
+- [x] Add deployment edit form.
 - [ ] Assign assets to deployment.
 - [ ] Assign consumables to deployment.
 - [ ] Issue consumables to deployment through stock movement ledger.
@@ -400,8 +400,8 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Return consumables from deployment if applicable.
 - [ ] Show deployment history for an asset.
 - [ ] Show deployment history for consumables.
-- [ ] Add deployment audit logging.
-- [ ] Add deployment tests.
+- [x] Add deployment audit logging.
+- [x] Add deployment tests.
 
 ## 18. QR Codes and Scanning
 

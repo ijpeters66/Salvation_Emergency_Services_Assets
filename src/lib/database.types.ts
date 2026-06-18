@@ -372,6 +372,66 @@ export type Database = {
         };
         Relationships: [];
       };
+      deployment: {
+        Row: {
+          id: string;
+          deployment_id: string;
+          deployment_name: string;
+          purpose_reason: string;
+          deployment_location_site: string;
+          team_name: string;
+          team_leader: string | null;
+          contact_number: string | null;
+          start_datetime: string;
+          expected_return_datetime: string | null;
+          actual_return_datetime: string | null;
+          status: string;
+          notes: string | null;
+          damage_fault_notes: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          deployment_id: string;
+          deployment_name: string;
+          purpose_reason: string;
+          deployment_location_site: string;
+          team_name: string;
+          team_leader?: string | null;
+          contact_number?: string | null;
+          start_datetime: string;
+          expected_return_datetime?: string | null;
+          actual_return_datetime?: string | null;
+          status?: string;
+          notes?: string | null;
+          damage_fault_notes?: string | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          deployment_id?: string;
+          deployment_name?: string;
+          purpose_reason?: string;
+          deployment_location_site?: string;
+          team_name?: string;
+          team_leader?: string | null;
+          contact_number?: string | null;
+          start_datetime?: string;
+          expected_return_datetime?: string | null;
+          actual_return_datetime?: string | null;
+          status?: string;
+          notes?: string | null;
+          damage_fault_notes?: string | null;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       location: {
         Row: {
           id: string;
