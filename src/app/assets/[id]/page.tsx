@@ -34,6 +34,7 @@ import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
 import { listMaintenanceRecords, listMaintenanceSchedules } from "@/lib/maintenance/server";
+import { listAssetDeploymentHistory, listDeployments } from "@/lib/deployments/server";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +89,8 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     plantDetails,
     schedules,
     maintenanceRecords,
+    deploymentHistory,
+    deployments,
   ] = await Promise.all([
     listAssetCategories(isAdmin, role),
     listLocations(false, role),
@@ -97,6 +100,8 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     getPlantDetailsByAssetId(id),
     listMaintenanceSchedules(id),
     listMaintenanceRecords(id),
+    listAssetDeploymentHistory(id),
+    listDeployments(),
   ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
@@ -117,6 +122,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     plantDetails?.odometer_reading ?? plantDetails?.hour_meter_reading ?? null;
   const scheduleById = new Map(schedules.map((schedule) => [schedule.id, schedule]));
   const totalMaintenanceCost = maintenanceRecords.reduce((total, record) => total + record.cost, 0);
+  const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
 
   return (
     <AppShell>
@@ -609,6 +615,43 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
           ) : (
             <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
               No maintenance records have been logged for this asset.
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment history</h2>
+          {deploymentHistory.length > 0 ? (
+            <ol className="mt-4 grid gap-3">
+              {deploymentHistory.map((deploymentAsset) => {
+                const deployment = deploymentById.get(deploymentAsset.deployment_id);
+
+                return (
+                  <li
+                    className="rounded-md border border-[var(--border)] p-4"
+                    key={deploymentAsset.id}
+                  >
+                    <p className="font-medium text-[var(--ink)]">
+                      {deployment?.deployment_name ?? "Unknown deployment"}
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      Checked out {dateTime(deploymentAsset.checked_out_at)}
+                      {deploymentAsset.checked_in_at
+                        ? `; checked in ${dateTime(deploymentAsset.checked_in_at)}`
+                        : "; currently deployed"}
+                    </p>
+                    {deploymentAsset.notes ? (
+                      <p className="mt-2 text-sm text-[var(--foreground)]">
+                        {deploymentAsset.notes}
+                      </p>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              No deployment history has been recorded for this asset.
             </p>
           )}
         </section>

@@ -432,6 +432,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      deployment_asset: {
+        Row: {
+          id: string;
+          deployment_id: string;
+          asset_id: string;
+          checked_out_at: string;
+          checked_in_at: string | null;
+          checked_out_by: string;
+          checked_in_by: string | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          deployment_id: string;
+          asset_id: string;
+          checked_out_at?: string;
+          checked_in_at?: string | null;
+          checked_out_by: string;
+          checked_in_by?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          deployment_id?: string;
+          asset_id?: string;
+          checked_out_at?: string;
+          checked_in_at?: string | null;
+          checked_out_by?: string;
+          checked_in_by?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
       location: {
         Row: {
           id: string;

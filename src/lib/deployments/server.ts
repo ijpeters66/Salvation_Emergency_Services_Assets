@@ -1,4 +1,7 @@
 import { writeAuditLog } from "@/lib/audit-log";
+import type { AssetMovementInsert } from "@/lib/assets/movement";
+import type { AssetUpdate } from "@/lib/assets/service";
+import type { DeploymentAssetInsert, DeploymentAssetUpdate } from "@/lib/deployments/assets";
 import type {
   DeploymentInsert,
   DeploymentStatus,
@@ -22,6 +25,39 @@ export async function getDeploymentById(id: string) {
   if (!getPublicEnvStatus().configured) return null;
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.from("deployment").select("*").eq("id", id).maybeSingle();
+  return error ? null : data;
+}
+
+export async function listDeploymentAssets(deploymentId: string) {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("deployment_asset")
+    .select("*")
+    .eq("deployment_id", deploymentId)
+    .order("checked_out_at", { ascending: false });
+  return error ? [] : data;
+}
+
+export async function listAssetDeploymentHistory(assetId: string) {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("deployment_asset")
+    .select("*")
+    .eq("asset_id", assetId)
+    .order("checked_out_at", { ascending: false });
+  return error ? [] : data;
+}
+
+export async function getDeploymentAssetById(id: string) {
+  if (!getPublicEnvStatus().configured) return null;
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("deployment_asset")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   return error ? null : data;
 }
 
@@ -49,6 +85,44 @@ export function createSupabaseDeploymentDependencies() {
       const supabase = await createSupabaseServerClient();
       const { data, error } = await supabase
         .from("deployment")
+        .update(payload)
+        .eq("id", id)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async insertDeploymentAsset(payload: DeploymentAssetInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("deployment_asset")
+        .insert(payload)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async updateDeploymentAsset(id: string, payload: DeploymentAssetUpdate) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("deployment_asset")
+        .update(payload)
+        .eq("id", id)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async insertMovement(payload: AssetMovementInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("asset_movement")
+        .insert(payload)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async updateAsset(id: string, payload: AssetUpdate) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("asset")
         .update(payload)
         .eq("id", id)
         .select("*")

@@ -18,3 +18,4 @@ client_brief/*.pdf
 **/~$*.docx
 playwright-report/
 test-results/
+*.tsbuildinfo

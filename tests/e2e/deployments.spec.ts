@@ -3,3 +3,7 @@ import { test } from "@playwright/test";
 test.skip("create deployment and view detail with mocked Supabase", async () => {
   // Requires a server-action aware Supabase test double or a disposable test database.
 });
+
+test.skip("check out an asset from deployment detail with mocked Supabase", async () => {
+  // Requires a server-action aware Supabase test double or a disposable test database.
+});

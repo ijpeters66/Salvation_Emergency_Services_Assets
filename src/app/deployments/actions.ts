@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getAssetById } from "@/lib/assets/server";
+import { checkInDeploymentAsset, checkOutDeploymentAsset } from "@/lib/deployments/assets";
 import {
   createDeploymentRecord,
   parseDeploymentFormData,
@@ -11,6 +13,7 @@ import {
 import {
   createSupabaseDeploymentDependencies,
   getCurrentSupabaseUserId,
+  getDeploymentAssetById,
   getDeploymentById,
 } from "@/lib/deployments/server";
 import { getPublicEnvStatus } from "@/lib/env";
@@ -60,4 +63,63 @@ export async function updateDeploymentAction(formData: FormData) {
   revalidatePath("/deployments");
   revalidatePath(`/deployments/${id}`);
   redirect(`/deployments/${id}?statusMessage=updated`);
+}
+
+export async function checkOutDeploymentAssetAction(formData: FormData) {
+  const deploymentId = String(formData.get("deploymentId") ?? "");
+  const assetId = String(formData.get("assetId") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const context = await getMutationContext();
+  if (!deploymentId || !assetId || !context) redirectToDeployments("validation-error");
+
+  const asset = await getAssetById(assetId);
+  if (!asset) redirect(`/deployments/${deploymentId}?statusMessage=asset-error`);
+
+  const result = await checkOutDeploymentAsset(context.dependencies, {
+    deploymentId,
+    asset,
+    notes,
+    userId: context.userId,
+  });
+  if (!result.ok) redirect(`/deployments/${deploymentId}?statusMessage=checkout-error`);
+
+  revalidatePath("/assets");
+  revalidatePath(`/assets/${assetId}`);
+  revalidatePath(`/deployments/${deploymentId}`);
+  redirect(`/deployments/${deploymentId}?statusMessage=asset-checked-out`);
+}
+
+export async function checkInDeploymentAssetAction(formData: FormData) {
+  const deploymentId = String(formData.get("deploymentId") ?? "");
+  const deploymentAssetId = String(formData.get("deploymentAssetId") ?? "");
+  const returnStatus = String(formData.get("returnStatus") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const context = await getMutationContext();
+  if (
+    !deploymentId ||
+    !deploymentAssetId ||
+    !["available", "damaged", "under_maintenance"].includes(returnStatus) ||
+    !context
+  ) {
+    redirectToDeployments("validation-error");
+  }
+
+  const deploymentAsset = await getDeploymentAssetById(deploymentAssetId);
+  if (!deploymentAsset) redirect(`/deployments/${deploymentId}?statusMessage=asset-error`);
+  const asset = await getAssetById(deploymentAsset.asset_id);
+  if (!asset) redirect(`/deployments/${deploymentId}?statusMessage=asset-error`);
+
+  const result = await checkInDeploymentAsset(context.dependencies, {
+    deploymentAsset,
+    asset,
+    returnStatus: returnStatus as "available" | "damaged" | "under_maintenance",
+    notes,
+    userId: context.userId,
+  });
+  if (!result.ok) redirect(`/deployments/${deploymentId}?statusMessage=checkin-error`);
+
+  revalidatePath("/assets");
+  revalidatePath(`/assets/${asset.id}`);
+  revalidatePath(`/deployments/${deploymentId}`);
+  redirect(`/deployments/${deploymentId}?statusMessage=asset-checked-in`);
 }

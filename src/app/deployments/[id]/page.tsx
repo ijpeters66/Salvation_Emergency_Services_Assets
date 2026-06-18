@@ -2,12 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, PencilLine } from "lucide-react";
 
-import { updateDeploymentAction } from "@/app/deployments/actions";
+import {
+  checkInDeploymentAssetAction,
+  checkOutDeploymentAssetAction,
+  updateDeploymentAction,
+} from "@/app/deployments/actions";
 import { DeploymentFields } from "@/app/deployments/deployment-fields";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import { listAssets } from "@/lib/assets/server";
 import { deploymentStatusLabels, type DeploymentStatus } from "@/lib/deployments/service";
-import { getDeploymentById } from "@/lib/deployments/server";
+import { getDeploymentById, listDeploymentAssets } from "@/lib/deployments/server";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +33,24 @@ function dateTime(value: string | null) {
 
 export default async function DeploymentDetailPage({ params }: DeploymentDetailPageProps) {
   const { id } = await params;
-  const deployment = await getDeploymentById(id);
+  const [deployment, deploymentAssets, availableAssets] = await Promise.all([
+    getDeploymentById(id),
+    listDeploymentAssets(id),
+    listAssets({ status: "available" }, "user"),
+  ]);
 
   if (!deployment) {
     notFound();
   }
+  const relatedAssets = await listAssets({}, "user");
+  const assetById = new Map(relatedAssets.map((asset) => [asset.id, asset]));
+  const activeDeploymentAssets = deploymentAssets.filter(
+    (deploymentAsset) => !deploymentAsset.checked_in_at,
+  );
+  const activeAssetIds = new Set(
+    activeDeploymentAssets.map((deploymentAsset) => deploymentAsset.asset_id),
+  );
+  const assignableAssets = availableAssets.filter((asset) => !activeAssetIds.has(asset.id));
 
   return (
     <AppShell>
@@ -117,6 +135,95 @@ export default async function DeploymentDetailPage({ params }: DeploymentDetailP
               </dd>
             </div>
           </dl>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment assets</h2>
+          <form action={checkOutDeploymentAssetAction} className="mt-4 grid gap-4 md:grid-cols-3">
+            <input name="deploymentId" type="hidden" value={deployment.id} />
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Available asset
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="assetId"
+                required
+              >
+                <option value="">Choose asset</option>
+                {assignableAssets.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.asset_name} ({asset.unique_asset_id})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
+              Notes
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="notes"
+              />
+            </label>
+            <div className="md:col-span-3">
+              <Button type="submit" disabled={assignableAssets.length === 0}>
+                Check out asset
+              </Button>
+            </div>
+          </form>
+
+          {activeDeploymentAssets.length > 0 ? (
+            <div className="mt-5 grid gap-3">
+              {activeDeploymentAssets.map((deploymentAsset) => {
+                const asset = assetById.get(deploymentAsset.asset_id);
+
+                return (
+                  <form
+                    action={checkInDeploymentAssetAction}
+                    className="grid gap-3 rounded-md border border-[var(--border)] p-4 md:grid-cols-4"
+                    key={deploymentAsset.id}
+                  >
+                    <input name="deploymentId" type="hidden" value={deployment.id} />
+                    <input name="deploymentAssetId" type="hidden" value={deploymentAsset.id} />
+                    <div className="md:col-span-2">
+                      <p className="font-medium text-[var(--ink)]">
+                        {asset?.asset_name ?? "Unknown asset"}
+                      </p>
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        Checked out {dateTime(deploymentAsset.checked_out_at)}
+                      </p>
+                    </div>
+                    <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                      Return status
+                      <select
+                        className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                        name="returnStatus"
+                        defaultValue="available"
+                      >
+                        <option value="available">Available</option>
+                        <option value="damaged">Damaged</option>
+                        <option value="under_maintenance">Under maintenance</option>
+                      </select>
+                    </label>
+                    <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                      Notes
+                      <input
+                        className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                        name="notes"
+                      />
+                    </label>
+                    <div className="md:col-span-4">
+                      <Button type="submit" variant="outline" size="sm">
+                        Check in asset
+                      </Button>
+                    </div>
+                  </form>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+              No assets are currently checked out to this deployment.
+            </p>
+          )}
         </section>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
