@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Archive, History, PencilLine, Route } from "lucide-react";
+import { ArrowLeft, Archive, History, PencilLine, Route, Wrench } from "lucide-react";
 
 import {
   archiveAssetAction,
@@ -9,6 +9,7 @@ import {
   unassignChildAssetAction,
   updateAssetAction,
 } from "@/app/assets/actions";
+import { upsertMaintenanceScheduleAction } from "@/app/maintenance/actions";
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,8 @@ import { getPlantExpiryAlerts } from "@/lib/assets/plant";
 import { assetStatuses } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
+import { getScheduleAlertState } from "@/lib/maintenance/schedules";
+import { listMaintenanceSchedules } from "@/lib/maintenance/server";
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +76,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     notFound();
   }
 
-  const [categories, locationRows, movements, assignments, allAssets, plantDetails] =
+  const [categories, locationRows, movements, assignments, allAssets, plantDetails, schedules] =
     await Promise.all([
       listAssetCategories(isAdmin, role),
       listLocations(false, role),
@@ -81,6 +84,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
       listAssetAssignments(id),
       listAssets({}, role),
       getPlantDetailsByAssetId(id),
+      listMaintenanceSchedules(id),
     ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
@@ -97,6 +101,8 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
   );
   const statusMessage = getParam(query.statusMessage);
   const plantAlerts = getPlantExpiryAlerts(plantDetails);
+  const currentMaintenanceReading =
+    plantDetails?.odometer_reading ?? plantDetails?.hour_meter_reading ?? null;
 
   return (
     <AppShell>
@@ -238,6 +244,227 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             ) : null}
           </section>
         ) : null}
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
+            <Wrench className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Maintenance schedules</h2>
+          </div>
+
+          {schedules.length > 0 ? (
+            <div className="mt-4 grid gap-4">
+              {schedules.map((schedule) => {
+                const alertState = getScheduleAlertState(
+                  schedule,
+                  schedule.service_interval_hours
+                    ? (plantDetails?.hour_meter_reading ?? null)
+                    : currentMaintenanceReading,
+                );
+
+                return (
+                  <form
+                    action={upsertMaintenanceScheduleAction}
+                    className="grid gap-3 rounded-md border border-[var(--border)] p-4"
+                    key={schedule.id}
+                  >
+                    <input name="scheduleId" type="hidden" value={schedule.id} />
+                    <input name="assetId" type="hidden" value={asset.id} />
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="font-medium text-[var(--ink)]">{schedule.maintenance_type}</p>
+                      <span className="text-sm font-medium text-[var(--brand-red)]">
+                        {alertState.replace("_", " ")}
+                      </span>
+                    </div>
+                    <div className="grid gap-3 md:grid-cols-3">
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Type
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="maintenanceType"
+                          defaultValue={schedule.maintenance_type}
+                          required
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Due date
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="nextServiceDueDate"
+                          type="date"
+                          defaultValue={schedule.next_service_due_date ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Due reading
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="nextServiceDueReading"
+                          type="number"
+                          step="0.1"
+                          defaultValue={schedule.next_service_due_reading ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Interval days
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="serviceIntervalDate"
+                          type="number"
+                          defaultValue={schedule.service_interval_date ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Interval odometer
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="serviceIntervalOdometer"
+                          type="number"
+                          defaultValue={schedule.service_interval_odometer ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Interval hours
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="serviceIntervalHours"
+                          type="number"
+                          step="0.1"
+                          defaultValue={schedule.service_interval_hours ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Provider
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="serviceProvider"
+                          defaultValue={schedule.service_provider ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Reminder days
+                        <input
+                          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="reminderThresholdDays"
+                          type="number"
+                          defaultValue={schedule.reminder_threshold_days ?? ""}
+                        />
+                      </label>
+                      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+                        Status
+                        <select
+                          className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                          name="status"
+                          defaultValue={schedule.status}
+                        >
+                          <option value="active">Active</option>
+                          <option value="paused">Paused</option>
+                          <option value="archived">Archived</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div>
+                      <Button type="submit" variant="outline" size="sm">
+                        Save schedule
+                      </Button>
+                    </div>
+                  </form>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              No maintenance schedules have been recorded for this asset.
+            </p>
+          )}
+
+          <form
+            action={upsertMaintenanceScheduleAction}
+            className="mt-5 grid gap-4 border-t border-[var(--border)] pt-5 md:grid-cols-3"
+          >
+            <input name="assetId" type="hidden" value={asset.id} />
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Type
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="maintenanceType"
+                placeholder="Annual service"
+                required
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Due date
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="nextServiceDueDate"
+                type="date"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Due reading
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="nextServiceDueReading"
+                type="number"
+                step="0.1"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Interval days
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="serviceIntervalDate"
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Interval odometer
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="serviceIntervalOdometer"
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Interval hours
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="serviceIntervalHours"
+                type="number"
+                step="0.1"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Provider
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="serviceProvider"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Reminder days
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="reminderThresholdDays"
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Status
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="status"
+                defaultValue="active"
+              >
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="archived">Archived</option>
+              </select>
+            </label>
+            <div className="md:col-span-3">
+              <Button type="submit">Add schedule</Button>
+            </div>
+          </form>
+        </section>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">

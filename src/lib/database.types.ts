@@ -414,6 +414,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      maintenance_schedule: {
+        Row: {
+          id: string;
+          asset_id: string;
+          maintenance_type: string;
+          service_interval_date: number | null;
+          service_interval_odometer: number | null;
+          service_interval_hours: number | null;
+          next_service_due_date: string | null;
+          next_service_due_reading: number | null;
+          service_provider: string | null;
+          reminder_threshold_days: number | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          asset_id: string;
+          maintenance_type: string;
+          service_interval_date?: number | null;
+          service_interval_odometer?: number | null;
+          service_interval_hours?: number | null;
+          next_service_due_date?: string | null;
+          next_service_due_reading?: number | null;
+          service_provider?: string | null;
+          reminder_threshold_days?: number | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          asset_id?: string;
+          maintenance_type?: string;
+          service_interval_date?: number | null;
+          service_interval_odometer?: number | null;
+          service_interval_hours?: number | null;
+          next_service_due_date?: string | null;
+          next_service_due_reading?: number | null;
+          service_provider?: string | null;
+          reminder_threshold_days?: number | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
       permission: {
         Row: {
           id: string;
