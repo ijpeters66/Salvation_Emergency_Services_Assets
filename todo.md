@@ -332,21 +332,21 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 15. Plant and Fleet
 
-- [ ] Identify which assets count as plant/fleet.
-- [ ] Add plant/fleet extension fields.
-- [ ] Add registration number.
-- [ ] Add registration expiry.
-- [ ] Add insurance expiry.
-- [ ] Add roadworthy/compliance date.
-- [ ] Add odometer reading.
-- [ ] Add hour meter reading.
-- [ ] Add fuel type.
-- [ ] Add service provider.
-- [ ] Show attached assets.
-- [ ] Add plant/fleet filters.
-- [ ] Add expiry alerts.
-- [ ] Add plant/fleet tests.
-- [ ] Confirm fleet records still behave as assets.
+- [x] Identify which assets count as plant/fleet.
+- [x] Add plant/fleet extension fields.
+- [x] Add registration number.
+- [x] Add registration expiry.
+- [x] Add insurance expiry.
+- [x] Add roadworthy/compliance date.
+- [x] Add odometer reading.
+- [x] Add hour meter reading.
+- [x] Add fuel type.
+- [x] Add service provider.
+- [x] Show attached assets.
+- [x] Add plant/fleet filters.
+- [x] Add expiry alerts.
+- [x] Add plant/fleet tests.
+- [x] Confirm fleet records still behave as assets.
 
 ## 16. Planned Maintenance
 

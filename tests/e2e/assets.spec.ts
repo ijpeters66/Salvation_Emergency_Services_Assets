@@ -11,3 +11,7 @@ test.skip("asset movement appears in history with mocked Supabase", async () => 
 test.skip("assigning and unassigning child assets with mocked Supabase", async () => {
   // Requires a server-action aware Supabase test double or a disposable test database.
 });
+
+test.skip("plant fleet section renders with mocked Supabase", async () => {
+  // Requires a server-action aware Supabase test double or a disposable test database.
+});

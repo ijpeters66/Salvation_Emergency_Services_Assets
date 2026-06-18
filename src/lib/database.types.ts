@@ -438,6 +438,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      plant_details: {
+        Row: {
+          asset_id: string;
+          registration_number: string | null;
+          registration_expiry: string | null;
+          insurance_expiry: string | null;
+          roadworthy_compliance_date: string | null;
+          odometer_reading: number | null;
+          hour_meter_reading: number | null;
+          fuel_type: string | null;
+          service_provider: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          asset_id: string;
+          registration_number?: string | null;
+          registration_expiry?: string | null;
+          insurance_expiry?: string | null;
+          roadworthy_compliance_date?: string | null;
+          odometer_reading?: number | null;
+          hour_meter_reading?: number | null;
+          fuel_type?: string | null;
+          service_provider?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          asset_id?: string;
+          registration_number?: string | null;
+          registration_expiry?: string | null;
+          insurance_expiry?: string | null;
+          roadworthy_compliance_date?: string | null;
+          odometer_reading?: number | null;
+          hour_meter_reading?: number | null;
+          fuel_type?: string | null;
+          service_provider?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
       role: {
         Row: {
           id: string;

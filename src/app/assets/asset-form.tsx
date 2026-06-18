@@ -1,10 +1,12 @@
 import type { AssetRow, AssetCategoryRow } from "@/lib/assets/service";
+import type { PlantDetailsRow } from "@/lib/assets/plant";
 import { assetStatusLabels } from "@/lib/assets/validation";
 import { assetStatuses } from "@/lib/domain-types";
 import type { LocationOption } from "@/lib/locations/service";
 
 type AssetFormProps = {
   asset?: AssetRow;
+  plantDetails?: PlantDetailsRow | null;
   categories: AssetCategoryRow[];
   locations: LocationOption[];
 };
@@ -13,7 +15,7 @@ function moneyValue(value: number | null | undefined) {
   return value == null ? "" : String(value);
 }
 
-export function AssetFields({ asset, categories, locations }: AssetFormProps) {
+export function AssetFields({ asset, plantDetails, categories, locations }: AssetFormProps) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
@@ -173,6 +175,82 @@ export function AssetFields({ asset, categories, locations }: AssetFormProps) {
           className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
           defaultValue={asset?.notes ?? ""}
           name="notes"
+        />
+      </label>
+      <label className="flex items-center gap-2 text-sm font-medium text-[var(--ink)] md:col-span-2">
+        <input defaultChecked={Boolean(plantDetails)} name="isPlant" type="checkbox" />
+        Mark as plant/fleet item
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Registration number
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.registration_number ?? ""}
+          name="registrationNumber"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Registration expiry
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.registration_expiry ?? ""}
+          name="registrationExpiry"
+          type="date"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Insurance expiry
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.insurance_expiry ?? ""}
+          name="insuranceExpiry"
+          type="date"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Roadworthy/compliance date
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.roadworthy_compliance_date ?? ""}
+          name="roadworthyComplianceDate"
+          type="date"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Odometer reading
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.odometer_reading ?? ""}
+          min="0"
+          name="odometerReading"
+          type="number"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Hour meter reading
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.hour_meter_reading ?? ""}
+          min="0"
+          name="hourMeterReading"
+          step="0.1"
+          type="number"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Fuel type
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.fuel_type ?? ""}
+          name="fuelType"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Service provider
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={plantDetails?.service_provider ?? ""}
+          name="serviceProvider"
         />
       </label>
     </div>

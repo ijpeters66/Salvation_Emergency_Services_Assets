@@ -52,6 +52,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
   const locationId = getParam(params.locationId) ?? "";
   const categoryId = getParam(params.categoryId) ?? "";
   const search = getParam(params.search) ?? "";
+  const plantOnly = getParam(params.plantOnly) === "1";
   const statusMessage = getParam(params.statusMessage);
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
@@ -67,6 +68,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             categoryId,
             search,
             includeArchived,
+            plantOnly,
           },
           role,
         ),
@@ -134,7 +136,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             <Filter className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Filters</h2>
           </div>
-          <form className="mt-4 grid gap-3 md:grid-cols-5">
+          <form className="mt-4 grid gap-3 md:grid-cols-6">
             <input
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base outline-none focus:border-[var(--brand-red)]"
               defaultValue={search}
@@ -177,6 +179,10 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                 </option>
               ))}
             </select>
+            <label className="flex h-10 items-center gap-2 text-sm font-medium text-[var(--ink)]">
+              <input defaultChecked={plantOnly} name="plantOnly" type="checkbox" value="1" />
+              Plant/fleet
+            </label>
             <Button type="submit" variant="outline">
               Apply
             </Button>

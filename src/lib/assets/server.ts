@@ -2,6 +2,7 @@ import { writeAuditLog } from "@/lib/audit-log";
 import type { AssetMovementInsert } from "@/lib/assets/movement";
 import type { AssetAssignmentInsert, AssetAssignmentUpdate } from "@/lib/assets/assignment";
 import type { AssetInsert, AssetUpdate } from "@/lib/assets/service";
+import type { PlantDetailsInsert } from "@/lib/assets/plant";
 import type { AssetStatus, UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
@@ -13,6 +14,7 @@ export type AssetFilters = {
   categoryId?: string;
   search?: string;
   includeArchived?: boolean;
+  plantOnly?: boolean;
 };
 
 export async function listAssetCategories(includeArchived: boolean, role: UserRole) {
@@ -72,7 +74,20 @@ export async function listAssets(filters: AssetFilters, role: UserRole) {
     return [];
   }
 
-  return data;
+  if (!filters.plantOnly) {
+    return data;
+  }
+
+  const { data: plantRows, error: plantError } = await supabase
+    .from("plant_details")
+    .select("asset_id");
+
+  if (plantError) {
+    return [];
+  }
+
+  const plantAssetIds = new Set(plantRows.map((row) => row.asset_id));
+  return data.filter((asset) => plantAssetIds.has(asset.id));
 }
 
 export async function getAssetById(id: string) {
@@ -82,6 +97,25 @@ export async function getAssetById(id: string) {
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.from("asset").select("*").eq("id", id).maybeSingle();
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+}
+
+export async function getPlantDetailsByAssetId(assetId: string) {
+  if (!getPublicEnvStatus().configured) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("plant_details")
+    .select("*")
+    .eq("asset_id", assetId)
+    .maybeSingle();
 
   if (error) {
     return null;
@@ -268,6 +302,20 @@ export function createSupabaseAssetDependencies() {
         .from("asset_assignment")
         .update(payload)
         .eq("id", id)
+        .select("*")
+        .single();
+
+      if (error) {
+        return err(error.message);
+      }
+
+      return ok(data);
+    },
+    async upsertPlantDetails(payload: PlantDetailsInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("plant_details")
+        .upsert(payload, { onConflict: "asset_id" })
         .select("*")
         .single();
 

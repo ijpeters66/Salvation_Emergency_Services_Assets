@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUserContext } from "@/lib/auth";
 import { assignChildAsset, unassignChildAsset } from "@/lib/assets/assignment";
 import { recordAssetMovement } from "@/lib/assets/movement";
+import { parsePlantDetailsFormData, upsertPlantDetailsRecord } from "@/lib/assets/plant";
 import { archiveAssetRecord, createAssetRecord, updateAssetRecord } from "@/lib/assets/service";
 import {
   createSupabaseAssetDependencies,
@@ -58,6 +59,21 @@ export async function createAssetAction(formData: FormData) {
     redirectToAssets("save-error");
   }
 
+  const plantDetails = parsePlantDetailsFormData(formData);
+
+  if (plantDetails.success && plantDetails.data.isPlant) {
+    const plantResult = await upsertPlantDetailsRecord(
+      context.dependencies,
+      result.data.id,
+      plantDetails.data,
+      context.userId,
+    );
+
+    if (!plantResult.ok) {
+      redirectToAssets("save-error");
+    }
+  }
+
   revalidatePath("/assets");
   redirect(`/assets/${result.data.id}?statusMessage=created`);
 }
@@ -104,6 +120,21 @@ export async function updateAssetAction(formData: FormData) {
 
   if (!result.ok) {
     redirectToAssets("save-error");
+  }
+
+  const plantDetails = parsePlantDetailsFormData(formData);
+
+  if (plantDetails.success && plantDetails.data.isPlant) {
+    const plantResult = await upsertPlantDetailsRecord(
+      context.dependencies,
+      id,
+      plantDetails.data,
+      context.userId,
+    );
+
+    if (!plantResult.ok) {
+      redirectToAssets("save-error");
+    }
   }
 
   revalidatePath("/assets");

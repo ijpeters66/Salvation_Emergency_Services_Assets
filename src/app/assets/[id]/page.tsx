@@ -17,12 +17,14 @@ import { getAssignableChildAssets } from "@/lib/assets/assignment";
 import { getMovementReasons } from "@/lib/assets/movement";
 import {
   getAssetById,
+  getPlantDetailsByAssetId,
   listAssetAssignments,
   listAssetCategories,
   listAssetMovements,
   listAssets,
 } from "@/lib/assets/server";
 import { assetStatusLabels } from "@/lib/assets/validation";
+import { getPlantExpiryAlerts } from "@/lib/assets/plant";
 import { assetStatuses } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
@@ -71,13 +73,15 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     notFound();
   }
 
-  const [categories, locationRows, movements, assignments, allAssets] = await Promise.all([
-    listAssetCategories(isAdmin, role),
-    listLocations(false, role),
-    listAssetMovements(id),
-    listAssetAssignments(id),
-    listAssets({}, role),
-  ]);
+  const [categories, locationRows, movements, assignments, allAssets, plantDetails] =
+    await Promise.all([
+      listAssetCategories(isAdmin, role),
+      listLocations(false, role),
+      listAssetMovements(id),
+      listAssetAssignments(id),
+      listAssets({}, role),
+      getPlantDetailsByAssetId(id),
+    ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
   const locationById = new Map(locations.map((location) => [location.value, location.label]));
@@ -92,6 +96,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     (item) => !activeChildAssignments.some((assignment) => assignment.child_asset_id === item.id),
   );
   const statusMessage = getParam(query.statusMessage);
+  const plantAlerts = getPlantExpiryAlerts(plantDetails);
 
   return (
     <AppShell>
@@ -186,6 +191,53 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             </div>
           </dl>
         </section>
+
+        {plantDetails ? (
+          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Plant/fleet details</h2>
+            <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Registration number</dt>
+                <dd className="mt-1 text-[var(--ink)]">
+                  {plantDetails.registration_number || "Not recorded"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Fuel type</dt>
+                <dd className="mt-1 text-[var(--ink)]">
+                  {plantDetails.fuel_type || "Not recorded"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Odometer</dt>
+                <dd className="mt-1 text-[var(--ink)]">
+                  {plantDetails.odometer_reading ?? "Not recorded"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Hour meter</dt>
+                <dd className="mt-1 text-[var(--ink)]">
+                  {plantDetails.hour_meter_reading ?? "Not recorded"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Service provider</dt>
+                <dd className="mt-1 text-[var(--ink)]">
+                  {plantDetails.service_provider || "Not recorded"}
+                </dd>
+              </div>
+            </dl>
+            {plantAlerts.length > 0 ? (
+              <ul className="mt-4 grid gap-2 text-sm text-[var(--muted)]">
+                {plantAlerts.map((alert) => (
+                  <li key={alert.label}>
+                    {alert.label}: {alert.date} ({alert.status})
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        ) : null}
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">
@@ -430,7 +482,12 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
           </div>
           <form action={updateAssetAction} className="mt-4 grid gap-4">
             <input name="id" type="hidden" value={asset.id} />
-            <AssetFields asset={asset} categories={categories} locations={locations} />
+            <AssetFields
+              asset={asset}
+              plantDetails={plantDetails}
+              categories={categories}
+              locations={locations}
+            />
             <div>
               <Button type="submit">Save changes</Button>
             </div>
