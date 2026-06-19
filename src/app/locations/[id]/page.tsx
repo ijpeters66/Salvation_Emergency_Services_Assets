@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Boxes, MapPinned, Package } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import { AttachmentSection } from "@/components/attachment-section";
 import { Button } from "@/components/ui/button";
 import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
+import { listDocumentAttachments } from "@/lib/attachments/server";
 import { getCurrentUserContext } from "@/lib/auth";
 import { listAssets } from "@/lib/assets/server";
 import { listConsumableBatches } from "@/lib/consumables/server";
@@ -47,10 +49,12 @@ export default async function LocationDetailPage({
     listConsumableBatches({ locationId: id }, role),
     listLocations(role === "system_admin", role),
   ]);
+  const attachments = await listDocumentAttachments("location", id, role);
 
   const qrPayload = buildLocationQrCodeValue(location.id);
   const activeLocations = locationRows.filter((candidate) => !candidate.archived_at).length;
   const scanAction = getParam(query.scanAction);
+  const attachmentStatus = getParam(query.attachmentStatus);
 
   return (
     <AppShell>
@@ -139,6 +143,17 @@ export default async function LocationDetailPage({
           meta={`${location.name} | ${location.state}`}
           name="Location label"
           payload={qrPayload}
+        />
+
+        <AttachmentSection
+          attachments={attachments}
+          ownerId={location.id}
+          ownerType="location"
+          redirectPath={`/locations/${location.id}`}
+          role={role}
+          status={attachmentStatus}
+          subtitle="Store site photos, access notes, floor plans, or local operating instructions."
+          title="Location attachments"
         />
       </section>
     </AppShell>

@@ -31,6 +31,17 @@ export async function listMaintenanceRecords(assetId: string) {
   return error ? [] : data;
 }
 
+export async function getMaintenanceRecordById(id: string) {
+  if (!getPublicEnvStatus().configured) return null;
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("maintenance_record")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  return error ? null : data;
+}
+
 export async function getCurrentSupabaseUserId() {
   if (!getPublicEnvStatus().configured) return null;
   const supabase = await createSupabaseServerClient();

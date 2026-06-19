@@ -425,23 +425,23 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 19. Attachments, Photos, and Documents
 
-- [ ] Configure Supabase Storage.
-- [ ] Define storage buckets.
-- [ ] Define accepted file types.
-- [ ] Define max upload size.
-- [ ] Add attachment metadata table.
-- [ ] Support asset attachments.
-- [ ] Support consumable batch attachments.
-- [ ] Support maintenance invoice attachments.
-- [ ] Support deployment attachments.
-- [ ] Support photo uploads from mobile.
-- [ ] Support document uploads from desktop.
-- [ ] Add attachment preview/download.
-- [ ] Add attachment archive/delete policy.
-- [ ] Add attachment audit logging.
-- [ ] Add storage RLS policies.
-- [ ] Add attachment tests.
-- [ ] Confirm sensitive files are not public.
+- [x] Configure Supabase Storage.
+- [x] Define storage buckets.
+- [x] Define accepted file types.
+- [x] Define max upload size.
+- [x] Add attachment metadata table.
+- [x] Support asset attachments.
+- [x] Support consumable batch attachments.
+- [x] Support maintenance invoice attachments.
+- [x] Support deployment attachments.
+- [x] Support photo uploads from mobile.
+- [x] Support document uploads from desktop.
+- [x] Add attachment preview/download.
+- [x] Add attachment archive/delete policy.
+- [x] Add attachment audit logging.
+- [x] Add storage RLS policies.
+- [x] Add attachment tests.
+- [x] Confirm sensitive files are not public.
 
 ## 20. Offline-First and Sync
 

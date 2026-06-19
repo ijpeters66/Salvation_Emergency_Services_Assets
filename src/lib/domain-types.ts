@@ -28,6 +28,7 @@ export type StockMovementType = (typeof stockMovementTypes)[number];
 
 export const attachmentOwnerTypes = [
   "asset",
+  "plant",
   "consumable_batch",
   "maintenance_record",
   "deployment",

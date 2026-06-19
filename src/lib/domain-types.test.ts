@@ -15,6 +15,7 @@ describe("domain type guards", () => {
     expect(isDeploymentStatus("active")).toBe(true);
     expect(isStockMovementType("stocktake_variance")).toBe(true);
     expect(isAttachmentOwnerType("maintenance_record")).toBe(true);
+    expect(isAttachmentOwnerType("plant")).toBe(true);
   });
 
   it("rejects unknown values", () => {

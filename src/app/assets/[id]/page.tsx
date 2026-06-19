@@ -15,8 +15,10 @@ import {
 } from "@/app/maintenance/actions";
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
+import { AttachmentSection } from "@/components/attachment-section";
 import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
 import { Button } from "@/components/ui/button";
+import { listDocumentAttachments } from "@/lib/attachments/server";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getAssignableChildAssets } from "@/lib/assets/assignment";
 import { getMovementReasons } from "@/lib/assets/movement";
@@ -97,6 +99,8 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     maintenanceRecords,
     deploymentHistory,
     deployments,
+    assetAttachments,
+    plantAttachments,
   ] = await Promise.all([
     listAssetCategories(isAdmin, role),
     listLocations(false, role),
@@ -108,6 +112,8 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     listMaintenanceRecords(id),
     listAssetDeploymentHistory(id),
     listDeployments(),
+    listDocumentAttachments("asset", id, role),
+    listDocumentAttachments("plant", id, role),
   ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
@@ -123,6 +129,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     (item) => !activeChildAssignments.some((assignment) => assignment.child_asset_id === item.id),
   );
   const statusMessage = getParam(query.statusMessage);
+  const attachmentStatus = getParam(query.attachmentStatus);
   const plantAlerts = getPlantExpiryAlerts(plantDetails);
   const currentMaintenanceReading =
     plantDetails?.odometer_reading ?? plantDetails?.hour_meter_reading ?? null;
@@ -244,6 +251,17 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
           payload={asset.qr_code_value}
         />
 
+        <AttachmentSection
+          attachments={assetAttachments}
+          ownerId={asset.id}
+          ownerType="asset"
+          redirectPath={`/assets/${asset.id}`}
+          role={role}
+          status={attachmentStatus}
+          subtitle="Upload photos, manuals, inspection sheets, or other asset documents."
+          title="Asset attachments"
+        />
+
         {plantDetails ? (
           <section className="rounded-md border border-[var(--border)] bg-white p-5">
             <h2 className="text-lg font-semibold text-[var(--ink)]">Plant/fleet details</h2>
@@ -289,6 +307,18 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
               </ul>
             ) : null}
           </section>
+        ) : null}
+
+        {plantDetails ? (
+          <AttachmentSection
+          attachments={plantAttachments}
+          ownerId={asset.id}
+          ownerType="plant"
+          redirectPath={`/assets/${asset.id}`}
+          role={role}
+          subtitle="Store registration papers, insurance documents, and compliance records for plant and fleet assets."
+          title="Plant and fleet attachments"
+        />
         ) : null}
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
@@ -625,7 +655,12 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
                           : "None"}
                       </td>
                       <td className="px-4 py-3 text-[var(--muted)]">
-                        <span className="font-medium text-[var(--ink)]">{record.service_type}</span>
+                        <Link
+                          className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
+                          href={`/maintenance/records/${record.id}`}
+                        >
+                          {record.service_type}
+                        </Link>
                         <span className="block">{record.description}</span>
                       </td>
                       <td className="px-4 py-3 text-[var(--muted)]">{record.supplier_provider}</td>

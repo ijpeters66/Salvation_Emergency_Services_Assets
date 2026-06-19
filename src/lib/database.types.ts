@@ -495,6 +495,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      document_attachment: {
+        Row: {
+          id: string;
+          owner_type: string;
+          owner_id: string;
+          file_name: string;
+          file_path: string;
+          mime_type: string;
+          file_size: number;
+          uploaded_by: string;
+          created_at: string;
+          archived_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          owner_type: string;
+          owner_id: string;
+          file_name: string;
+          file_path: string;
+          mime_type: string;
+          file_size: number;
+          uploaded_by: string;
+          created_at?: string;
+          archived_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          owner_type?: string;
+          owner_id?: string;
+          file_name?: string;
+          file_path?: string;
+          mime_type?: string;
+          file_size?: number;
+          uploaded_by?: string;
+          created_at?: string;
+          archived_at?: string | null;
+        };
+        Relationships: [];
+      };
       location: {
         Row: {
           id: string;

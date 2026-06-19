@@ -9,8 +9,10 @@ import {
 } from "@/app/consumables/actions";
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
+import { AttachmentSection } from "@/components/attachment-section";
 import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
 import { Button } from "@/components/ui/button";
+import { listDocumentAttachments } from "@/lib/attachments/server";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
   getConsumableBatchById,
@@ -64,12 +66,13 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
   const batch = await getConsumableBatchById(id);
   if (!batch) notFound();
 
-  const [categories, items, locationRows, movements, deployments] = await Promise.all([
+  const [categories, items, locationRows, movements, deployments, attachments] = await Promise.all([
     listConsumableCategories(isAdmin, role),
     listConsumableItems(isAdmin, role),
     listLocations(false, role),
     listStockMovements(id),
     listDeployments(),
+    listDocumentAttachments("consumable_batch", id, role),
   ]);
   const locations = toLocationOptions(locationRows);
   const item = items.find((candidate) => candidate.id === batch.item_id);
@@ -78,6 +81,7 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
   const totalValue = calculateBatchValue(batch.quantity_on_hand, batch.unit_cost);
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
   const scanAction = getParam(query.scanAction);
+  const attachmentStatus = getParam(query.attachmentStatus);
 
   return (
     <AppShell>
@@ -172,6 +176,17 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
           meta={`${item?.name ?? "Consumable batch"} | ${batch.batch_lot_number}`}
           name="Consumable batch label"
           payload={batch.qr_code_value}
+        />
+
+        <AttachmentSection
+          attachments={attachments}
+          ownerId={batch.id}
+          ownerType="consumable_batch"
+          redirectPath={`/consumables/${batch.id}`}
+          role={role}
+          status={attachmentStatus}
+          subtitle="Upload donation paperwork, batch documentation, expiry evidence, or handling guidance."
+          title="Batch attachments"
         />
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">

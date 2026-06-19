@@ -8,10 +8,13 @@ import {
   issueDeploymentConsumablesAction,
   updateDeploymentAction,
 } from "@/app/deployments/actions";
+import { AttachmentSection } from "@/components/attachment-section";
 import { DeploymentFields } from "@/app/deployments/deployment-fields";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { listAssets } from "@/lib/assets/server";
+import { listDocumentAttachments } from "@/lib/attachments/server";
+import { getCurrentUserContext } from "@/lib/auth";
 import { listConsumableBatches, listConsumableItems } from "@/lib/consumables/server";
 import { deploymentStatusLabels, type DeploymentStatus } from "@/lib/deployments/service";
 import {
@@ -26,7 +29,12 @@ export const dynamic = "force-dynamic";
 
 type DeploymentDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 function dateTime(value: string | null) {
   if (!value) return "Not recorded";
@@ -39,8 +47,14 @@ function dateTime(value: string | null) {
   }).format(new Date(value));
 }
 
-export default async function DeploymentDetailPage({ params }: DeploymentDetailPageProps) {
+export default async function DeploymentDetailPage({
+  params,
+  searchParams,
+}: DeploymentDetailPageProps) {
   const { id } = await params;
+  const query = (await searchParams) ?? {};
+  const user = await getCurrentUserContext();
+  const role = user?.role ?? "user";
   const [
     deployment,
     deploymentAssets,
@@ -49,20 +63,22 @@ export default async function DeploymentDetailPage({ params }: DeploymentDetailP
     consumableItems,
     consumableBatches,
     locationRows,
+    attachments,
   ] = await Promise.all([
     getDeploymentById(id),
     listDeploymentAssets(id),
-    listAssets({ status: "available" }, "user"),
+    listAssets({ status: "available" }, role),
     listDeploymentConsumables(id),
-    listConsumableItems(false, "user"),
-    listConsumableBatches({}, "user"),
-    listLocations(false, "user"),
+    listConsumableItems(false, role),
+    listConsumableBatches({}, role),
+    listLocations(false, role),
+    listDocumentAttachments("deployment", id, role),
   ]);
 
   if (!deployment) {
     notFound();
   }
-  const relatedAssets = await listAssets({}, "user");
+  const relatedAssets = await listAssets({}, role);
   const assetById = new Map(relatedAssets.map((asset) => [asset.id, asset]));
   const itemById = new Map(consumableItems.map((item) => [item.id, item]));
   const batchById = new Map(consumableBatches.map((batch) => [batch.id, batch]));
@@ -74,6 +90,7 @@ export default async function DeploymentDetailPage({ params }: DeploymentDetailP
     activeDeploymentAssets.map((deploymentAsset) => deploymentAsset.asset_id),
   );
   const assignableAssets = availableAssets.filter((asset) => !activeAssetIds.has(asset.id));
+  const attachmentStatus = getParam(query.attachmentStatus);
 
   return (
     <AppShell>
@@ -363,6 +380,17 @@ export default async function DeploymentDetailPage({ params }: DeploymentDetailP
             </p>
           )}
         </section>
+
+        <AttachmentSection
+          attachments={attachments}
+          ownerId={deployment.id}
+          ownerType="deployment"
+          redirectPath={`/deployments/${deployment.id}`}
+          role={role}
+          status={attachmentStatus}
+          subtitle="Upload deployment paperwork, photos, situation reports, or return documentation."
+          title="Deployment attachments"
+        />
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">
