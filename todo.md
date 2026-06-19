@@ -143,7 +143,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add Reports route.
 - [x] Add Settings route.
 - [x] Add Audit Trail route for admins.
-- [ ] Add QR scan entry point.
+- [x] Add QR scan entry point.
 - [ ] Add clear active navigation state.
 - [ ] Add mobile navigation drawer.
 - [x] Add tablet-friendly layout.
@@ -411,12 +411,12 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Generate QR codes for locations if needed.
 - [x] Add QR code display on detail pages.
 - [x] Add QR code print/export workflow.
-- [ ] Add scan route.
-- [ ] Add mobile camera scanning.
-- [ ] Add fallback manual QR/code entry.
-- [ ] Route scanned asset QR to asset detail/actions.
-- [ ] Route scanned consumable QR to batch detail/actions.
-- [ ] Route scanned location QR to location detail/actions if used.
+- [x] Add scan route.
+- [x] Add mobile camera scanning.
+- [x] Add fallback manual QR/code entry.
+- [x] Route scanned asset QR to asset detail/actions.
+- [x] Route scanned consumable QR to batch detail/actions.
+- [x] Route scanned location QR to location detail/actions if used.
 - [ ] Add scan actions: view, move, deploy, maintain, stock movement.
 - [ ] Confirm QR scanning works on iOS.
 - [ ] Confirm QR scanning works on Android.

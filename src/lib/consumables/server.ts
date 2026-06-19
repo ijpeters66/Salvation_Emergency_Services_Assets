@@ -92,6 +92,17 @@ export async function getConsumableBatchById(id: string) {
   return error ? null : data;
 }
 
+export async function getConsumableBatchByQrCodeValue(qrCodeValue: string) {
+  if (!getPublicEnvStatus().configured) return null;
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("consumable_batch")
+    .select("*")
+    .eq("qr_code_value", qrCodeValue)
+    .maybeSingle();
+  return error ? null : data;
+}
+
 export async function listStockMovements(batchId: string) {
   if (!getPublicEnvStatus().configured) return [];
   const supabase = await createSupabaseServerClient();

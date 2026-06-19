@@ -29,7 +29,17 @@ export const dynamic = "force-dynamic";
 
 type BatchDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const scanActionMessages: Record<string, string> = {
+  issue: "Scan action: ready to record a consumable issue.",
+  stocktake: "Scan action: stocktake workflow placeholder.",
+};
+
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 function money(value: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(value);
@@ -45,8 +55,9 @@ function dateTime(value: string) {
   }).format(new Date(value));
 }
 
-export default async function BatchDetailPage({ params }: BatchDetailPageProps) {
+export default async function BatchDetailPage({ params, searchParams }: BatchDetailPageProps) {
   const { id } = await params;
+  const query = (await searchParams) ?? {};
   const user = await getCurrentUserContext();
   const role = user?.role ?? "user";
   const isAdmin = role === "system_admin";
@@ -66,6 +77,7 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
   const location = locations.find((candidate) => candidate.value === batch.location_id);
   const totalValue = calculateBatchValue(batch.quantity_on_hand, batch.unit_cost);
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
+  const scanAction = getParam(query.scanAction);
 
   return (
     <AppShell>
@@ -120,6 +132,12 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
             </p>
           </article>
         </section>
+
+        {scanAction ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {scanActionMessages[scanAction] ?? "Scan action received."}
+          </p>
+        ) : null}
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Traceability</h2>

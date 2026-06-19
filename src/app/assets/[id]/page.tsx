@@ -44,6 +44,11 @@ type AssetDetailPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+const scanActionMessages: Record<string, string> = {
+  move: "Scan action: ready to record an asset movement.",
+  stocktake: "Scan action: stocktake workflow placeholder.",
+};
+
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -124,6 +129,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
   const scheduleById = new Map(schedules.map((schedule) => [schedule.id, schedule]));
   const totalMaintenanceCost = maintenanceRecords.reduce((total, record) => total + record.cost, 0);
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
+  const scanAction = getParam(query.scanAction);
 
   return (
     <AppShell>
@@ -157,6 +163,12 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
         {statusMessage ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             Asset {statusMessage}.
+          </p>
+        ) : null}
+
+        {scanAction ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {scanActionMessages[scanAction] ?? "Scan action received."}
           </p>
         ) : null}
 

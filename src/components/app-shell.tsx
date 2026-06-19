@@ -55,7 +55,7 @@ export async function AppShell({ children }: AppShellProps) {
               </Button>
             )}
             <Button asChild size="sm">
-              <Link href="/dashboard">
+              <Link href="/scan">
                 <QrCode className="size-4" aria-hidden="true" />
                 Scan
               </Link>

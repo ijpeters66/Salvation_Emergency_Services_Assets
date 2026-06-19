@@ -5,6 +5,7 @@ import {
   MapPinned,
   Package,
   PackageCheck,
+  QrCode,
   Settings,
   Truck,
   Wrench,
@@ -16,6 +17,13 @@ export const appNavItems = [
     href: "/dashboard",
     icon: Gauge,
     description: "Operational overview, alerts, and recent activity.",
+    adminOnly: false,
+  },
+  {
+    title: "Scan",
+    href: "/scan",
+    icon: QrCode,
+    description: "Scan asset, consumable, or location codes and jump into the next action.",
     adminOnly: false,
   },
   {

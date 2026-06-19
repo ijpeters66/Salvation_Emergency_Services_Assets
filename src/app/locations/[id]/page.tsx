@@ -16,10 +16,24 @@ export const dynamic = "force-dynamic";
 
 type LocationDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function LocationDetailPage({ params }: LocationDetailPageProps) {
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+const scanActionMessages: Record<string, string> = {
+  move: "Scan action: this location can now be used as the destination for an asset move.",
+  stocktake: "Scan action: stocktake workflow placeholder.",
+};
+
+export default async function LocationDetailPage({
+  params,
+  searchParams,
+}: LocationDetailPageProps) {
   const { id } = await params;
+  const query = (await searchParams) ?? {};
   const user = await getCurrentUserContext();
   const role = user?.role ?? "user";
   const location = await getLocationById(id);
@@ -36,6 +50,7 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
 
   const qrPayload = buildLocationQrCodeValue(location.id);
   const activeLocations = locationRows.filter((candidate) => !candidate.archived_at).length;
+  const scanAction = getParam(query.scanAction);
 
   return (
     <AppShell>
@@ -81,6 +96,12 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
             <p className="mt-3 text-2xl font-semibold text-[var(--ink)]">{activeLocations}</p>
           </article>
         </section>
+
+        {scanAction ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {scanActionMessages[scanAction] ?? "Scan action received."}
+          </p>
+        ) : null}
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Location details</h2>

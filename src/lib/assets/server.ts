@@ -105,6 +105,25 @@ export async function getAssetById(id: string) {
   return data;
 }
 
+export async function getAssetByQrCodeValue(qrCodeValue: string) {
+  if (!getPublicEnvStatus().configured) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("asset")
+    .select("*")
+    .eq("qr_code_value", qrCodeValue)
+    .maybeSingle();
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+}
+
 export async function getPlantDetailsByAssetId(assetId: string) {
   if (!getPublicEnvStatus().configured) {
     return null;
