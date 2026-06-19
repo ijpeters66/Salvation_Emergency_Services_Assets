@@ -26,6 +26,21 @@ export async function listLocations(includeArchived: boolean, role: UserRole) {
   return data;
 }
 
+export async function getLocationById(id: string) {
+  if (!getPublicEnvStatus().configured) {
+    return null;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("location").select("*").eq("id", id).maybeSingle();
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+}
+
 export async function getCurrentSupabaseUserId() {
   if (!getPublicEnvStatus().configured) {
     return null;

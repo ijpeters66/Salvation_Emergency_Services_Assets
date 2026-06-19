@@ -9,6 +9,7 @@ import {
 } from "@/app/consumables/actions";
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
+import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
@@ -141,6 +142,19 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
             </div>
           </dl>
         </section>
+
+        <QrCodeCard
+          label="Consumable QR payload"
+          payload={batch.qr_code_value}
+          subtitle="Print this batch label for stock bins, issue packs, and future scan-led stock actions."
+          title="Batch QR label"
+        />
+
+        <PrintableQrLabel
+          meta={`${item?.name ?? "Consumable batch"} | ${batch.batch_lot_number}`}
+          name="Consumable batch label"
+          payload={batch.qr_code_value}
+        />
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">

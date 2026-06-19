@@ -161,7 +161,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add location edit form.
 - [x] Add location archive action.
 - [x] Add location list.
-- [ ] Add location detail page.
+- [x] Add location detail page.
 - [ ] Show assets at a location.
 - [ ] Show consumables at a location.
 - [ ] Show stock thresholds by location.
@@ -405,12 +405,12 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 18. QR Codes and Scanning
 
-- [ ] Define QR code format.
-- [ ] Generate QR codes for assets.
-- [ ] Generate QR codes for consumable batches.
-- [ ] Generate QR codes for locations if needed.
-- [ ] Add QR code display on detail pages.
-- [ ] Add QR code print/export workflow.
+- [x] Define QR code format.
+- [x] Generate QR codes for assets.
+- [x] Generate QR codes for consumable batches.
+- [x] Generate QR codes for locations if needed.
+- [x] Add QR code display on detail pages.
+- [x] Add QR code print/export workflow.
 - [ ] Add scan route.
 - [ ] Add mobile camera scanning.
 - [ ] Add fallback manual QR/code entry.
@@ -421,7 +421,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Confirm QR scanning works on iOS.
 - [ ] Confirm QR scanning works on Android.
 - [ ] Confirm QR scanning works offline where feasible.
-- [ ] Add QR tests.
+- [x] Add QR tests.
 
 ## 19. Attachments, Photos, and Documents
 

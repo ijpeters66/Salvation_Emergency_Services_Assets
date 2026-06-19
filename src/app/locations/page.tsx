@@ -192,7 +192,11 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                 <tbody className="divide-y divide-[var(--border)]">
                   {locations.map((location) => (
                     <tr key={location.id}>
-                      <td className="px-5 py-4 font-medium text-[var(--ink)]">{location.name}</td>
+                      <td className="px-5 py-4 font-medium text-[var(--ink)]">
+                        <Link className="hover:text-[var(--brand-red)]" href={`/locations/${location.id}`}>
+                          {location.name}
+                        </Link>
+                      </td>
                       <td className="px-5 py-4 text-[var(--muted)]">
                         {locationTypeLabels[location.type as keyof typeof locationTypeLabels] ??
                           location.type}
@@ -224,6 +228,9 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                               </div>
                             </form>
                           </details>
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/locations/${location.id}`}>View</Link>
+                          </Button>
                           {isAdmin && !location.archived_at ? (
                             <form action={archiveLocationAction}>
                               <input name="id" type="hidden" value={location.id} />

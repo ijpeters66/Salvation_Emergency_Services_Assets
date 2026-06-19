@@ -15,6 +15,7 @@ import {
 } from "@/app/maintenance/actions";
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
+import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getAssignableChildAssets } from "@/lib/assets/assignment";
@@ -217,6 +218,19 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             </div>
           </dl>
         </section>
+
+        <QrCodeCard
+          label="Asset QR payload"
+          payload={asset.qr_code_value}
+          subtitle="This label is ready for detail screens, equipment tags, and future scan-to-action workflows."
+          title="Asset QR label"
+        />
+
+        <PrintableQrLabel
+          meta={`${asset.unique_asset_id} | ${assetStatusLabels[asset.status as keyof typeof assetStatusLabels] ?? asset.status}`}
+          name={asset.asset_name}
+          payload={asset.qr_code_value}
+        />
 
         {plantDetails ? (
           <section className="rounded-md border border-[var(--border)] bg-white p-5">
