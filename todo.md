@@ -394,12 +394,12 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add deployment create form.
 - [x] Add deployment edit form.
 - [x] Assign assets to deployment.
-- [ ] Assign consumables to deployment.
-- [ ] Issue consumables to deployment through stock movement ledger.
+- [x] Assign consumables to deployment.
+- [x] Issue consumables to deployment through stock movement ledger.
 - [x] Return assets from deployment.
 - [ ] Return consumables from deployment if applicable.
 - [x] Show deployment history for an asset.
-- [ ] Show deployment history for consumables.
+- [x] Show deployment history for consumables.
 - [x] Add deployment audit logging.
 - [x] Add deployment tests.
 

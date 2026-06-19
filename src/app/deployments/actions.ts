@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getAssetById } from "@/lib/assets/server";
+import { listIssueEligibleBatches } from "@/lib/consumables/server";
 import { checkInDeploymentAsset, checkOutDeploymentAsset } from "@/lib/deployments/assets";
+import { issueDeploymentConsumables } from "@/lib/deployments/consumables";
 import {
   createDeploymentRecord,
   parseDeploymentFormData,
@@ -122,4 +124,36 @@ export async function checkInDeploymentAssetAction(formData: FormData) {
   revalidatePath(`/assets/${asset.id}`);
   revalidatePath(`/deployments/${deploymentId}`);
   redirect(`/deployments/${deploymentId}?statusMessage=asset-checked-in`);
+}
+
+export async function issueDeploymentConsumablesAction(formData: FormData) {
+  const deploymentId = String(formData.get("deploymentId") ?? "");
+  const itemId = String(formData.get("itemId") ?? "");
+  const locationId = String(formData.get("locationId") ?? "");
+  const quantity = Number(formData.get("quantity") ?? 0);
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const context = await getMutationContext();
+
+  if (!deploymentId || !itemId || !locationId || !quantity || !context) {
+    redirectToDeployments("validation-error");
+  }
+
+  const batches = await listIssueEligibleBatches(itemId, locationId);
+  const result = await issueDeploymentConsumables(context.dependencies, batches, {
+    deploymentId,
+    itemId,
+    locationId,
+    quantity,
+    notes,
+    userId: context.userId,
+  });
+
+  if (!result.ok) {
+    redirect(`/deployments/${deploymentId}?statusMessage=consumable-issue-error`);
+  }
+
+  revalidatePath("/consumables");
+  revalidatePath("/deployments");
+  revalidatePath(`/deployments/${deploymentId}`);
+  redirect(`/deployments/${deploymentId}?statusMessage=consumables-issued`);
 }

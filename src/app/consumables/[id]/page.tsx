@@ -19,6 +19,7 @@ import {
 } from "@/lib/consumables/server";
 import { calculateBatchValue } from "@/lib/consumables/service";
 import { stockMovementLabels } from "@/lib/consumables/stock-movement";
+import { listDeployments } from "@/lib/deployments/server";
 import { stockMovementTypes } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
@@ -51,17 +52,19 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
   const batch = await getConsumableBatchById(id);
   if (!batch) notFound();
 
-  const [categories, items, locationRows, movements] = await Promise.all([
+  const [categories, items, locationRows, movements, deployments] = await Promise.all([
     listConsumableCategories(isAdmin, role),
     listConsumableItems(isAdmin, role),
     listLocations(false, role),
     listStockMovements(id),
+    listDeployments(),
   ]);
   const locations = toLocationOptions(locationRows);
   const item = items.find((candidate) => candidate.id === batch.item_id);
   const category = categories.find((candidate) => candidate.id === item?.category_id);
   const location = locations.find((candidate) => candidate.value === batch.location_id);
   const totalValue = calculateBatchValue(batch.quantity_on_hand, batch.unit_cost);
+  const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
 
   return (
     <AppShell>
@@ -243,6 +246,7 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
                     <th className="px-5 py-3 font-semibold">Qty</th>
                     <th className="px-5 py-3 font-semibold">From</th>
                     <th className="px-5 py-3 font-semibold">To</th>
+                    <th className="px-5 py-3 font-semibold">Deployment</th>
                     <th className="px-5 py-3 font-semibold">Reason</th>
                   </tr>
                 </thead>
@@ -266,6 +270,12 @@ export default async function BatchDetailPage({ params }: BatchDetailPageProps) 
                       <td className="px-5 py-4 text-[var(--muted)]">
                         {locations.find((candidate) => candidate.value === movement.to_location_id)
                           ?.label ?? "None"}
+                      </td>
+                      <td className="px-5 py-4 text-[var(--muted)]">
+                        {movement.related_deployment_id
+                          ? (deploymentById.get(movement.related_deployment_id)?.deployment_name ??
+                            movement.related_deployment_id)
+                          : "None"}
                       </td>
                       <td className="px-5 py-4 text-[var(--muted)]">{movement.reason}</td>
                     </tr>

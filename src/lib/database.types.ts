@@ -465,6 +465,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      deployment_consumable: {
+        Row: {
+          id: string;
+          deployment_id: string;
+          consumable_batch_id: string;
+          stock_movement_id: string;
+          quantity: number;
+          issued_at: string;
+          issued_by: string;
+        };
+        Insert: {
+          id?: string;
+          deployment_id: string;
+          consumable_batch_id: string;
+          stock_movement_id: string;
+          quantity: number;
+          issued_at?: string;
+          issued_by: string;
+        };
+        Update: {
+          id?: string;
+          deployment_id?: string;
+          consumable_batch_id?: string;
+          stock_movement_id?: string;
+          quantity?: number;
+          issued_at?: string;
+          issued_by?: string;
+        };
+        Relationships: [];
+      };
       location: {
         Row: {
           id: string;

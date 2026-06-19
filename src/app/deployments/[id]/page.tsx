@@ -5,14 +5,22 @@ import { ArrowLeft, PencilLine } from "lucide-react";
 import {
   checkInDeploymentAssetAction,
   checkOutDeploymentAssetAction,
+  issueDeploymentConsumablesAction,
   updateDeploymentAction,
 } from "@/app/deployments/actions";
 import { DeploymentFields } from "@/app/deployments/deployment-fields";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { listAssets } from "@/lib/assets/server";
+import { listConsumableBatches, listConsumableItems } from "@/lib/consumables/server";
 import { deploymentStatusLabels, type DeploymentStatus } from "@/lib/deployments/service";
-import { getDeploymentById, listDeploymentAssets } from "@/lib/deployments/server";
+import {
+  getDeploymentById,
+  listDeploymentAssets,
+  listDeploymentConsumables,
+} from "@/lib/deployments/server";
+import { listLocations } from "@/lib/locations/server";
+import { toLocationOptions } from "@/lib/locations/service";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +41,22 @@ function dateTime(value: string | null) {
 
 export default async function DeploymentDetailPage({ params }: DeploymentDetailPageProps) {
   const { id } = await params;
-  const [deployment, deploymentAssets, availableAssets] = await Promise.all([
+  const [
+    deployment,
+    deploymentAssets,
+    availableAssets,
+    deploymentConsumables,
+    consumableItems,
+    consumableBatches,
+    locationRows,
+  ] = await Promise.all([
     getDeploymentById(id),
     listDeploymentAssets(id),
     listAssets({ status: "available" }, "user"),
+    listDeploymentConsumables(id),
+    listConsumableItems(false, "user"),
+    listConsumableBatches({}, "user"),
+    listLocations(false, "user"),
   ]);
 
   if (!deployment) {
@@ -44,6 +64,9 @@ export default async function DeploymentDetailPage({ params }: DeploymentDetailP
   }
   const relatedAssets = await listAssets({}, "user");
   const assetById = new Map(relatedAssets.map((asset) => [asset.id, asset]));
+  const itemById = new Map(consumableItems.map((item) => [item.id, item]));
+  const batchById = new Map(consumableBatches.map((batch) => [batch.id, batch]));
+  const locations = toLocationOptions(locationRows);
   const activeDeploymentAssets = deploymentAssets.filter(
     (deploymentAsset) => !deploymentAsset.checked_in_at,
   );
@@ -222,6 +245,121 @@ export default async function DeploymentDetailPage({ params }: DeploymentDetailP
           ) : (
             <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
               No assets are currently checked out to this deployment.
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment consumables</h2>
+          <form
+            action={issueDeploymentConsumablesAction}
+            className="mt-4 grid gap-4 md:grid-cols-4"
+          >
+            <input name="deploymentId" type="hidden" value={deployment.id} />
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Consumable item
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="itemId"
+                required
+              >
+                <option value="">Choose item</option>
+                {consumableItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Issue from
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="locationId"
+                required
+              >
+                <option value="">Choose location</option>
+                {locations.map((location) => (
+                  <option key={location.value} value={location.value}>
+                    {location.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Quantity
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                min="1"
+                name="quantity"
+                required
+                type="number"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Notes
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+                name="notes"
+              />
+            </label>
+            <div className="md:col-span-4">
+              <Button type="submit">Issue consumables</Button>
+            </div>
+          </form>
+
+          {deploymentConsumables.length > 0 ? (
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
+                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Issued</th>
+                    <th className="px-4 py-3 font-semibold">Item</th>
+                    <th className="px-4 py-3 font-semibold">Batch</th>
+                    <th className="px-4 py-3 font-semibold">Quantity</th>
+                    <th className="px-4 py-3 font-semibold">Movement</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {deploymentConsumables.map((deploymentConsumable) => {
+                    const batch = batchById.get(deploymentConsumable.consumable_batch_id);
+                    const item = batch ? itemById.get(batch.item_id) : null;
+
+                    return (
+                      <tr key={deploymentConsumable.id}>
+                        <td className="px-4 py-3 text-[var(--muted)]">
+                          {dateTime(deploymentConsumable.issued_at)}
+                        </td>
+                        <td className="px-4 py-3 text-[var(--muted)]">
+                          {item?.name ?? "Unknown item"}
+                        </td>
+                        <td className="px-4 py-3">
+                          {batch ? (
+                            <Link
+                              className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
+                              href={`/consumables/${batch.id}`}
+                            >
+                              {batch.batch_lot_number}
+                            </Link>
+                          ) : (
+                            <span className="text-[var(--muted)]">Unknown batch</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-[var(--muted)]">
+                          {deploymentConsumable.quantity}
+                        </td>
+                        <td className="px-4 py-3 text-[var(--muted)]">
+                          {deploymentConsumable.stock_movement_id}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+              No consumables have been issued to this deployment yet.
             </p>
           )}
         </section>

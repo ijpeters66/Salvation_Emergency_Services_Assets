@@ -7,3 +7,7 @@ test.skip("create deployment and view detail with mocked Supabase", async () => 
 test.skip("check out an asset from deployment detail with mocked Supabase", async () => {
   // Requires a server-action aware Supabase test double or a disposable test database.
 });
+
+test.skip("issue consumables from deployment detail with mocked Supabase", async () => {
+  // Requires a server-action aware Supabase test double or a disposable test database.
+});

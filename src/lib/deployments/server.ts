@@ -2,11 +2,14 @@ import { writeAuditLog } from "@/lib/audit-log";
 import type { AssetMovementInsert } from "@/lib/assets/movement";
 import type { AssetUpdate } from "@/lib/assets/service";
 import type { DeploymentAssetInsert, DeploymentAssetUpdate } from "@/lib/deployments/assets";
+import type { DeploymentConsumableInsert } from "@/lib/deployments/consumables";
 import type {
   DeploymentInsert,
   DeploymentStatus,
   DeploymentUpdate,
 } from "@/lib/deployments/service";
+import type { ConsumableBatchUpdate } from "@/lib/consumables/service";
+import type { StockMovementInsert } from "@/lib/consumables/stock-movement";
 import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -59,6 +62,17 @@ export async function getDeploymentAssetById(id: string) {
     .eq("id", id)
     .maybeSingle();
   return error ? null : data;
+}
+
+export async function listDeploymentConsumables(deploymentId: string) {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("deployment_consumable")
+    .select("*")
+    .eq("deployment_id", deploymentId)
+    .order("issued_at", { ascending: false });
+  return error ? [] : data;
 }
 
 export async function getCurrentSupabaseUserId() {
@@ -125,6 +139,34 @@ export function createSupabaseDeploymentDependencies() {
         .from("asset")
         .update(payload)
         .eq("id", id)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async insertStockMovement(payload: StockMovementInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("stock_movement")
+        .insert(payload)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async updateBatch(id: string, payload: ConsumableBatchUpdate) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("consumable_batch")
+        .update(payload)
+        .eq("id", id)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async insertDeploymentConsumable(payload: DeploymentConsumableInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("deployment_consumable")
+        .insert(payload)
         .select("*")
         .single();
       return error ? err(error.message) : ok(data);
