@@ -378,6 +378,9 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add maintenance calendar/list view.
 - [x] Add maintenance audit logging.
 - [x] Add maintenance tests.
+- [x] Add approved maintenance vendor register.
+- [x] Add vendor business/contact details.
+- [x] Add approved vendor selection for maintenance forms.
 
 ## 17. Deployments
 

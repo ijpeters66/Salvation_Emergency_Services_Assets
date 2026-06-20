@@ -1,17 +1,126 @@
 import Link from "next/link";
-import { Wrench } from "lucide-react";
+import { Archive, PencilLine, Plus, Wrench } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import {
+  archiveMaintenanceVendorAction,
+  createMaintenanceVendorAction,
+  updateMaintenanceVendorAction,
+} from "@/app/maintenance/actions";
+import { Button } from "@/components/ui/button";
+import { getCurrentUserContext } from "@/lib/auth";
 import { listAssets } from "@/lib/assets/server";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
-import { listMaintenanceSchedules } from "@/lib/maintenance/server";
+import { listMaintenanceSchedules, listMaintenanceVendors } from "@/lib/maintenance/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function MaintenancePage() {
-  const [schedules, assets] = await Promise.all([
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+const statusMessages: Record<string, string> = {
+  "validation-error": "Check the maintenance vendor details and try again.",
+  "auth-error": "You need an active signed-in session to update vendors.",
+  "save-error": "The vendor could not be saved. Try again or check Supabase configuration.",
+  "vendor-saved": "Approved vendor saved.",
+  "vendor-archived": "Approved vendor archived.",
+};
+
+type MaintenancePageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function VendorFields({
+  defaults,
+}: {
+  defaults?: {
+    business_name: string;
+    contact_name: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    website: string | null;
+    notes: string | null;
+  };
+}) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Business name
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.business_name ?? ""}
+          name="businessName"
+          required
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Contact name
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.contact_name ?? ""}
+          name="contactName"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Phone
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.phone ?? ""}
+          name="phone"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Email
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.email ?? ""}
+          name="email"
+          type="email"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Address
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.address ?? ""}
+          name="address"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+        Website
+        <input
+          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.website ?? ""}
+          name="website"
+          type="url"
+        />
+      </label>
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
+        Notes
+        <textarea
+          className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+          defaultValue={defaults?.notes ?? ""}
+          name="notes"
+        />
+      </label>
+    </div>
+  );
+}
+
+export default async function MaintenancePage({ searchParams }: MaintenancePageProps) {
+  const params = (await searchParams) ?? {};
+  const user = await getCurrentUserContext();
+  const role = user?.role ?? "user";
+  const isAdmin = role === "system_admin";
+  const includeArchived = isAdmin && getParam(params.archived) === "1";
+  const status = getParam(params.statusMessage);
+  const message = status ? statusMessages[status] : null;
+  const [schedules, assets, vendors] = await Promise.all([
     listMaintenanceSchedules(),
-    listAssets({}, "user"),
+    listAssets({}, role),
+    listMaintenanceVendors(includeArchived, role),
   ]);
   const assetById = new Map(assets.map((asset) => [asset.id, asset]));
   const actionable = schedules
@@ -36,6 +145,12 @@ export default async function MaintenancePage() {
             Review due soon and overdue maintenance schedules for assets and plant/fleet items.
           </p>
         </div>
+
+        {message ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {message}
+          </p>
+        ) : null}
 
         <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
@@ -81,6 +196,118 @@ export default async function MaintenancePage() {
           ) : (
             <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
               No due soon or overdue maintenance schedules are active.
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-center gap-2">
+              <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--ink)]">Approved vendors</h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                  Manage approved maintenance providers for vehicles, trailers, plant, and related equipment.
+                </p>
+              </div>
+            </div>
+            {isAdmin ? (
+              <Button asChild size="sm" variant="outline">
+                <Link href={includeArchived ? "/maintenance" : "/maintenance?archived=1"}>
+                  <Archive className="size-4" aria-hidden="true" />
+                  {includeArchived ? "Hide archived" : "View archived"}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+
+          <form action={createMaintenanceVendorAction} className="mt-5 grid gap-4">
+            <VendorFields />
+            <div>
+              <Button type="submit">Add approved vendor</Button>
+            </div>
+          </form>
+
+          {vendors.length > 0 ? (
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full min-w-[64rem] border-collapse text-left text-sm">
+                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Business</th>
+                    <th className="px-4 py-3 font-semibold">Contact</th>
+                    <th className="px-4 py-3 font-semibold">Phone</th>
+                    <th className="px-4 py-3 font-semibold">Email</th>
+                    <th className="px-4 py-3 font-semibold">Website</th>
+                    <th className="px-4 py-3 font-semibold">Notes</th>
+                    <th className="px-4 py-3 font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {vendors.map((vendor) => (
+                    <tr key={vendor.id}>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-[var(--ink)]">{vendor.business_name}</div>
+                        <div className="text-[var(--muted)]">{vendor.address || "No address"}</div>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted)]">
+                        {vendor.contact_name || "Not recorded"}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted)]">{vendor.phone || "Not recorded"}</td>
+                      <td className="px-4 py-3 text-[var(--muted)]">{vendor.email || "Not recorded"}</td>
+                      <td className="px-4 py-3 text-[var(--muted)]">
+                        {vendor.website ? (
+                          <a
+                            className="hover:text-[var(--brand-red)]"
+                            href={vendor.website}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            {vendor.website}
+                          </a>
+                        ) : (
+                          "Not recorded"
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted)]">{vendor.notes || "Not recorded"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <details className="group">
+                            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--ink)]">
+                              <PencilLine className="size-4" aria-hidden="true" />
+                              Edit
+                            </summary>
+                            <form
+                              action={updateMaintenanceVendorAction}
+                              className="mt-3 grid w-[min(42rem,85vw)] gap-4 rounded-md border border-[var(--border)] bg-white p-4 shadow-sm"
+                            >
+                              <input name="vendorId" type="hidden" value={vendor.id} />
+                              <VendorFields defaults={vendor} />
+                              <div>
+                                <Button size="sm" type="submit">
+                                  Save changes
+                                </Button>
+                              </div>
+                            </form>
+                          </details>
+                          {isAdmin && !vendor.archived_at ? (
+                            <form action={archiveMaintenanceVendorAction}>
+                              <input name="id" type="hidden" value={vendor.id} />
+                              <Button size="sm" type="submit" variant="outline">
+                                <Archive className="size-4" aria-hidden="true" />
+                                Archive
+                              </Button>
+                            </form>
+                          ) : null}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
+              No approved maintenance vendors have been added yet.
             </p>
           )}
         </section>

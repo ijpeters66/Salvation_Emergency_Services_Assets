@@ -4,6 +4,11 @@ import type {
   MaintenanceScheduleInsert,
   MaintenanceScheduleUpdate,
 } from "@/lib/maintenance/schedules";
+import type {
+  MaintenanceVendorInsert,
+  MaintenanceVendorUpdate,
+} from "@/lib/maintenance/vendors";
+import type { UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -16,6 +21,17 @@ export async function listMaintenanceSchedules(assetId?: string) {
     .select("*")
     .order("next_service_due_date", { ascending: true });
   if (assetId) query = query.eq("asset_id", assetId);
+  const { data, error } = await query;
+  return error ? [] : data;
+}
+
+export async function listMaintenanceVendors(includeArchived = false, role: UserRole = "user") {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  let query = supabase.from("maintenance_vendor").select("*").order("business_name");
+  if (!includeArchived || role !== "system_admin") {
+    query = query.is("archived_at", null);
+  }
   const { data, error } = await query;
   return error ? [] : data;
 }
@@ -86,6 +102,25 @@ export function createSupabaseMaintenanceDependencies() {
         .from("maintenance_schedule")
         .update(payload)
         .eq("id", scheduleId)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async insertVendor(payload: MaintenanceVendorInsert) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("maintenance_vendor")
+        .insert(payload)
+        .select("*")
+        .single();
+      return error ? err(error.message) : ok(data);
+    },
+    async updateVendor(id: string, payload: MaintenanceVendorUpdate) {
+      const supabase = await createSupabaseServerClient();
+      const { data, error } = await supabase
+        .from("maintenance_vendor")
+        .update(payload)
+        .eq("id", id)
         .select("*")
         .single();
       return error ? err(error.message) : ok(data);

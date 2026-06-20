@@ -678,6 +678,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      maintenance_vendor: {
+        Row: {
+          id: string;
+          business_name: string;
+          contact_name: string | null;
+          phone: string | null;
+          email: string | null;
+          address: string | null;
+          website: string | null;
+          notes: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          business_name: string;
+          contact_name?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          website?: string | null;
+          notes?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+          updated_by: string;
+        };
+        Update: {
+          id?: string;
+          business_name?: string;
+          contact_name?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          website?: string | null;
+          notes?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string;
+          updated_by?: string;
+        };
+        Relationships: [];
+      };
       permission: {
         Row: {
           id: string;

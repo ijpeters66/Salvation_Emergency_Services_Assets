@@ -36,7 +36,12 @@ import { assetStatuses } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
-import { listMaintenanceRecords, listMaintenanceSchedules } from "@/lib/maintenance/server";
+import {
+  listMaintenanceRecords,
+  listMaintenanceSchedules,
+  listMaintenanceVendors,
+} from "@/lib/maintenance/server";
+import { toMaintenanceVendorNames } from "@/lib/maintenance/vendors";
 import { listAssetDeploymentHistory, listDeployments } from "@/lib/deployments/server";
 
 export const dynamic = "force-dynamic";
@@ -101,6 +106,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     deployments,
     assetAttachments,
     plantAttachments,
+    maintenanceVendors,
   ] = await Promise.all([
     listAssetCategories(isAdmin, role),
     listLocations(false, role),
@@ -114,6 +120,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     listDeployments(),
     listDocumentAttachments("asset", id, role),
     listDocumentAttachments("plant", id, role),
+    listMaintenanceVendors(false, role),
   ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
@@ -136,6 +143,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
   const scheduleById = new Map(schedules.map((schedule) => [schedule.id, schedule]));
   const totalMaintenanceCost = maintenanceRecords.reduce((total, record) => total + record.cost, 0);
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
+  const maintenanceVendorNames = toMaintenanceVendorNames(maintenanceVendors);
   const scanAction = getParam(query.scanAction);
 
   return (
@@ -414,6 +422,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
                           className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
                           name="serviceProvider"
                           defaultValue={schedule.service_provider ?? ""}
+                          list="maintenance-vendor-options"
                         />
                       </label>
                       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
@@ -514,6 +523,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
               <input
                 className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
                 name="serviceProvider"
+                list="maintenance-vendor-options"
               />
             </label>
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
@@ -608,6 +618,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
                 className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
                 name="supplierProvider"
                 required
+                list="maintenance-vendor-options"
               />
             </label>
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
@@ -630,6 +641,13 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
               <Button type="submit">Record maintenance</Button>
             </div>
           </form>
+          {maintenanceVendorNames.length > 0 ? (
+            <datalist id="maintenance-vendor-options">
+              {maintenanceVendorNames.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+          ) : null}
 
           {maintenanceRecords.length > 0 ? (
             <div className="mt-5 overflow-x-auto">
