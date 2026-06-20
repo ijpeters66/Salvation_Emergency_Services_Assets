@@ -449,10 +449,10 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 ## 20. Offline-First and Sync
 
 - [ ] Define offline-first scope for MVP.
-- [ ] Add service worker.
-- [ ] Add app install/PWA manifest.
-- [ ] Add IndexedDB storage.
-- [ ] Cache reference data.
+- [x] Add service worker.
+- [x] Add app install/PWA manifest.
+- [x] Add IndexedDB storage.
+- [x] Cache reference data.
 - [ ] Cache recently viewed assets.
 - [ ] Cache recently viewed consumables.
 - [ ] Queue offline creates.
@@ -460,7 +460,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Queue offline stock movements.
 - [ ] Queue offline maintenance records.
 - [ ] Queue offline deployment actions.
-- [ ] Add sync status indicator.
+- [x] Add sync status indicator.
 - [ ] Add pending changes view.
 - [ ] Add retry sync action.
 - [ ] Add conflict detection.
@@ -469,7 +469,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Confirm offline changes sync when internet returns.
 - [ ] Confirm duplicate submissions are avoided.
 - [ ] Confirm users understand when data is pending sync.
-- [ ] Add offline/sync tests.
+- [x] Add offline/sync tests.
 
 ## 21. Dashboard
 
