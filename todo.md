@@ -689,7 +689,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Write maintenance workflow instructions.
 - [ ] Write reporting/export instructions.
 - [ ] Write backup/export notes.
-- [ ] Write environment setup notes.
+- [x] Write environment setup notes.
 - [ ] Write deployment notes.
 - [ ] Write data model overview.
 - [ ] Write known limitations.

@@ -246,9 +246,7 @@ CSV export should be included early. XLSX and PDF export can be added where requ
 
 ## Development Setup
 
-The application has not been scaffolded yet. Once the app exists, this section should be updated with exact commands.
-
-Expected setup shape:
+Local development setup:
 
 ```bash
 npm install
@@ -274,9 +272,39 @@ Expected variables once Supabase is added:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+QA_USER_EMAIL=
+QA_USER_PASSWORD=
+QA_USER_DISPLAY_NAME=
+QA_USER_ROLE_KEY=system_admin
 ```
 
 The service role key must only be used server-side.
+
+## Local Auth and QA Setup
+
+To test the real login flow, point the app at a live Supabase project and create a QA user.
+
+1. Copy `.env.example` to `.env.local`.
+2. Fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+3. Apply the SQL migrations in `supabase/migrations/` to the target Supabase project.
+4. Create a QA login:
+
+```bash
+npm run qa:create-user -- --email qa@example.com --password "ChangeMe123!" --name "QA Admin" --role system_admin
+```
+
+You can also set `QA_USER_EMAIL`, `QA_USER_PASSWORD`, `QA_USER_DISPLAY_NAME`, and `QA_USER_ROLE_KEY` in `.env.local`, then run:
+
+```bash
+npm run qa:create-user
+```
+
+The script creates the Supabase Auth user, confirms the email, and upserts the matching `app_user_profile` record so the app can resolve the user role after login.
+
+Once that is done, sign in at `/login` with the QA email and password you created.
 
 ## Testing Expectations
 
