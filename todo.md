@@ -455,20 +455,20 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Cache reference data.
 - [ ] Cache recently viewed assets.
 - [ ] Cache recently viewed consumables.
-- [ ] Queue offline creates.
-- [ ] Queue offline edits.
-- [ ] Queue offline stock movements.
-- [ ] Queue offline maintenance records.
-- [ ] Queue offline deployment actions.
+- [x] Queue offline creates.
+- [x] Queue offline edits.
+- [x] Queue offline stock movements.
+- [x] Queue offline maintenance records.
+- [x] Queue offline deployment actions.
 - [x] Add sync status indicator.
-- [ ] Add pending changes view.
+- [x] Add pending changes view.
 - [ ] Add retry sync action.
-- [ ] Add conflict detection.
-- [ ] Add conflict resolution rules.
+- [x] Add conflict detection.
+- [x] Add conflict resolution rules.
 - [ ] Add offline_sync_reference to audit logs.
-- [ ] Confirm offline changes sync when internet returns.
+- [x] Confirm offline changes sync when internet returns.
 - [ ] Confirm duplicate submissions are avoided.
-- [ ] Confirm users understand when data is pending sync.
+- [x] Confirm users understand when data is pending sync.
 - [x] Add offline/sync tests.
 
 ## 21. Dashboard

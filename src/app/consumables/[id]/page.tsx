@@ -10,6 +10,8 @@ import {
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
 import { AttachmentSection } from "@/components/attachment-section";
+import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
+import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
 import { Button } from "@/components/ui/button";
 import { listDocumentAttachments } from "@/lib/attachments/server";
@@ -37,6 +39,10 @@ type BatchDetailPageProps = {
 const scanActionMessages: Record<string, string> = {
   issue: "Scan action: ready to record a consumable issue.",
   stocktake: "Scan action: stocktake workflow placeholder.",
+};
+
+const statusMessages: Record<string, string> = {
+  "queued-offline": "Stock movement saved offline and queued for sync.",
 };
 
 function getParam(value: string | string[] | undefined) {
@@ -82,6 +88,8 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
   const scanAction = getParam(query.scanAction);
   const attachmentStatus = getParam(query.attachmentStatus);
+  const statusMessage = getParam(query.statusMessage);
+  const message = statusMessage ? statusMessages[statusMessage] : null;
 
   return (
     <AppShell>
@@ -111,6 +119,12 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
             </form>
           ) : null}
         </div>
+
+        {message ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {message}
+          </p>
+        ) : null}
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <article className="rounded-md border border-[var(--border)] bg-white p-5">
@@ -189,13 +203,28 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
           title="Batch attachments"
         />
 
+        <OfflineSyncPanel
+          entityTypes={["stock_movement"]}
+          parentEntityId={batch.id}
+          title="Offline stock movement sync status"
+        />
+
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Record stock movement</h2>
           </div>
-          <form action={recordStockMovementAction} className="mt-4 grid gap-3 md:grid-cols-2">
+          <OfflineMutationForm
+            action={recordStockMovementAction}
+            className="mt-4 grid gap-3 md:grid-cols-2"
+            displayLabelFields={["movementType", "reason"]}
+            entityType="stock_movement"
+            operationType="create"
+            parentEntityIdField="batchId"
+            redirectPath={`/consumables/${batch.id}`}
+          >
             <input name="batchId" type="hidden" value={batch.id} />
+            <input name="offlineUpdatedAt" type="hidden" value={batch.updated_at} />
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
               Movement type
               <select
@@ -275,7 +304,7 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
             <div className="md:col-span-2">
               <Button type="submit">Record movement</Button>
             </div>
-          </form>
+          </OfflineMutationForm>
         </section>
 
         <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">

@@ -11,6 +11,8 @@ import {
 import { AttachmentSection } from "@/components/attachment-section";
 import { DeploymentFields } from "@/app/deployments/deployment-fields";
 import { AppShell } from "@/components/app-shell";
+import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
+import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Button } from "@/components/ui/button";
 import { listAssets } from "@/lib/assets/server";
 import { listDocumentAttachments } from "@/lib/attachments/server";
@@ -35,6 +37,10 @@ type DeploymentDetailPageProps = {
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
+
+const statusMessages: Record<string, string> = {
+  "queued-offline": "Deployment change saved offline and queued for sync.",
+};
 
 function dateTime(value: string | null) {
   if (!value) return "Not recorded";
@@ -91,6 +97,8 @@ export default async function DeploymentDetailPage({
   );
   const assignableAssets = availableAssets.filter((asset) => !activeAssetIds.has(asset.id));
   const attachmentStatus = getParam(query.attachmentStatus);
+  const statusMessage = getParam(query.statusMessage);
+  const message = statusMessage ? statusMessages[statusMessage] : null;
 
   return (
     <AppShell>
@@ -109,6 +117,18 @@ export default async function DeploymentDetailPage({
             {deployment.deployment_name}
           </h1>
         </div>
+
+        <OfflineSyncPanel
+          entityId={deployment.id}
+          entityTypes={["deployment"]}
+          title="Offline deployment sync status"
+        />
+
+        {message ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {message}
+          </p>
+        ) : null}
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <article className="rounded-md border border-[var(--border)] bg-white p-5">
@@ -397,13 +417,22 @@ export default async function DeploymentDetailPage({
             <PencilLine className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Edit deployment</h2>
           </div>
-          <form action={updateDeploymentAction} className="mt-4 grid gap-4 md:grid-cols-3">
+          <OfflineMutationForm
+            action={updateDeploymentAction}
+            className="mt-4 grid gap-4 md:grid-cols-3"
+            displayLabelFields={["deploymentName", "deploymentId"]}
+            entityIdField="id"
+            entityType="deployment"
+            operationType="update"
+            redirectPath={`/deployments/${deployment.id}`}
+          >
             <input name="id" type="hidden" value={deployment.id} />
+            <input name="offlineUpdatedAt" type="hidden" value={deployment.updated_at} />
             <DeploymentFields deployment={deployment} />
             <div className="md:col-span-3">
               <Button type="submit">Save deployment</Button>
             </div>
-          </form>
+          </OfflineMutationForm>
         </section>
       </section>
     </AppShell>

@@ -4,6 +4,8 @@ import { Archive, Filter, Package, Plus } from "lucide-react";
 import { archiveAssetAction, createAssetAction } from "@/app/assets/actions";
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
+import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
+import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { listAssetCategories, listAssets } from "@/lib/assets/server";
@@ -21,6 +23,7 @@ type AssetsPageProps = {
 
 const statusMessages: Record<string, string> = {
   archived: "Asset archived.",
+  "queued-offline": "Asset change saved offline and queued for sync.",
   "validation-error": "Check the asset details and try again.",
   "auth-error": "You need an active signed-in session to change assets.",
   "save-error": "The asset could not be saved. Check for duplicate IDs or Supabase setup.",
@@ -121,15 +124,24 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create asset</h2>
           </div>
-          <form action={createAssetAction} className="mt-4 grid gap-4">
+          <OfflineMutationForm
+            action={createAssetAction}
+            className="mt-4 grid gap-4"
+            displayLabelFields={["assetName", "uniqueAssetId"]}
+            entityType="asset"
+            operationType="create"
+            redirectPath="/assets"
+          >
             <AssetFields categories={categories} locations={locations} />
             <div>
               <Button type="submit" disabled={categories.length === 0 || locations.length === 0}>
                 Create asset
               </Button>
             </div>
-          </form>
+          </OfflineMutationForm>
         </section>
+
+        <OfflineSyncPanel entityTypes={["asset"]} title="Offline asset changes" />
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex items-center gap-2">

@@ -7,6 +7,8 @@ import {
   archiveLocationAction,
 } from "@/app/locations/actions";
 import { AppShell } from "@/components/app-shell";
+import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
+import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPublicEnvStatus } from "@/lib/env";
@@ -23,6 +25,7 @@ const statusMessages: Record<string, string> = {
   created: "Location created.",
   updated: "Location updated.",
   archived: "Location archived.",
+  "queued-offline": "Location change saved offline and queued for sync.",
   "validation-error": "Check the location details and try again.",
   "auth-error": "You need an active signed-in session to change locations.",
   "save-error": "The location could not be saved. Try again or check Supabase configuration.",
@@ -116,7 +119,7 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
   const isAdmin = user?.role === "system_admin";
   const includeArchived = isAdmin && getParam(params.archived) === "1";
   const locations = user ? await listLocations(includeArchived, user.role) : [];
-  const status = getParam(params.status);
+  const status = getParam(params.status) ?? getParam(params.statusMessage);
   const message = status ? statusMessages[status] : null;
   const envConfigured = getPublicEnvStatus().configured;
 
@@ -162,13 +165,22 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create location</h2>
           </div>
-          <form action={createLocationAction} className="mt-4 grid gap-4">
+          <OfflineMutationForm
+            action={createLocationAction}
+            className="mt-4 grid gap-4"
+            displayLabelFields={["name"]}
+            entityType="location"
+            operationType="create"
+            redirectPath="/locations"
+          >
             <LocationFields />
             <div>
               <Button type="submit">Create location</Button>
             </div>
-          </form>
+          </OfflineMutationForm>
         </section>
+
+        <OfflineSyncPanel entityTypes={["location"]} title="Offline location changes" />
 
         <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
@@ -215,18 +227,24 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                               <PencilLine className="size-4" aria-hidden="true" />
                               Edit
                             </summary>
-                            <form
+                            <OfflineMutationForm
                               action={updateLocationAction}
                               className="mt-3 grid w-[min(34rem,80vw)] gap-4 rounded-md border border-[var(--border)] bg-white p-4 shadow-sm"
+                              displayLabelFields={["name"]}
+                              entityIdField="id"
+                              entityType="location"
+                              operationType="update"
+                              redirectPath="/locations"
                             >
                               <input name="id" type="hidden" value={location.id} />
+                              <input name="offlineUpdatedAt" type="hidden" value={location.updated_at} />
                               <LocationFields defaults={location} />
                               <div>
                                 <Button type="submit" size="sm">
                                   Save changes
                                 </Button>
                               </div>
-                            </form>
+                            </OfflineMutationForm>
                           </details>
                           <Button asChild variant="outline" size="sm">
                             <Link href={`/locations/${location.id}`}>View</Link>

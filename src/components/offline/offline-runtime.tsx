@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CloudOff, CloudUpload } from "lucide-react";
 
 import {
@@ -8,6 +8,8 @@ import {
   listQueuedOfflineMutations,
   type OfflineBootstrapPayload,
 } from "@/lib/offline/indexed-db";
+import { getPublicEnvStatus } from "@/lib/env";
+import { syncQueuedOfflineMutations, type OfflineSyncResult } from "@/lib/offline/sync";
 
 function getNavigatorOnlineState() {
   if (typeof navigator === "undefined") {
@@ -18,6 +20,10 @@ function getNavigatorOnlineState() {
 }
 
 async function refreshOfflineBootstrap() {
+  if (!getPublicEnvStatus().configured) {
+    return;
+  }
+
   const response = await fetch("/api/offline/bootstrap", {
     credentials: "include",
     headers: {
@@ -34,34 +40,69 @@ async function refreshOfflineBootstrap() {
 }
 
 export function OfflineRuntime() {
-  const [isOnline, setIsOnline] = useState(getNavigatorOnlineState);
+  const [isOnline, setIsOnline] = useState(true);
   const [queuedMutations, setQueuedMutations] = useState(0);
+  const syncInFlight = useRef(false);
 
   useEffect(() => {
+    const refreshQueueCount = async () => {
+      const queue = await listQueuedOfflineMutations().catch(() => []);
+      setQueuedMutations(queue.filter((record) => record.sync_status !== "synced").length);
+    };
+
+    const syncQueue = async () => {
+      if (syncInFlight.current || !getNavigatorOnlineState() || !getPublicEnvStatus().configured) {
+        return;
+      }
+
+      syncInFlight.current = true;
+
+      try {
+        await syncQueuedOfflineMutations(async (mutation): Promise<OfflineSyncResult> => {
+          const response = await fetch("/api/offline/sync", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify(mutation),
+          });
+
+          return (await response.json()) as OfflineSyncResult;
+        });
+      } finally {
+        syncInFlight.current = false;
+        await refreshQueueCount().catch(() => undefined);
+      }
+    };
+
     const handleOnline = async () => {
       setIsOnline(true);
       await refreshOfflineBootstrap().catch(() => undefined);
-      const queue = await listQueuedOfflineMutations().catch(() => []);
-      setQueuedMutations(queue.length);
+      await syncQueue().catch(() => undefined);
     };
 
     const handleOffline = async () => {
       setIsOnline(false);
-      const queue = await listQueuedOfflineMutations().catch(() => []);
-      setQueuedMutations(queue.length);
+      await refreshQueueCount().catch(() => undefined);
     };
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    window.addEventListener("offline-store-changed", refreshQueueCount);
 
-    void refreshOfflineBootstrap().catch(() => undefined);
-    void listQueuedOfflineMutations()
-      .then((queue) => setQueuedMutations(queue.length))
-      .catch(() => undefined);
+    const timer = window.setTimeout(() => {
+      setIsOnline(getNavigatorOnlineState());
+      void refreshOfflineBootstrap().catch(() => undefined);
+      void refreshQueueCount().catch(() => undefined);
+      void syncQueue().catch(() => undefined);
+    }, 0);
 
     return () => {
+      window.clearTimeout(timer);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("offline-store-changed", refreshQueueCount);
     };
   }, []);
 

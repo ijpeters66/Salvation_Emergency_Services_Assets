@@ -6,15 +6,19 @@ import {
   MUTATION_QUEUE_STORE,
   OFFLINE_DATABASE_NAME,
   OFFLINE_DATABASE_VERSION,
+  OPTIMISTIC_RECORD_STORE,
   REFERENCE_DATA_KEYS,
   REFERENCE_DATA_STORE,
   cacheOfflineBootstrapPayload,
   createOfflineMutation,
+  createOfflineOptimisticRecord,
   getOfflineReferenceData,
   listOfflineReferenceData,
+  listOptimisticRecords,
   listQueuedOfflineMutations,
   openOfflineDatabase,
   queueOfflineMutation,
+  saveOptimisticRecord,
 } from "@/lib/offline/indexed-db";
 
 describe("offline indexed db", () => {
@@ -27,7 +31,7 @@ describe("offline indexed db", () => {
 
     expect(database.version).toBe(OFFLINE_DATABASE_VERSION);
     expect(Array.from(database.objectStoreNames)).toEqual(
-      expect.arrayContaining([REFERENCE_DATA_STORE, MUTATION_QUEUE_STORE]),
+      expect.arrayContaining([REFERENCE_DATA_STORE, MUTATION_QUEUE_STORE, OPTIMISTIC_RECORD_STORE]),
     );
 
     database.close();
@@ -80,5 +84,23 @@ describe("offline indexed db", () => {
 
     expect(queue.map((record) => record.id)).toEqual(["mutation-1", "mutation-2"]);
     expect(queue[0]?.sync_status).toBe("pending");
+  });
+
+  it("stores optimistic records for local rendering", async () => {
+    await saveOptimisticRecord(
+      createOfflineOptimisticRecord({
+        entity_type: "asset",
+        entity_id: "offline-1",
+        display_label: "Support trailer",
+        route: "/assets",
+        payload: { assetName: "Support trailer" },
+      }),
+    );
+
+    const optimisticRecords = await listOptimisticRecords();
+
+    expect(optimisticRecords).toHaveLength(1);
+    expect(optimisticRecords[0]?.display_label).toBe("Support trailer");
+    expect(optimisticRecords[0]?.sync_status).toBe("pending");
   });
 });

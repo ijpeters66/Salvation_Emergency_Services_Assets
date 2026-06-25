@@ -16,6 +16,8 @@ import {
 import { AssetFields } from "@/app/assets/asset-form";
 import { AppShell } from "@/components/app-shell";
 import { AttachmentSection } from "@/components/attachment-section";
+import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
+import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { PrintableQrLabel, QrCodeCard } from "@/components/qr-code-card";
 import { Button } from "@/components/ui/button";
 import { listDocumentAttachments } from "@/lib/attachments/server";
@@ -180,6 +182,13 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             Asset {statusMessage}.
           </p>
         ) : null}
+
+        <OfflineSyncPanel
+          entityId={asset.id}
+          entityTypes={["asset", "maintenance_record"]}
+          parentEntityId={asset.id}
+          title="Offline asset sync status"
+        />
 
         {scanAction ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
@@ -559,11 +568,18 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             <span className="font-semibold text-[var(--ink)]">{money(totalMaintenanceCost)}</span>
           </p>
 
-          <form
+          <OfflineMutationForm
             action={createMaintenanceRecordAction}
             className="mt-5 grid gap-4 border-t border-[var(--border)] pt-5 md:grid-cols-3"
+            displayLabelFields={["serviceType", "description"]}
+            entityType="maintenance_record"
+            operationType="create"
+            parentEntityIdField="assetId"
+            parentEntityType="asset"
+            redirectPath={`/assets/${asset.id}`}
           >
             <input name="assetId" type="hidden" value={asset.id} />
+            <input name="offlineUpdatedAt" type="hidden" value={asset.updated_at} />
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
               Linked schedule
               <select
@@ -640,7 +656,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             <div className="md:col-span-3">
               <Button type="submit">Record maintenance</Button>
             </div>
-          </form>
+          </OfflineMutationForm>
           {maintenanceVendorNames.length > 0 ? (
             <datalist id="maintenance-vendor-options">
               {maintenanceVendorNames.map((name) => (
@@ -976,8 +992,17 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             <PencilLine className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Edit asset</h2>
           </div>
-          <form action={updateAssetAction} className="mt-4 grid gap-4">
+          <OfflineMutationForm
+            action={updateAssetAction}
+            className="mt-4 grid gap-4"
+            displayLabelFields={["assetName", "uniqueAssetId"]}
+            entityIdField="id"
+            entityType="asset"
+            operationType="update"
+            redirectPath={`/assets/${asset.id}`}
+          >
             <input name="id" type="hidden" value={asset.id} />
+            <input name="offlineUpdatedAt" type="hidden" value={asset.updated_at} />
             <AssetFields
               asset={asset}
               plantDetails={plantDetails}
@@ -987,7 +1012,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             <div>
               <Button type="submit">Save changes</Button>
             </div>
-          </form>
+          </OfflineMutationForm>
         </section>
       </section>
     </AppShell>
