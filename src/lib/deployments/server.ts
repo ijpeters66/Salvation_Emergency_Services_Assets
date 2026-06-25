@@ -14,14 +14,24 @@ import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export async function listDeployments(filters: { status?: DeploymentStatus; from?: string } = {}) {
+export async function listDeployments(
+  filters: { status?: DeploymentStatus; from?: string; overdueReturn?: boolean } = {},
+) {
   if (!getPublicEnvStatus().configured) return [];
   const supabase = await createSupabaseServerClient();
   let query = supabase.from("deployment").select("*").order("start_datetime", { ascending: false });
   if (filters.status) query = query.eq("status", filters.status);
   if (filters.from) query = query.gte("start_datetime", new Date(filters.from).toISOString());
   const { data, error } = await query;
-  return error ? [] : data;
+  if (error) return [];
+  if (!filters.overdueReturn) return data;
+  const now = new Date().getTime();
+  return data.filter(
+    (deployment) =>
+      deployment.status === "active" &&
+      deployment.expected_return_datetime &&
+      new Date(deployment.expected_return_datetime).getTime() < now,
+  );
 }
 
 export async function getDeploymentById(id: string) {

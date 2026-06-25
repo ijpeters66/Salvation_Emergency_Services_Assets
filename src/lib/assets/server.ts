@@ -2,7 +2,7 @@ import { writeAuditLog } from "@/lib/audit-log";
 import type { AssetMovementInsert } from "@/lib/assets/movement";
 import type { AssetAssignmentInsert, AssetAssignmentUpdate } from "@/lib/assets/assignment";
 import type { AssetInsert, AssetUpdate } from "@/lib/assets/service";
-import type { PlantDetailsInsert } from "@/lib/assets/plant";
+import type { PlantDetailsInsert, PlantDetailsRow } from "@/lib/assets/plant";
 import type { AssetStatus, UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import { err, ok } from "@/lib/result";
@@ -143,6 +143,21 @@ export async function getPlantDetailsByAssetId(assetId: string) {
   return data;
 }
 
+export async function listPlantDetails(): Promise<PlantDetailsRow[]> {
+  if (!getPublicEnvStatus().configured) {
+    return [];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("plant_details").select("*");
+
+  if (error) {
+    return [];
+  }
+
+  return data;
+}
+
 export async function listAssetMovements(assetId: string) {
   if (!getPublicEnvStatus().configured) {
     return [];
@@ -154,6 +169,25 @@ export async function listAssetMovements(assetId: string) {
     .select("*")
     .eq("asset_id", assetId)
     .order("created_at", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return data;
+}
+
+export async function listRecentAssetMovements(limit = 10) {
+  if (!getPublicEnvStatus().configured) {
+    return [];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("asset_movement")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
     return [];

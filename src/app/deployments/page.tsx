@@ -42,12 +42,13 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
   const query = (await searchParams) ?? {};
   const status = getParam(query.status);
   const from = getParam(query.from);
+  const overdueReturn = getParam(query.overdueReturn) === "1";
   const statusMessage = getParam(query.statusMessage);
   const statusFilter = deploymentStatuses.includes(status as DeploymentStatus)
     ? (status as DeploymentStatus)
     : undefined;
   const message = statusMessage ? statusMessages[statusMessage] : null;
-  const deployments = await listDeployments({ status: statusFilter, from });
+  const visibleDeployments = await listDeployments({ status: statusFilter, from, overdueReturn });
 
   return (
     <AppShell>
@@ -134,7 +135,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
           <div className="border-b border-[var(--border)] px-5 py-4">
             <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment list</h2>
           </div>
-          {deployments.length > 0 ? (
+          {visibleDeployments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[60rem] border-collapse text-left text-sm">
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
@@ -148,7 +149,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {deployments.map((deployment) => (
+                  {visibleDeployments.map((deployment) => (
                     <tr key={deployment.id}>
                       <td className="px-5 py-4">
                         <Link

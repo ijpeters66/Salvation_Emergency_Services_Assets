@@ -6,8 +6,12 @@ import { isPublicRoute } from "@/lib/auth-state";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const isPreviewMode =
+    request.nextUrl.searchParams.get("preview") === "1" &&
+    ["/dashboard", "/consumables"].includes(pathname) &&
+    (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
-  if (isPublicRoute(pathname)) {
+  if (isPublicRoute(pathname) || isPreviewMode) {
     return NextResponse.next();
   }
 

@@ -473,20 +473,20 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 21. Dashboard
 
-- [ ] Add dashboard route.
-- [ ] Show asset counts by status.
-- [ ] Show low-stock alerts.
-- [ ] Show out-of-stock alerts.
-- [ ] Show maintenance due soon.
-- [ ] Show overdue maintenance.
-- [ ] Show registration/insurance expiry alerts.
-- [ ] Show active deployments.
-- [ ] Show recent stock movements.
-- [ ] Show recent asset changes.
-- [ ] Make dashboard tiles clickable.
+- [x] Add dashboard route.
+- [x] Show asset counts by status.
+- [x] Show low-stock alerts.
+- [x] Show out-of-stock alerts.
+- [x] Show maintenance due soon.
+- [x] Show overdue maintenance.
+- [x] Show registration/insurance expiry alerts.
+- [x] Show active deployments.
+- [x] Show recent stock movements.
+- [x] Show recent asset changes.
+- [x] Make dashboard tiles clickable.
 - [ ] Add dashboard filters if needed.
 - [ ] Confirm dashboard loads quickly.
-- [ ] Add dashboard tests.
+- [x] Add dashboard tests.
 
 ## 22. Audit Trail
 

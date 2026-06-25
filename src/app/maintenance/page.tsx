@@ -9,7 +9,8 @@ import {
 } from "@/app/maintenance/actions";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
-import { listAssets } from "@/lib/assets/server";
+import { getPlantExpiryAlerts } from "@/lib/assets/plant";
+import { listAssets, listPlantDetails } from "@/lib/assets/server";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
 import { listMaintenanceSchedules, listMaintenanceVendors } from "@/lib/maintenance/server";
 
@@ -115,21 +116,48 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
   const role = user?.role ?? "user";
   const isAdmin = role === "system_admin";
   const includeArchived = isAdmin && getParam(params.archived) === "1";
+  const alertFilter = getParam(params.alert) ?? "";
   const status = getParam(params.statusMessage);
   const message = status ? statusMessages[status] : null;
-  const [schedules, assets, vendors] = await Promise.all([
+  const [schedules, assets, plantDetails, vendors] = await Promise.all([
     listMaintenanceSchedules(),
     listAssets({}, role),
+    listPlantDetails(),
     listMaintenanceVendors(includeArchived, role),
   ]);
   const assetById = new Map(assets.map((asset) => [asset.id, asset]));
+  const plantByAssetId = new Map(plantDetails.map((details) => [details.asset_id, details]));
   const actionable = schedules
     .map((schedule) => ({
       schedule,
       asset: assetById.get(schedule.asset_id),
-      alertState: getScheduleAlertState(schedule),
+      alertState: getScheduleAlertState(
+        schedule,
+        plantByAssetId.get(schedule.asset_id)?.odometer_reading ??
+          plantByAssetId.get(schedule.asset_id)?.hour_meter_reading ??
+          null,
+      ),
     }))
-    .filter((item) => item.alertState !== "not_due");
+    .filter((item) =>
+      alertFilter === "due-soon"
+        ? item.alertState === "due_soon"
+        : alertFilter === "overdue"
+          ? item.alertState === "overdue"
+          : item.alertState !== "not_due",
+    );
+  const expiryAlerts = plantDetails
+    .flatMap((details) =>
+      getPlantExpiryAlerts(details).map((alert) => ({
+        alert,
+        assetId: details.asset_id,
+        assetName: assetById.get(details.asset_id)?.asset_name ?? "Unknown asset",
+      })),
+    )
+    .filter((item) =>
+      alertFilter === "expiry"
+        ? item.alert.status === "due_soon" || item.alert.status === "overdue"
+        : true,
+    );
 
   return (
     <AppShell>
@@ -199,6 +227,50 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
             </p>
           )}
         </section>
+
+        {alertFilter === "expiry" ? (
+          <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+            <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
+              <Wrench className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Registration and insurance expiry</h2>
+            </div>
+            {expiryAlerts.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[54rem] border-collapse text-left text-sm">
+                  <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold">Asset</th>
+                      <th className="px-5 py-3 font-semibold">Alert</th>
+                      <th className="px-5 py-3 font-semibold">Date</th>
+                      <th className="px-5 py-3 font-semibold">State</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border)]">
+                    {expiryAlerts.map((item, index) => (
+                      <tr key={`${item.assetId}:${item.alert.label}:${index}`}>
+                        <td className="px-5 py-4">
+                          <Link
+                            className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
+                            href={`/assets/${item.assetId}`}
+                          >
+                            {item.assetName}
+                          </Link>
+                        </td>
+                        <td className="px-5 py-4 text-[var(--muted)]">{item.alert.label}</td>
+                        <td className="px-5 py-4 text-[var(--muted)]">{item.alert.date}</td>
+                        <td className="px-5 py-4 text-[var(--muted)]">{item.alert.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
+                No registration, insurance, or compliance expiries are due soon or overdue.
+              </p>
+            )}
+          </section>
+        ) : null}
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

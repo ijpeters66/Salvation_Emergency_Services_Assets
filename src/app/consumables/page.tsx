@@ -57,12 +57,96 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   const categoryId = getParam(params.categoryId) ?? "";
   const search = getParam(params.search) ?? "";
   const lowQuantity = getParam(params.lowQuantity) === "1";
+  const alertFilter = getParam(params.alert) ?? "";
+  const isPreview = getParam(params.preview) === "1";
   const statusMessage = getParam(params.statusMessage);
   const issuedSummary = getParam(params.issuedSummary);
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
 
-  const [categories, items, locationRows, rawBatches, thresholds] = user
+  const previewData = {
+    categories: [
+      { id: "preview-cat-1", name: "Medical", archived_at: null },
+      { id: "preview-cat-2", name: "PPE", archived_at: null },
+    ],
+    items: [
+      { id: "preview-item-1", name: "Trauma dressing", category_id: "preview-cat-1", archived_at: null },
+      { id: "preview-item-2", name: "Saline", category_id: "preview-cat-1", archived_at: null },
+    ],
+    locationRows: [
+      { id: "preview-loc-1", name: "Ballarat depot", archived_at: null },
+      { id: "preview-loc-2", name: "Hamilton truck", archived_at: null },
+    ],
+    rawBatches: [
+      {
+        id: "preview-batch-1",
+        item_id: "preview-item-1",
+        batch_lot_number: "LOT-A",
+        quantity_received: 12,
+        quantity_on_hand: 2,
+        unit_cost: 18,
+        replacement_cost: 20,
+        date_received: "2026-06-01",
+        supplier_donor: "Preview supplier",
+        expiry_date: "2027-01-01",
+        location_id: "preview-loc-1",
+        qr_code_value: "PREVIEW-1",
+        archived_at: null,
+      },
+      {
+        id: "preview-batch-2",
+        item_id: "preview-item-2",
+        batch_lot_number: "LOT-B",
+        quantity_received: 8,
+        quantity_on_hand: 0,
+        unit_cost: 12,
+        replacement_cost: 15,
+        date_received: "2026-06-03",
+        supplier_donor: "Preview supplier",
+        expiry_date: "2027-03-01",
+        location_id: "preview-loc-2",
+        qr_code_value: "PREVIEW-2",
+        archived_at: null,
+      },
+    ],
+    thresholds: [
+      { id: "preview-threshold-1", consumable_item_id: "preview-item-1", location_id: "preview-loc-1", minimum_quantity: 4 },
+      { id: "preview-threshold-2", consumable_item_id: "preview-item-2", location_id: "preview-loc-2", minimum_quantity: 3 },
+    ],
+  };
+
+  const [categories, items, locationRows, rawBatches, thresholds] =
+    isPreview && !user
+      ? [
+          previewData.categories as never[],
+          previewData.items as never[],
+          previewData.locationRows.map((location) => ({
+            ...location,
+            type: "warehouse",
+            address: null,
+            state: "Victoria",
+            notes: null,
+            created_at: "",
+            updated_at: "",
+            created_by: "preview",
+            updated_by: "preview",
+          })) as never[],
+          previewData.rawBatches.map((batch) => ({
+            ...batch,
+            created_at: "",
+            updated_at: "",
+            created_by: "preview",
+            updated_by: "preview",
+          })) as never[],
+          previewData.thresholds.map((threshold) => ({
+            ...threshold,
+            created_at: "",
+            updated_at: "",
+            created_by: "preview",
+            updated_by: "preview",
+          })) as never[],
+        ]
+      : user
     ? await Promise.all([
         listConsumableCategories(includeArchived, role),
         listConsumableItems(includeArchived, role),
@@ -82,6 +166,21 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   const stockAlerts = buildStockAlerts(thresholds, rawBatches).filter(
     (alert) => alert.status !== "normal",
   );
+  const filteredStockAlerts =
+    alertFilter === "low-stock"
+      ? stockAlerts.filter((alert) => alert.status === "low_stock")
+      : alertFilter === "out-of-stock"
+        ? stockAlerts.filter((alert) => alert.status === "out_of_stock")
+        : stockAlerts;
+  const filteredAlertKeys = new Set(
+    filteredStockAlerts.map(
+      (alert) => `${alert.threshold.consumable_item_id}:${alert.threshold.location_id}`,
+    ),
+  );
+  const visibleBatches =
+    alertFilter.length > 0
+      ? batches.filter((batch) => filteredAlertKeys.has(`${batch.item_id}:${batch.location_id}`))
+      : batches;
 
   return (
     <AppShell>
@@ -128,9 +227,9 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Stock alerts</h2>
-          {stockAlerts.length > 0 ? (
+          {filteredStockAlerts.length > 0 ? (
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {stockAlerts.map((alert) => {
+              {filteredStockAlerts.map((alert) => {
                 const item = itemById.get(alert.threshold.consumable_item_id);
                 const alertLocation = locationById.get(alert.threshold.location_id);
 
@@ -153,7 +252,11 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             </div>
           ) : (
             <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
-              No low-stock or out-of-stock threshold alerts are active.
+              {alertFilter === "low-stock"
+                ? "No low-stock threshold alerts are active."
+                : alertFilter === "out-of-stock"
+                  ? "No out-of-stock threshold alerts are active."
+                  : "No low-stock or out-of-stock threshold alerts are active."}
             </p>
           )}
         </section>
@@ -300,7 +403,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             <Filter className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Filters</h2>
           </div>
-          <form className="mt-4 grid gap-3 md:grid-cols-5">
+          <form className="mt-4 grid gap-3 md:grid-cols-6">
             <input
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base outline-none focus:border-[var(--brand-red)]"
               defaultValue={search}
@@ -335,6 +438,15 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
               <input defaultChecked={lowQuantity} name="lowQuantity" type="checkbox" value="1" />
               Low quantity
             </label>
+            <select
+              className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base outline-none focus:border-[var(--brand-red)]"
+              defaultValue={alertFilter}
+              name="alert"
+            >
+              <option value="">All stock alerts</option>
+              <option value="low-stock">Low stock only</option>
+              <option value="out-of-stock">Out of stock only</option>
+            </select>
             <Button type="submit" variant="outline">
               Apply
             </Button>
@@ -346,7 +458,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             <PackageCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Batch list</h2>
           </div>
-          {batches.length > 0 ? (
+          {visibleBatches.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[72rem] border-collapse text-left text-sm">
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
@@ -361,7 +473,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {batches.map((batch) => {
+                  {visibleBatches.map((batch) => {
                     const item = itemById.get(batch.item_id);
                     return (
                       <tr key={batch.id}>

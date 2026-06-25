@@ -114,6 +114,17 @@ export async function listStockMovements(batchId: string) {
   return error ? [] : data;
 }
 
+export async function listRecentStockMovements(limit = 10) {
+  if (!getPublicEnvStatus().configured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("stock_movement")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return error ? [] : data;
+}
+
 export async function listStockThresholds() {
   if (!getPublicEnvStatus().configured) return [];
   const supabase = await createSupabaseServerClient();
