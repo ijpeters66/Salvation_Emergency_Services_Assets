@@ -516,28 +516,28 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 
 ## 23. Reporting and Export
 
-- [ ] Add reports route.
-- [ ] Add asset register report.
-- [ ] Add asset value report.
-- [ ] Add assets by location report.
-- [ ] Add assets by status report.
-- [ ] Add consumables by location report.
-- [ ] Add low-stock report.
-- [ ] Add stock movement report.
-- [ ] Add deployment report.
-- [ ] Add maintenance report.
-- [ ] Add audit report.
-- [ ] Add report filters.
-- [ ] Add date range filters.
-- [ ] Add location filters.
-- [ ] Add category filters.
-- [ ] Add status filters.
-- [ ] Add CSV export.
+- [x] Add reports route.
+- [x] Add asset register report.
+- [x] Add asset value report.
+- [x] Add assets by location report.
+- [x] Add assets by status report.
+- [x] Add consumables by location report.
+- [x] Add low-stock report.
+- [x] Add stock movement report.
+- [x] Add deployment report.
+- [x] Add maintenance report.
+- [x] Add audit report.
+- [x] Add report filters.
+- [x] Add date range filters.
+- [x] Add location filters.
+- [x] Add category filters.
+- [x] Add status filters.
+- [x] Add CSV export.
 - [ ] Add XLSX export if required.
 - [ ] Add PDF export if required.
 - [ ] Confirm reports match client expectations.
-- [ ] Confirm exports are readable by non-technical users.
-- [ ] Add report tests.
+- [x] Confirm exports are readable by non-technical users.
+- [x] Add report tests.
 
 ## 24. Settings and Admin
 
