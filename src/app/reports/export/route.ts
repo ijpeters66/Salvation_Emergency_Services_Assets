@@ -1,59 +1,91 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUserContext } from "@/lib/auth";
+import { getReportBrandingSettings } from "@/lib/report-branding";
 import {
   buildReport,
   buildReportFilename,
   canAccessReport,
-  parseReportFilters,
+  parseReportRequest,
   toCsvString,
 } from "@/lib/reports";
+import { buildReportExportMetadata } from "@/lib/reports/export";
+import { generatePdfReport } from "@/lib/reports/pdf";
 import { getReportSnapshot } from "@/lib/reports/server";
+import { generateXlsxReport } from "@/lib/reports/xlsx";
 
 export const dynamic = "force-dynamic";
 
+function buildDownloadResponse(
+  body: BodyInit,
+  contentType: string,
+  filename: string,
+) {
+  return new NextResponse(body, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const parseResult = parseReportFilters(url.searchParams);
+  const parseResult = parseReportRequest(url.searchParams);
 
   if (!parseResult.success) {
     return NextResponse.json(
-      { error: parseResult.error.issues[0]?.message ?? "Invalid report filters." },
+      { error: parseResult.error.issues[0]?.message ?? "Invalid report export request." },
       { status: 400 },
     );
   }
 
-  const filters = parseResult.data;
+  const reportRequest = parseResult.data;
   const user = await getCurrentUserContext();
-  const isPreview = filters.preview && !user;
+  const isPreview = reportRequest.preview && !user;
   const role = isPreview ? "user" : user?.role ?? "user";
 
   if (!user && !isPreview) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!canAccessReport(filters.reportId, role)) {
+  if (!canAccessReport(reportRequest.reportId, role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const snapshot = await getReportSnapshot(role, { preview: isPreview });
-  const report = buildReport(snapshot, filters);
+  const report = buildReport(snapshot, reportRequest);
   const preparedBy =
-    filters.preparedBy ||
+    reportRequest.preparedBy ||
     user?.displayName ||
     user?.email ||
     (isPreview ? "Preview team" : "Operations team");
-  const csv = toCsvString(report, {
-    generatedAt: new Date().toISOString(),
-    preparedBy,
-  });
+  const metadata = buildReportExportMetadata(report, preparedBy);
+  const branding = getReportBrandingSettings();
+  const baseFilename = buildReportFilename(reportRequest.reportId);
 
-  return new NextResponse(csv, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${buildReportFilename(filters.reportId)}"`,
-      "Cache-Control": "no-store",
-    },
-  });
+  switch (reportRequest.format) {
+    case "csv": {
+      const csv = toCsvString(report, metadata);
+      return buildDownloadResponse(csv, "text/csv; charset=utf-8", `${baseFilename}.csv`);
+    }
+    case "pdf": {
+      const pdfBytes = await generatePdfReport(report, branding, metadata);
+      return buildDownloadResponse(
+        Buffer.from(pdfBytes),
+        "application/pdf",
+        `${baseFilename}.pdf`,
+      );
+    }
+    case "xlsx": {
+      const xlsxBuffer = await generateXlsxReport(report, branding, metadata);
+      return buildDownloadResponse(
+        Buffer.from(xlsxBuffer),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        `${baseFilename}.xlsx`,
+      );
+    }
+  }
 }

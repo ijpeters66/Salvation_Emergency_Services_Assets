@@ -1,17 +1,21 @@
 import Link from "next/link";
-import { BarChart3, Download, ExternalLink, Filter } from "lucide-react";
+import { BarChart3, Download, ExternalLink, FileSpreadsheet, FileText, Filter } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
-  buildExportHref,
   buildReport,
   canAccessReport,
   getRelatedReportHref,
   parseReportFilters,
   reportDefinitions,
 } from "@/lib/reports";
+import {
+  buildFormatAwareExportHref,
+  supportsPdfExport,
+  supportsXlsxExport,
+} from "@/lib/reports/export";
 import { getReportSnapshot } from "@/lib/reports/server";
 
 export const dynamic = "force-dynamic";
@@ -230,7 +234,6 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
         <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {availableReports.map((report) => {
-            const exportHref = buildExportHref(filters, report.id);
             const relatedHref = getRelatedReportHref(report.id, filters);
             const isSelected = filters.reportId === report.id;
 
@@ -249,11 +252,27 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild size="sm">
-                    <Link href={exportHref}>
+                    <Link href={buildFormatAwareExportHref(report.id, filters, "csv")}>
                       <Download className="size-4" aria-hidden="true" />
-                      Export CSV
+                      CSV
                     </Link>
                   </Button>
+                  {supportsXlsxExport(report.id) ? (
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={buildFormatAwareExportHref(report.id, filters, "xlsx")}>
+                        <FileSpreadsheet className="size-4" aria-hidden="true" />
+                        XLSX
+                      </Link>
+                    </Button>
+                  ) : null}
+                  {supportsPdfExport(report.id) ? (
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={buildFormatAwareExportHref(report.id, filters, "pdf")}>
+                        <FileText className="size-4" aria-hidden="true" />
+                        PDF
+                      </Link>
+                    </Button>
+                  ) : null}
                   <Button asChild size="sm" variant="outline">
                     <Link href={relatedHref}>
                       <ExternalLink className="size-4" aria-hidden="true" />
@@ -277,6 +296,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             <h2 className="text-lg font-semibold text-[var(--ink)]">
               {selectedReport?.definition.title ?? "Report preview"}
             </h2>
+            <div className="ml-auto hidden text-sm text-[var(--muted)] sm:block">
+              PDF and XLSX pull from the same report query used for CSV exports.
+            </div>
           </div>
           {selectedReport ? (
             selectedReport.rows.length > 0 ? (

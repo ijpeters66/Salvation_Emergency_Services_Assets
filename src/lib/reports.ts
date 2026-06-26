@@ -10,6 +10,10 @@ import type { Database } from "@/lib/database.types";
 import { assetStatusLabels } from "@/lib/assets/validation";
 import { deploymentStatusLabels } from "@/lib/deployments/service";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
+import {
+  reportExportFormats,
+  type ReportExportFormat,
+} from "@/lib/reports/export";
 
 type AssetRow = Database["public"]["Tables"]["asset"]["Row"];
 type AssetCategoryRow = Database["public"]["Tables"]["asset_category"]["Row"];
@@ -186,6 +190,10 @@ export type BuiltReport = {
   appliedFilters: string[];
 };
 
+export type ReportRequest = ReportFilters & {
+  format: ReportExportFormat;
+};
+
 export function getReportDefinition(reportId: ReportId) {
   return reportDefinitions.find((report) => report.id === reportId) ?? reportDefinitions[0];
 }
@@ -220,6 +228,34 @@ export function parseReportFilters(
     preparedBy: getParam(input, "preparedBy") ?? "",
     preview: getParam(input, "preview") === "1",
   });
+}
+
+export function parseReportRequest(
+  input: URLSearchParams | Record<string, string | string[] | undefined>,
+) {
+  const filters = parseReportFilters(input);
+  if (!filters.success) {
+    return filters;
+  }
+
+  const rawFormat = getParam(input, "format") ?? "csv";
+  const format = reportExportFormats.find((item) => item === rawFormat);
+  if (!format) {
+    return {
+      success: false as const,
+      error: {
+        issues: [{ message: "Unsupported export format." }],
+      },
+    };
+  }
+
+  return {
+    success: true as const,
+    data: {
+      ...filters.data,
+      format,
+    },
+  };
 }
 
 function money(value: number | null) {
@@ -937,9 +973,14 @@ export function toCsvString(report: BuiltReport, metadata: {
     .join("\n");
 }
 
-export function buildExportHref(filters: ReportFilters, reportId: ReportId) {
+export function buildExportHref(
+  filters: ReportFilters,
+  reportId: ReportId,
+  format: ReportExportFormat = "csv",
+) {
   const params = new URLSearchParams();
   params.set("reportId", reportId);
+  params.set("format", format);
 
   if (filters.locationId) params.set("locationId", filters.locationId);
   if (filters.categoryId) params.set("categoryId", filters.categoryId);
@@ -954,7 +995,7 @@ export function buildExportHref(filters: ReportFilters, reportId: ReportId) {
 
 export function buildReportFilename(reportId: ReportId, date = new Date()) {
   const stamp = date.toISOString().slice(0, 10);
-  return `${reportId}-${stamp}.csv`;
+  return `${reportId}-${stamp}`;
 }
 
 export function buildPreviewReportSnapshot(): ReportSnapshot {

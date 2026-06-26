@@ -533,25 +533,25 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add category filters.
 - [x] Add status filters.
 - [x] Add CSV export.
-- [ ] Add XLSX export if required.
-- [ ] Add PDF export if required.
+- [x] Add XLSX export if required.
+- [x] Add PDF export if required.
 - [ ] Confirm reports match client expectations.
 - [x] Confirm exports are readable by non-technical users.
 - [x] Add report tests.
 
 ## 24. Settings and Admin
 
-- [ ] Add settings route.
+- [x] Add settings route.
 - [ ] Add user management if in scope.
 - [ ] Add role assignment if in scope.
 - [ ] Add location management access.
 - [ ] Add category management access.
 - [ ] Add movement reason management.
-- [ ] Add system settings.
+- [x] Add system settings.
 - [ ] Add archive/restore workflows if required.
-- [ ] Restrict settings to system admins.
+- [x] Restrict settings to system admins.
 - [ ] Add admin audit logging.
-- [ ] Add admin tests.
+- [x] Add admin tests.
 
 ## 25. Testing
 
@@ -570,12 +570,12 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Add Playwright test for consumable stock movement.
 - [ ] Add Playwright test for deployment flow.
 - [ ] Add Playwright test for maintenance record flow.
-- [ ] Add Playwright test for reports route.
+- [x] Add Playwright test for reports route.
 - [ ] Add mobile viewport tests.
 - [ ] Add offline behaviour tests where practical.
 - [x] Run lint before handoff.
 - [x] Run unit tests before handoff.
-- [ ] Run Playwright tests before handoff.
+- [x] Run Playwright tests before handoff.
 - [x] Run production build before handoff.
 
 ## 26. Data Migration

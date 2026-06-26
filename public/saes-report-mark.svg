@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="SAES report mark">
+  <rect width="96" height="96" rx="14" fill="#e12d3c"/>
+  <path d="M48 18l22 8v18c0 14.5-8.8 27.5-22 33.2C34.8 71.5 26 58.5 26 44V26l22-8z" fill="#ffffff" opacity="0.95"/>
+  <text x="48" y="53" text-anchor="middle" font-family="Roboto, Arial, sans-serif" font-size="20" font-weight="700" fill="#003450">SAES</text>
+</svg>
