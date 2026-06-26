@@ -507,12 +507,12 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Include new value where useful.
 - [ ] Include device source where useful.
 - [ ] Include offline sync reference where useful.
-- [ ] Add audit trail list view.
-- [ ] Add audit trail filters.
-- [ ] Add audit trail detail view.
-- [ ] Restrict audit trail to system admins.
+- [x] Add audit trail list view.
+- [x] Add audit trail filters.
+- [x] Add audit trail detail view.
+- [x] Restrict audit trail to system admins.
 - [ ] Add audit export.
-- [ ] Add audit tests.
+- [x] Add audit tests.
 
 ## 23. Reporting and Export
 
