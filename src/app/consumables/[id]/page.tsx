@@ -28,6 +28,8 @@ import { listDeployments } from "@/lib/deployments/server";
 import { stockMovementTypes } from "@/lib/domain-types";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
+import { getMovementReasonLabels } from "@/lib/settings";
+import { listMovementReasons } from "@/lib/settings/server";
 
 export const dynamic = "force-dynamic";
 
@@ -72,14 +74,16 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
   const batch = await getConsumableBatchById(id);
   if (!batch) notFound();
 
-  const [categories, items, locationRows, movements, deployments, attachments] = await Promise.all([
-    listConsumableCategories(isAdmin, role),
-    listConsumableItems(isAdmin, role),
-    listLocations(false, role),
-    listStockMovements(id),
-    listDeployments(),
-    listDocumentAttachments("consumable_batch", id, role),
-  ]);
+  const [categories, items, locationRows, movements, deployments, attachments, movementReasons] =
+    await Promise.all([
+      listConsumableCategories(isAdmin, role),
+      listConsumableItems(isAdmin, role),
+      listLocations(false, role),
+      listStockMovements(id),
+      listDeployments(),
+      listDocumentAttachments("consumable_batch", id, role),
+      listMovementReasons(),
+    ]);
   const locations = toLocationOptions(locationRows);
   const item = items.find((candidate) => candidate.id === batch.item_id);
   const category = categories.find((candidate) => candidate.id === item?.category_id);
@@ -90,6 +94,7 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
   const attachmentStatus = getParam(query.attachmentStatus);
   const statusMessage = getParam(query.statusMessage);
   const message = statusMessage ? statusMessages[statusMessage] : null;
+  const movementReasonLabels = getMovementReasonLabels(movementReasons);
 
   return (
     <AppShell>
@@ -280,11 +285,21 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
             </label>
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
               Reason
-              <input
-                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
                 name="reason"
                 required
-              />
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Choose reason
+                </option>
+                {movementReasonLabels.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
               Related deployment

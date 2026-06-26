@@ -1,4 +1,5 @@
 import { deploymentStatusLabels, deploymentStatuses } from "@/lib/deployments/service";
+import { defaultMovementReasonSeeds } from "@/lib/settings";
 
 type DeploymentFieldValue = {
   deployment_id: string;
@@ -16,7 +17,13 @@ type DeploymentFieldValue = {
   damage_fault_notes: string | null;
 };
 
-export function DeploymentFields({ deployment }: { deployment?: DeploymentFieldValue }) {
+export function DeploymentFields({
+  deployment,
+  movementReasons = [...defaultMovementReasonSeeds],
+}: {
+  deployment?: DeploymentFieldValue;
+  movementReasons?: string[];
+}) {
   const toLocal = (value: string | null | undefined) => (value ? value.slice(0, 16) : "");
 
   return (
@@ -41,12 +48,21 @@ export function DeploymentFields({ deployment }: { deployment?: DeploymentFieldV
       </label>
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
         Purpose/reason
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+        <select
+          className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
           name="purposeReason"
           defaultValue={deployment?.purpose_reason ?? ""}
           required
-        />
+        >
+          <option value="" disabled>
+            Choose reason
+          </option>
+          {movementReasons.map((reason) => (
+            <option key={reason} value={reason}>
+              {reason}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
         Location/site

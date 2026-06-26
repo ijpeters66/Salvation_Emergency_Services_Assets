@@ -20,9 +20,13 @@ export async function getCurrentUserContext(): Promise<AuthUserContext | null> {
 
     const { data: profile } = await supabase
       .from("app_user_profile")
-      .select("display_name, role_id")
+      .select("display_name, role_id, is_active")
       .eq("user_id", user.id)
       .maybeSingle();
+
+    if (profile && !profile.is_active) {
+      return null;
+    }
 
     let role: AuthUserContext["role"] = "user";
 

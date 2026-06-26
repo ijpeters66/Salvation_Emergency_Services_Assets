@@ -26,6 +26,8 @@ import {
 } from "@/lib/deployments/server";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
+import { getMovementReasonLabels } from "@/lib/settings";
+import { listMovementReasons } from "@/lib/settings/server";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +72,7 @@ export default async function DeploymentDetailPage({
     consumableBatches,
     locationRows,
     attachments,
+    movementReasons,
   ] = await Promise.all([
     getDeploymentById(id),
     listDeploymentAssets(id),
@@ -79,6 +82,7 @@ export default async function DeploymentDetailPage({
     listConsumableBatches({}, role),
     listLocations(false, role),
     listDocumentAttachments("deployment", id, role),
+    listMovementReasons(),
   ]);
 
   if (!deployment) {
@@ -99,6 +103,7 @@ export default async function DeploymentDetailPage({
   const attachmentStatus = getParam(query.attachmentStatus);
   const statusMessage = getParam(query.statusMessage);
   const message = statusMessage ? statusMessages[statusMessage] : null;
+  const movementReasonLabels = getMovementReasonLabels(movementReasons);
 
   return (
     <AppShell>
@@ -428,7 +433,10 @@ export default async function DeploymentDetailPage({
           >
             <input name="id" type="hidden" value={deployment.id} />
             <input name="offlineUpdatedAt" type="hidden" value={deployment.updated_at} />
-            <DeploymentFields deployment={deployment} />
+            <DeploymentFields
+              deployment={deployment}
+              movementReasons={movementReasonLabels}
+            />
             <div className="md:col-span-3">
               <Button type="submit">Save deployment</Button>
             </div>

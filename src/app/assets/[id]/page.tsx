@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import { listDocumentAttachments } from "@/lib/attachments/server";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getAssignableChildAssets } from "@/lib/assets/assignment";
-import { getMovementReasons } from "@/lib/assets/movement";
 import {
   getAssetById,
   getPlantDetailsByAssetId,
@@ -45,6 +44,8 @@ import {
 } from "@/lib/maintenance/server";
 import { toMaintenanceVendorNames } from "@/lib/maintenance/vendors";
 import { listAssetDeploymentHistory, listDeployments } from "@/lib/deployments/server";
+import { getMovementReasonLabels } from "@/lib/settings";
+import { listMovementReasons } from "@/lib/settings/server";
 
 export const dynamic = "force-dynamic";
 
@@ -109,6 +110,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     assetAttachments,
     plantAttachments,
     maintenanceVendors,
+    movementReasons,
   ] = await Promise.all([
     listAssetCategories(isAdmin, role),
     listLocations(false, role),
@@ -123,6 +125,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
     listDocumentAttachments("asset", id, role),
     listDocumentAttachments("plant", id, role),
     listMaintenanceVendors(false, role),
+    listMovementReasons(),
   ]);
   const locations = toLocationOptions(locationRows);
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
@@ -147,6 +150,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
   const maintenanceVendorNames = toMaintenanceVendorNames(maintenanceVendors);
   const scanAction = getParam(query.scanAction);
+  const movementReasonLabels = getMovementReasonLabels(movementReasons);
 
   return (
     <AppShell>
@@ -797,7 +801,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
                 name="reason"
                 required
               >
-                {getMovementReasons().map((reason) => (
+                {movementReasonLabels.map((reason) => (
                   <option key={reason} value={reason}>
                     {reason}
                   </option>

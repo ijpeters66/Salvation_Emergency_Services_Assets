@@ -13,6 +13,8 @@ import {
   type DeploymentStatus,
 } from "@/lib/deployments/service";
 import { listDeployments } from "@/lib/deployments/server";
+import { getMovementReasonLabels } from "@/lib/settings";
+import { listMovementReasons } from "@/lib/settings/server";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +50,11 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
     ? (status as DeploymentStatus)
     : undefined;
   const message = statusMessage ? statusMessages[statusMessage] : null;
-  const visibleDeployments = await listDeployments({ status: statusFilter, from, overdueReturn });
+  const [visibleDeployments, movementReasons] = await Promise.all([
+    listDeployments({ status: statusFilter, from, overdueReturn }),
+    listMovementReasons(),
+  ]);
+  const movementReasonLabels = getMovementReasonLabels(movementReasons);
 
   return (
     <AppShell>
@@ -122,7 +128,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
             operationType="create"
             redirectPath="/deployments"
           >
-            <DeploymentFields />
+            <DeploymentFields movementReasons={movementReasonLabels} />
             <div className="md:col-span-3">
               <Button type="submit">Create deployment</Button>
             </div>

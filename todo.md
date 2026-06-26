@@ -542,15 +542,15 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 ## 24. Settings and Admin
 
 - [x] Add settings route.
-- [ ] Add user management if in scope.
-- [ ] Add role assignment if in scope.
+- [x] Add user management if in scope.
+- [x] Add role assignment if in scope.
 - [ ] Add location management access.
-- [ ] Add category management access.
-- [ ] Add movement reason management.
+- [x] Add category management access.
+- [x] Add movement reason management.
 - [x] Add system settings.
 - [ ] Add archive/restore workflows if required.
 - [x] Restrict settings to system admins.
-- [ ] Add admin audit logging.
+- [x] Add admin audit logging.
 - [x] Add admin tests.
 
 ## 25. Testing

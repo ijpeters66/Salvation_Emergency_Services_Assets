@@ -20,6 +20,10 @@ function getErrorMessage(error: string | undefined) {
     return "Those login details did not work. Check the email and password, then try again.";
   }
 
+  if (error === "inactive") {
+    return "This user profile has been deactivated. Contact a system admin for access.";
+  }
+
   return null;
 }
 

@@ -4,13 +4,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import SettingsPage from "@/app/settings/page";
 
-const { redirectMock, getCurrentUserContextMock, getReportBrandingSettingsMock } = vi.hoisted(
-  () => ({
+const {
+  redirectMock,
+  getCurrentUserContextMock,
+  getStoredReportBrandingSettingsMock,
+  listSettingsUsersMock,
+  listRolesMock,
+  listAssetCategoriesForSettingsMock,
+  listConsumableCategoriesForSettingsMock,
+  listMovementReasonsMock,
+} = vi.hoisted(() => ({
     redirectMock: vi.fn(),
     getCurrentUserContextMock: vi.fn(),
-    getReportBrandingSettingsMock: vi.fn(),
-  }),
-);
+    getStoredReportBrandingSettingsMock: vi.fn(),
+    listSettingsUsersMock: vi.fn(),
+    listRolesMock: vi.fn(),
+    listAssetCategoriesForSettingsMock: vi.fn(),
+    listConsumableCategoriesForSettingsMock: vi.fn(),
+    listMovementReasonsMock: vi.fn(),
+  }));
 
 vi.mock("next/navigation", () => ({
   redirect: redirectMock,
@@ -28,15 +40,25 @@ vi.mock("@/lib/auth", () => ({
   getCurrentUserContext: getCurrentUserContextMock,
 }));
 
-vi.mock("@/lib/report-branding", () => ({
-  getReportBrandingSettings: getReportBrandingSettingsMock,
+vi.mock("@/lib/settings/server", () => ({
+  getStoredReportBrandingSettings: getStoredReportBrandingSettingsMock,
+  listSettingsUsers: listSettingsUsersMock,
+  listRoles: listRolesMock,
+  listAssetCategoriesForSettings: listAssetCategoriesForSettingsMock,
+  listConsumableCategoriesForSettings: listConsumableCategoriesForSettingsMock,
+  listMovementReasons: listMovementReasonsMock,
 }));
 
 describe("SettingsPage", () => {
   beforeEach(() => {
     redirectMock.mockReset();
     getCurrentUserContextMock.mockReset();
-    getReportBrandingSettingsMock.mockReset();
+    getStoredReportBrandingSettingsMock.mockReset();
+    listSettingsUsersMock.mockReset();
+    listRolesMock.mockReset();
+    listAssetCategoriesForSettingsMock.mockReset();
+    listConsumableCategoriesForSettingsMock.mockReset();
+    listMovementReasonsMock.mockReset();
   });
 
   it("redirects non-admin users back to the dashboard", async () => {
@@ -49,7 +71,7 @@ describe("SettingsPage", () => {
       throw new Error("redirected");
     });
 
-    await expect(SettingsPage()).rejects.toThrow("redirected");
+    await expect(SettingsPage({})).rejects.toThrow("redirected");
     expect(redirectMock).toHaveBeenCalledWith("/dashboard");
   });
 
@@ -59,7 +81,7 @@ describe("SettingsPage", () => {
       displayName: "Admin",
       role: "system_admin",
     });
-    getReportBrandingSettingsMock.mockReturnValue({
+    getStoredReportBrandingSettingsMock.mockResolvedValue({
       organizationName: "Custom Ops",
       productName: "Custom Register",
       logoText: "COPS",
@@ -70,12 +92,45 @@ describe("SettingsPage", () => {
       surfaceColor: "#ddeeff",
       fontFamily: "Arial",
     });
+    listSettingsUsersMock.mockResolvedValue([
+      {
+        user_id: "user-1",
+        display_name: "Alex Admin",
+        role_id: "role-1",
+        role_key: "system_admin",
+        role_name: "System Admin",
+        is_active: true,
+      },
+    ]);
+    listRolesMock.mockResolvedValue([
+      { id: "role-1", key: "system_admin", name: "System Admin" },
+      { id: "role-2", key: "user", name: "User" },
+    ]);
+    listAssetCategoriesForSettingsMock.mockResolvedValue([
+      { id: "asset-cat-1", name: "Vehicles", description: null, archived_at: null },
+    ]);
+    listConsumableCategoriesForSettingsMock.mockResolvedValue([
+      { id: "consumable-cat-1", name: "Medical", description: null, archived_at: null },
+    ]);
+    listMovementReasonsMock.mockResolvedValue([
+      {
+        id: "reason-1",
+        key: "flood_response",
+        label: "Flood Response",
+        description: null,
+        sort_order: 10,
+        archived_at: null,
+      },
+    ]);
 
-    const markup = renderToStaticMarkup(await SettingsPage());
+    const markup = renderToStaticMarkup(await SettingsPage({}));
 
+    expect(markup).toContain("User management");
     expect(markup).toContain("Report branding");
+    expect(markup).toContain("Movement reasons");
     expect(markup).toContain("Custom Ops");
     expect(markup).toContain("Custom Register");
     expect(markup).toContain("#112233");
+    expect(markup).toContain("Flood Response");
   });
 });

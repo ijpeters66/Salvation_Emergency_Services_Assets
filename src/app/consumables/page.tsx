@@ -22,6 +22,8 @@ import { buildStockAlerts } from "@/lib/consumables/thresholds";
 import { getPublicEnvStatus } from "@/lib/env";
 import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
+import { getMovementReasonLabels } from "@/lib/settings";
+import { listMovementReasons } from "@/lib/settings/server";
 
 export const dynamic = "force-dynamic";
 
@@ -115,7 +117,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
     ],
   };
 
-  const [categories, items, locationRows, rawBatches, thresholds] =
+  const [categories, items, locationRows, rawBatches, thresholds, movementReasons] =
     isPreview && !user
       ? [
           previewData.categories as never[],
@@ -145,6 +147,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             created_by: "preview",
             updated_by: "preview",
           })) as never[],
+          [] as never[],
         ]
       : user
     ? await Promise.all([
@@ -153,8 +156,9 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
         listLocations(false, role),
         listConsumableBatches({ locationId, search, lowQuantity, includeArchived }, role),
         listStockThresholds(),
+        listMovementReasons(),
       ])
-    : [[], [], [], [], []];
+    : [[], [], [], [], [], []];
 
   const locations = toLocationOptions(locationRows);
   const itemById = new Map(items.map((item) => [item.id, item]));
@@ -181,6 +185,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
     alertFilter.length > 0
       ? batches.filter((batch) => filteredAlertKeys.has(`${batch.item_id}:${batch.location_id}`))
       : batches;
+  const movementReasonLabels = getMovementReasonLabels(movementReasons);
 
   return (
     <AppShell>
@@ -309,11 +314,21 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             </label>
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
               Reason
-              <input
-                className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
                 name="reason"
                 required
-              />
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Choose reason
+                </option>
+                {movementReasonLabels.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
               Notes

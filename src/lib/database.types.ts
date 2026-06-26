@@ -9,6 +9,7 @@ export type Database = {
           user_id: string;
           role_id: string;
           display_name: string | null;
+          is_active: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -17,6 +18,7 @@ export type Database = {
           user_id: string;
           role_id: string;
           display_name?: string | null;
+          is_active?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -25,6 +27,7 @@ export type Database = {
           user_id?: string;
           role_id?: string;
           display_name?: string | null;
+          is_active?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -750,6 +753,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      movement_reason: {
+        Row: {
+          id: string;
+          key: string;
+          label: string;
+          description: string | null;
+          sort_order: number;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          label: string;
+          description?: string | null;
+          sort_order?: number;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          label?: string;
+          description?: string | null;
+          sort_order?: number;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
       plant_details: {
         Row: {
           asset_id: string;
@@ -915,12 +957,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      system_setting: {
+        Row: {
+          key: string;
+          value: Json;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          key: string;
+          value?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          key?: string;
+          value?: Json;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
+      admin_list_user_profiles: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          display_name: string | null;
+          role_id: string;
+          role_key: string;
+          role_name: string;
+          is_active: boolean;
+        }[];
+      };
       current_user_is_system_admin: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      set_updated_at: {
+        Args: Record<string, never>;
+        Returns: unknown;
       };
     };
     Enums: Record<string, never>;

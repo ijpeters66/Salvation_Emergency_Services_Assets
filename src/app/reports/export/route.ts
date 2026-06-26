@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUserContext } from "@/lib/auth";
-import { getReportBrandingSettings } from "@/lib/report-branding";
 import {
   buildReport,
   buildReportFilename,
@@ -13,6 +12,7 @@ import { buildReportExportMetadata } from "@/lib/reports/export";
 import { generatePdfReport } from "@/lib/reports/pdf";
 import { getReportSnapshot } from "@/lib/reports/server";
 import { generateXlsxReport } from "@/lib/reports/xlsx";
+import { getStoredReportBrandingSettings } from "@/lib/settings/server";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
     user?.email ||
     (isPreview ? "Preview team" : "Operations team");
   const metadata = buildReportExportMetadata(report, preparedBy);
-  const branding = getReportBrandingSettings();
+  const branding = await getStoredReportBrandingSettings();
   const baseFilename = buildReportFilename(reportRequest.reportId);
 
   switch (reportRequest.format) {

@@ -17,7 +17,7 @@ function getSafeNextPath(value: FormDataEntryValue | null) {
   return value;
 }
 
-function redirectToLogin(error: "configuration" | "credentials", nextPath: string) {
+function redirectToLogin(error: "configuration" | "credentials" | "inactive", nextPath: string) {
   const params = new URLSearchParams({ error, next: nextPath });
   redirect(`/login?${params.toString()}`);
 }
@@ -40,6 +40,17 @@ export async function loginAction(formData: FormData) {
 
   if (error) {
     redirectToLogin("credentials", nextPath);
+  }
+
+  const { data: profile } = await supabase
+    .from("app_user_profile")
+    .select("is_active")
+    .eq("user_id", (await supabase.auth.getUser()).data.user?.id ?? "")
+    .maybeSingle();
+
+  if (profile && !profile.is_active) {
+    await supabase.auth.signOut();
+    redirectToLogin("inactive", nextPath);
   }
 
   redirect(nextPath);

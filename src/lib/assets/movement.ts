@@ -4,6 +4,7 @@ import type { Database } from "@/lib/database.types";
 import type { AssetStatus } from "@/lib/domain-types";
 import { isAssetStatus } from "@/lib/domain-types";
 import { ok, type AppResult } from "@/lib/result";
+import { defaultMovementReasonSeeds } from "@/lib/settings";
 
 export type AssetMovementRow = Database["public"]["Tables"]["asset_movement"]["Row"];
 export type AssetMovementInsert = Database["public"]["Tables"]["asset_movement"]["Insert"];
@@ -24,18 +25,8 @@ export type AssetMovementDependencies = {
   getActiveChildAssets?(parentAssetId: string): Promise<AppResult<AssetRow[]>>;
 };
 
-const movementReasons = [
-  "Location correction",
-  "Deployment",
-  "Return to store",
-  "Maintenance",
-  "Damage report",
-  "Retirement",
-  "Stocktake correction",
-] as const;
-
 export function getMovementReasons() {
-  return movementReasons;
+  return defaultMovementReasonSeeds;
 }
 
 export function isValidAssetTransition(fromStatus: string, toStatus: string) {
