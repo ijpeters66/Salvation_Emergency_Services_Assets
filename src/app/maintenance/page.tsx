@@ -206,6 +206,9 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
           {actionable.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[54rem] border-collapse text-left text-sm">
+                <caption className="sr-only">
+                  Due maintenance schedule table showing asset, maintenance type, due date, due reading, and state.
+                </caption>
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Asset</th>
@@ -257,6 +260,9 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
             {expiryAlerts.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[54rem] border-collapse text-left text-sm">
+                  <caption className="sr-only">
+                    Registration and insurance expiry alerts showing asset, alert type, date, and state.
+                  </caption>
                   <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                     <tr>
                       <th className="px-5 py-3 font-semibold">Asset</th>
@@ -323,6 +329,9 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
           {vendors.length > 0 ? (
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[64rem] border-collapse text-left text-sm">
+                <caption className="sr-only">
+                  Approved maintenance vendors showing business details, contact information, notes, and actions.
+                </caption>
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Business</th>

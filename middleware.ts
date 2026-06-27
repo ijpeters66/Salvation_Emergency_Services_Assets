@@ -4,12 +4,26 @@ import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/database.types";
 import { isPublicRoute } from "@/lib/auth-state";
 
+const previewPaths = new Set([
+  "/dashboard",
+  "/assets",
+  "/consumables",
+  "/deployments",
+  "/locations",
+  "/maintenance",
+  "/reports",
+  "/scan",
+  "/audit",
+]);
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPreviewMode =
     request.nextUrl.searchParams.get("preview") === "1" &&
-    ["/dashboard", "/consumables"].includes(pathname) &&
-    (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    (previewPaths.has(pathname) ||
+      pathname.startsWith("/assets/") ||
+      pathname.startsWith("/consumables/") ||
+      pathname.startsWith("/deployments/"));
 
   if (isPublicRoute(pathname) || isPreviewMode) {
     return NextResponse.next();

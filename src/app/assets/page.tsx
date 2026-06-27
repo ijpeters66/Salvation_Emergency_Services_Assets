@@ -243,6 +243,9 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
           {assets.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[72rem] border-collapse text-left text-sm">
+                <caption className="sr-only">
+                  Asset register showing asset name, category, location, status, value, and actions.
+                </caption>
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Asset</th>

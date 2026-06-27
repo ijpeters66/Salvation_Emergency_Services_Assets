@@ -610,10 +610,10 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Confirm file uploads are access-controlled.
 - [ ] Confirm audit logs cannot be casually edited.
 - [ ] Confirm backups are configured.
-- [ ] Confirm data export is available.
+- [x] Confirm data export is available.
 - [ ] Confirm account recovery process is clear.
-- [ ] Confirm production error handling is acceptable.
-- [ ] Confirm monitoring/logging plan is appropriate for project size.
+- [x] Confirm production error handling is acceptable.
+- [x] Confirm monitoring/logging plan is appropriate for project size.
 
 ## 28. UX and Field Usability
 
@@ -652,7 +652,7 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Smoke test production stock movement flow.
 - [ ] Smoke test production report export.
 - [ ] Smoke test production mobile access.
-- [ ] Document deployment steps.
+- [x] Document deployment steps.
 
 ## 30. Client Testing and Feedback
 
@@ -688,9 +688,9 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [ ] Write deployment workflow instructions.
 - [ ] Write maintenance workflow instructions.
 - [ ] Write reporting/export instructions.
-- [ ] Write backup/export notes.
+- [x] Write backup/export notes.
 - [x] Write environment setup notes.
-- [ ] Write deployment notes.
+- [x] Write deployment notes.
 - [ ] Write data model overview.
 - [ ] Write known limitations.
 - [ ] Write Phase 2 backlog.

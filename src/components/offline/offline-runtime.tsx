@@ -10,6 +10,7 @@ import {
 } from "@/lib/offline/indexed-db";
 import { getPublicEnvStatus } from "@/lib/env";
 import { syncQueuedOfflineMutations, type OfflineSyncResult } from "@/lib/offline/sync";
+import { reportOfflineSyncError } from "@/lib/observability";
 
 function getNavigatorOnlineState() {
   if (typeof navigator === "undefined") {
@@ -70,6 +71,12 @@ export function OfflineRuntime() {
 
           return (await response.json()) as OfflineSyncResult;
         });
+      } catch {
+        reportOfflineSyncError({
+          message: "Queued offline mutations could not be synchronised.",
+          mutationId: null,
+          status: null,
+        });
       } finally {
         syncInFlight.current = false;
         await refreshQueueCount().catch(() => undefined);
@@ -78,7 +85,13 @@ export function OfflineRuntime() {
 
     const handleOnline = async () => {
       setIsOnline(true);
-      await refreshOfflineBootstrap().catch(() => undefined);
+      await refreshOfflineBootstrap().catch(() => {
+        reportOfflineSyncError({
+          message: "Offline bootstrap refresh failed after reconnect.",
+          mutationId: null,
+          status: null,
+        });
+      });
       await syncQueue().catch(() => undefined);
     };
 
@@ -93,7 +106,13 @@ export function OfflineRuntime() {
 
     const timer = window.setTimeout(() => {
       setIsOnline(getNavigatorOnlineState());
-      void refreshOfflineBootstrap().catch(() => undefined);
+      void refreshOfflineBootstrap().catch(() => {
+        reportOfflineSyncError({
+          message: "Offline bootstrap refresh failed during startup.",
+          mutationId: null,
+          status: null,
+        });
+      });
       void refreshQueueCount().catch(() => undefined);
       void syncQueue().catch(() => undefined);
     }, 0);

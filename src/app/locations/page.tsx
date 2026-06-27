@@ -197,6 +197,9 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
           {locations.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
+                <caption className="sr-only">
+                  Location register showing name, type, address, state, status, and actions.
+                </caption>
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Name</th>

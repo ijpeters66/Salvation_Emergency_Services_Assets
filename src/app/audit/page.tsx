@@ -201,6 +201,9 @@ export default async function AuditPage({ searchParams }: AuditPageProps) {
             {entries.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[60rem] border-collapse text-left text-sm">
+                  <caption className="sr-only">
+                    Audit events table showing timestamp, user, action, record type, record reference, and detail link.
+                  </caption>
                   <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                     <tr>
                       <th className="px-5 py-3 font-semibold">When</th>

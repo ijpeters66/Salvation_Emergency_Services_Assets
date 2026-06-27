@@ -12,7 +12,8 @@
     "format:write": "prettier --write package.json package-lock.json components.json prettier.config.mjs playwright.config.ts vitest.config.ts src tests",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "smoke:prod": "node scripts/smoke-prod.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.5",

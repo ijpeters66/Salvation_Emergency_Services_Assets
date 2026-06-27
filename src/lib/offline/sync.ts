@@ -8,6 +8,10 @@ import {
   type OfflineMutationRecord,
   type OfflineOptimisticRecord,
 } from "@/lib/offline/indexed-db";
+import {
+  reportOfflineMutationFailure,
+  reportOfflineSyncError,
+} from "@/lib/observability";
 
 export type OfflineSyncSuccess = {
   ok: true;
@@ -74,6 +78,12 @@ export async function markOfflineMutationFailed(
     updated_at: new Date().toISOString(),
   }));
 
+  reportOfflineMutationFailure({
+    mutationId,
+    message,
+    retryCount: nextRetryCount,
+  });
+
   return updatedRecord;
 }
 
@@ -91,6 +101,12 @@ async function markOfflineMutationConflict(mutation: OfflineMutationRecord, mess
     last_error: message,
     updated_at: new Date().toISOString(),
   }));
+
+  reportOfflineSyncError({
+    mutationId: mutation.id,
+    message,
+    status: 409,
+  });
 }
 
 async function markOfflineMutationSynced(
@@ -159,6 +175,11 @@ export async function syncQueuedOfflineMutations(
       continue;
     }
 
+    reportOfflineSyncError({
+      mutationId: mutation.id,
+      message: result.message,
+      status: null,
+    });
     await markOfflineMutationFailed(mutation.id, result.message, mutation.retry_count + 1);
   }
 }

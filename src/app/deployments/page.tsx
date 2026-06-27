@@ -173,6 +173,9 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
           {visibleDeployments.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[60rem] border-collapse text-left text-sm">
+                <caption className="sr-only">
+                  Deployment register showing deployment name, purpose, location, team, start time, and status.
+                </caption>
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Deployment</th>
