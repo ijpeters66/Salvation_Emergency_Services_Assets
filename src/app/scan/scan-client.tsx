@@ -33,7 +33,7 @@ const actionLabels: Record<QrScanAction, string> = {
   stocktake_placeholder: "Stocktake placeholder",
 };
 
-export function ScanClient() {
+export function ScanClient({ preview = false }: { preview?: boolean }) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -89,7 +89,7 @@ export function ScanClient() {
 
       try {
         const response = await fetch(
-          `/api/scan/resolve?payload=${encodeURIComponent(payload)}&action=${encodeURIComponent(selectedAction)}`,
+          `/api/scan/resolve?payload=${encodeURIComponent(payload)}&action=${encodeURIComponent(selectedAction)}${preview ? "&preview=1" : ""}`,
         );
         const data = (await response.json()) as { destination?: string; error?: string };
 
@@ -106,7 +106,7 @@ export function ScanClient() {
         setIsResolving(false);
       }
     },
-    [router, selectedAction, stopCamera],
+    [preview, router, selectedAction, stopCamera],
   );
 
   const scanCurrentFrame = useCallback(async () => {

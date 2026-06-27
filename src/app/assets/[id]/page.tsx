@@ -46,6 +46,22 @@ import { toMaintenanceVendorNames } from "@/lib/maintenance/vendors";
 import { listAssetDeploymentHistory, listDeployments } from "@/lib/deployments/server";
 import { getMovementReasonLabels } from "@/lib/settings";
 import { listMovementReasons } from "@/lib/settings/server";
+import {
+  getPreviewAssetById,
+  getPreviewLocationOptions,
+  previewAssetAssignments,
+  previewAssetCategories,
+  previewAssetMovements,
+  previewAssets,
+  previewDeployments,
+  previewDeploymentAssets,
+  previewLocations,
+  previewMaintenanceRecords,
+  previewMaintenanceSchedules,
+  previewMaintenanceVendors,
+  previewMovementReasons,
+  previewPlantDetails,
+} from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -84,12 +100,344 @@ function dateTime(value: string) {
   }).format(new Date(value));
 }
 
+function PreviewAssetDetailPage({
+  assetId,
+  statusMessage,
+  attachmentStatus,
+  scanAction,
+}: {
+  assetId: string;
+  statusMessage: string | undefined;
+  attachmentStatus: string | undefined;
+  scanAction: string | undefined;
+}) {
+  const asset = getPreviewAssetById(assetId);
+
+  if (!asset) {
+    notFound();
+  }
+
+  const locations = getPreviewLocationOptions();
+  const categoryById = new Map(previewAssetCategories.map((category) => [category.id, category.name]));
+  const locationById = new Map(previewLocations.map((location) => [location.id, location.name]));
+  const activeParentAssignment = previewAssetAssignments.find(
+    (assignment) => assignment.child_asset_id === asset.id && !assignment.unassigned_at,
+  );
+  const activeChildAssignments = previewAssetAssignments.filter(
+    (assignment) => assignment.parent_asset_id === asset.id && !assignment.unassigned_at,
+  );
+  const movements = previewAssetMovements.filter((movement) => movement.asset_id === asset.id);
+  const plantDetails = previewPlantDetails.find((details) => details.asset_id === asset.id) ?? null;
+  const movementReasonLabels = [...previewMovementReasons];
+  const deploymentHistory = previewDeploymentAssets.filter(
+    (deploymentAsset) => deploymentAsset.asset_id === asset.id,
+  );
+  const deploymentById = new Map(previewDeployments.map((deployment) => [deployment.id, deployment]));
+  const maintenanceVendors = previewMaintenanceVendors.map((vendor) => vendor.business_name);
+
+  return (
+    <AppShell>
+      <section className="grid gap-6">
+        <div>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/assets?preview=1">
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Assets
+            </Link>
+          </Button>
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
+            {asset.unique_asset_id}
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
+            {asset.asset_name}
+          </h1>
+          <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+        </div>
+
+        {statusMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            Asset {statusMessage}.
+          </p>
+        ) : null}
+
+        {scanAction ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {scanActionMessages[scanAction] ?? "Scan action received."}
+          </p>
+        ) : null}
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Status</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {assetStatusLabels[asset.status as keyof typeof assetStatusLabels] ?? asset.status}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Location</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {locationById.get(asset.current_location_id) ?? "Unknown location"}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Category</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {categoryById.get(asset.category_id) ?? "Unknown category"}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Current value</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{money(asset.current_value)}</p>
+          </article>
+        </section>
+
+        <QrCodeCard
+          label="Asset QR payload"
+          payload={asset.qr_code_value}
+          subtitle="Preview QR payload for workflow testing and client walkthroughs."
+          title="Asset QR label"
+        />
+
+        <PrintableQrLabel
+          meta={`${asset.asset_name} | ${asset.unique_asset_id}`}
+          name="Asset label"
+          payload={asset.qr_code_value}
+        />
+
+        <AttachmentSection
+          attachments={[]}
+          ownerId={asset.id}
+          ownerType="asset"
+          redirectPath={`/assets/${asset.id}?preview=1`}
+          role="user"
+          status={attachmentStatus}
+          subtitle="Upload inspection photos, service sheets, and handover documents."
+          title="Asset attachments"
+        />
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
+            <Route className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">
+              Record status or location change
+            </h2>
+          </div>
+          <form className="mt-4 grid gap-4 md:grid-cols-2">
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              New status
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base"
+                defaultValue={asset.status}
+              >
+                {assetStatuses.map((status) => (
+                  <option key={status} value={status}>
+                    {assetStatusLabels[status]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              New location
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base"
+                defaultValue={asset.current_location_id}
+              >
+                {locations.map((location) => (
+                  <option key={location.value} value={location.value}>
+                    {location.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Reason
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {movementReasonLabels.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Notes
+              <input className="h-10 rounded-md border border-[var(--border)] px-3 text-base" />
+            </label>
+            <div className="md:col-span-2">
+              <Button type="button">Record movement</Button>
+            </div>
+          </form>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Parent asset</h2>
+            {activeParentAssignment ? (
+              <div className="mt-4 rounded-md border border-[var(--border)] p-4">
+                <p className="font-medium text-[var(--ink)]">
+                  {previewAssets.find((candidate) => candidate.id === activeParentAssignment.parent_asset_id)
+                    ?.asset_name ?? "Unknown parent"}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Assigned {dateTime(activeParentAssignment.assigned_at)}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                This asset is not currently assigned to a parent asset.
+              </p>
+            )}
+          </div>
+          <div className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Child assets</h2>
+            {activeChildAssignments.length > 0 ? (
+              <div className="mt-4 grid gap-3">
+                {activeChildAssignments.map((assignment) => (
+                  <div className="rounded-md border border-[var(--border)] p-4" key={assignment.id}>
+                    <p className="font-medium text-[var(--ink)]">
+                      {previewAssets.find((candidate) => candidate.id === assignment.child_asset_id)
+                        ?.asset_name ?? "Unknown child"}
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      Assigned {dateTime(assignment.assigned_at)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+                No child assets are currently assigned.
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
+            <Wrench className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Record maintenance</h2>
+          </div>
+          <form className="mt-4 grid gap-3 md:grid-cols-3">
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Maintenance type
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base"
+                defaultValue={previewMaintenanceSchedules[0]?.maintenance_type ?? ""}
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Service provider
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {maintenanceVendors.map((vendor) => (
+                  <option key={vendor} value={vendor}>
+                    {vendor}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Cost
+              <input
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base"
+                defaultValue={previewMaintenanceRecords[0]?.cost ?? 0}
+                type="number"
+              />
+            </label>
+            <div className="md:col-span-3">
+              <Button type="button">Record maintenance</Button>
+            </div>
+          </form>
+        </section>
+
+        <AttachmentSection
+          attachments={[]}
+          ownerId={asset.id}
+          ownerType="plant"
+          redirectPath={`/assets/${asset.id}?preview=1`}
+          role="user"
+          subtitle="Upload plant and fleet registration, insurance, and inspection paperwork."
+          title="Plant and fleet attachments"
+        />
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
+            <History className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Movement history</h2>
+          </div>
+          <div className="mt-4 grid gap-3">
+            {movements.map((movement) => (
+              <div className="rounded-md border border-[var(--border)] p-4" key={movement.id}>
+                <p className="font-medium text-[var(--ink)]">{movement.reason}</p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  {dateTime(movement.created_at)} · {movement.to_status.replaceAll("_", " ")}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">{movement.notes}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment history</h2>
+          {deploymentHistory.length > 0 ? (
+            <div className="mt-4 grid gap-3">
+              {deploymentHistory.map((deploymentAsset) => (
+                <div className="rounded-md border border-[var(--border)] p-4" key={deploymentAsset.id}>
+                  <p className="font-medium text-[var(--ink)]">
+                    {deploymentById.get(deploymentAsset.deployment_id)?.deployment_name ?? "Unknown deployment"}
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--muted)]">
+                    Checked out {dateTime(deploymentAsset.checked_out_at)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              No deployment history has been recorded for this asset yet.
+            </p>
+          )}
+        </section>
+
+        {plantDetails ? (
+          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Plant and fleet details</h2>
+            <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Registration number</dt>
+                <dd className="mt-1 text-[var(--ink)]">{plantDetails.registration_number}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-[var(--muted)]">Service provider</dt>
+                <dd className="mt-1 text-[var(--ink)]">{plantDetails.service_provider}</dd>
+              </div>
+            </dl>
+          </section>
+        ) : null}
+      </section>
+    </AppShell>
+  );
+}
+
 export default async function AssetDetailPage({ params, searchParams }: AssetDetailPageProps) {
   const { id } = await params;
   const query = (await searchParams) ?? {};
+  const isPreview = getParam(query.preview) === "1";
   const user = await getCurrentUserContext();
   const role = user?.role ?? "user";
   const isAdmin = role === "system_admin";
+
+  if (isPreview && !user) {
+    return (
+      <PreviewAssetDetailPage
+        assetId={id}
+        attachmentStatus={getParam(query.attachmentStatus)}
+        scanAction={getParam(query.scanAction)}
+        statusMessage={getParam(query.statusMessage)}
+      />
+    );
+  }
+
   const asset = await getAssetById(id);
 
   if (!asset) {

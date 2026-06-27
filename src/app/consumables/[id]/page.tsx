@@ -30,6 +30,16 @@ import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
 import { getMovementReasonLabels } from "@/lib/settings";
 import { listMovementReasons } from "@/lib/settings/server";
+import {
+  getPreviewConsumableBatchById,
+  getPreviewLocationOptions,
+  previewConsumableCategories,
+  previewConsumableItems,
+  previewDeployments,
+  previewLocations,
+  previewMovementReasons,
+  previewStockMovements,
+} from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -65,12 +75,203 @@ function dateTime(value: string) {
   }).format(new Date(value));
 }
 
+function PreviewBatchDetailPage({
+  batchId,
+  attachmentStatus,
+  statusMessage,
+  scanAction,
+}: {
+  batchId: string;
+  attachmentStatus: string | undefined;
+  statusMessage: string | undefined;
+  scanAction: string | undefined;
+}) {
+  const batch = getPreviewConsumableBatchById(batchId);
+
+  if (!batch) {
+    notFound();
+  }
+
+  const locations = getPreviewLocationOptions();
+  const item = previewConsumableItems.find((candidate) => candidate.id === batch.item_id);
+  const category = previewConsumableCategories.find((candidate) => candidate.id === item?.category_id);
+  const movements = previewStockMovements.filter(
+    (movement) => movement.consumable_batch_id === batch.id,
+  );
+  const deploymentById = new Map(previewDeployments.map((deployment) => [deployment.id, deployment]));
+  const message = statusMessage ? statusMessages[statusMessage] : null;
+  const movementReasonLabels = [...previewMovementReasons];
+
+  return (
+    <AppShell>
+      <section className="grid gap-6">
+        <div>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/consumables?preview=1">
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Consumables
+            </Link>
+          </Button>
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
+            {batch.batch_lot_number}
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
+            {item?.name ?? "Consumable batch"}
+          </h1>
+          <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+        </div>
+
+        {message ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {message}
+          </p>
+        ) : null}
+
+        {scanAction ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {scanActionMessages[scanAction] ?? "Scan action received."}
+          </p>
+        ) : null}
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Quantity on hand</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {batch.quantity_on_hand} / {batch.quantity_received}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Category</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{category?.name ?? "Unknown"}</p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Location</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {previewLocations.find((location) => location.id === batch.location_id)?.name ?? "Unknown"}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Expiry</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{batch.expiry_date ?? "No expiry"}</p>
+          </article>
+        </section>
+
+        <QrCodeCard
+          label="Consumable QR payload"
+          payload={batch.qr_code_value}
+          subtitle="Preview QR payload for issue and stocktake workflow checks."
+          title="Batch QR label"
+        />
+
+        <PrintableQrLabel
+          meta={`${item?.name ?? "Consumable batch"} | ${batch.batch_lot_number}`}
+          name="Consumable batch label"
+          payload={batch.qr_code_value}
+        />
+
+        <AttachmentSection
+          attachments={[]}
+          ownerId={batch.id}
+          ownerType="consumable_batch"
+          redirectPath={`/consumables/${batch.id}?preview=1`}
+          role="user"
+          status={attachmentStatus}
+          subtitle="Upload donation paperwork, batch documentation, and expiry evidence."
+          title="Batch attachments"
+        />
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="flex items-center gap-2">
+            <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Record stock movement</h2>
+          </div>
+          <form className="mt-4 grid gap-3 md:grid-cols-2">
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Movement type
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {stockMovementTypes.map((movementType) => (
+                  <option key={movementType} value={movementType}>
+                    {stockMovementLabels[movementType]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Quantity
+              <input className="h-10 rounded-md border border-[var(--border)] px-3 text-base" defaultValue="4" />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              From location
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {locations.map((location) => (
+                  <option key={location.value} value={location.value}>
+                    {location.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Reason
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {movementReasonLabels.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="md:col-span-2">
+              <Button type="button">Record movement</Button>
+            </div>
+          </form>
+        </section>
+
+        <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+          <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
+            <History className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Stock movement ledger</h2>
+          </div>
+          <div className="grid gap-3 p-5">
+            {movements.map((movement) => (
+              <div className="rounded-md border border-[var(--border)] p-4" key={movement.id}>
+                <p className="font-medium text-[var(--ink)]">{movement.reason}</p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  {stockMovementLabels[movement.movement_type]} · qty {movement.quantity} · {dateTime(movement.created_at)}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Related deployment:{" "}
+                  {(movement.related_deployment_id
+                    ? deploymentById.get(movement.related_deployment_id)?.deployment_name
+                    : null) ?? "None"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+    </AppShell>
+  );
+}
+
 export default async function BatchDetailPage({ params, searchParams }: BatchDetailPageProps) {
   const { id } = await params;
   const query = (await searchParams) ?? {};
+  const isPreview = getParam(query.preview) === "1";
   const user = await getCurrentUserContext();
   const role = user?.role ?? "user";
   const isAdmin = role === "system_admin";
+
+  if (isPreview && !user) {
+    return (
+      <PreviewBatchDetailPage
+        attachmentStatus={getParam(query.attachmentStatus)}
+        batchId={id}
+        scanAction={getParam(query.scanAction)}
+        statusMessage={getParam(query.statusMessage)}
+      />
+    );
+  }
+
   const batch = await getConsumableBatchById(id);
   if (!batch) notFound();
 

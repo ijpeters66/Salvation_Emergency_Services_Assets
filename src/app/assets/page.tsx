@@ -9,11 +9,17 @@ import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { listAssetCategories, listAssets } from "@/lib/assets/server";
+import type { AssetCategoryRow, AssetRow } from "@/lib/assets/service";
 import { assetStatusLabels } from "@/lib/assets/validation";
 import { assetStatuses, isAssetStatus } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import { listLocations } from "@/lib/locations/server";
-import { toLocationOptions } from "@/lib/locations/service";
+import { toLocationOptions, type LocationOption } from "@/lib/locations/service";
+import {
+  previewAssetCategories,
+  previewAssets,
+  getPreviewLocationOptions,
+} from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -56,29 +62,53 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
   const categoryId = getParam(params.categoryId) ?? "";
   const search = getParam(params.search) ?? "";
   const plantOnly = getParam(params.plantOnly) === "1";
+  const isPreview = getParam(params.preview) === "1";
   const statusMessage = getParam(params.statusMessage);
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
 
-  const [categories, locationRows, assets] = user
-    ? await Promise.all([
-        listAssetCategories(includeArchived, role),
-        listLocations(false, role),
-        listAssets(
-          {
-            status,
-            locationId,
-            categoryId,
-            search,
-            includeArchived,
-            plantOnly,
-          },
-          role,
-        ),
-      ])
-    : [[], [], []];
+  let categories: AssetCategoryRow[] = [];
+  let locations: LocationOption[] = [];
+  let assets: AssetRow[] = [];
 
-  const locations = toLocationOptions(locationRows);
+  if (isPreview && !user) {
+    categories = [...previewAssetCategories] as AssetCategoryRow[];
+    locations = getPreviewLocationOptions();
+    assets = previewAssets.filter((asset) => {
+      if (status !== "all" && asset.status !== status) return false;
+      if (locationId && asset.current_location_id !== locationId) return false;
+      if (categoryId && asset.category_id !== categoryId) return false;
+      if (
+        search &&
+        !`${asset.asset_name} ${asset.unique_asset_id}`.toLowerCase().includes(search.toLowerCase())
+      ) {
+        return false;
+      }
+      if (plantOnly && asset.category_id !== "preview-asset-cat-2") return false;
+      return true;
+    }) as AssetRow[];
+  } else if (user) {
+    const [loadedCategories, locationRows, loadedAssets] = await Promise.all([
+      listAssetCategories(includeArchived, role),
+      listLocations(false, role),
+      listAssets(
+        {
+          status,
+          locationId,
+          categoryId,
+          search,
+          includeArchived,
+          plantOnly,
+        },
+        role,
+      ),
+    ]);
+
+    categories = loadedCategories;
+    locations = toLocationOptions(locationRows);
+    assets = loadedAssets;
+  }
+
   const categoryById = new Map(categories.map((category) => [category.id, category.name]));
   const locationById = new Map(locations.map((location) => [location.value, location.label]));
 
@@ -96,6 +126,9 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
               Track individual assets, QR codes, category, location, status, values, and history.
             </p>
+            {isPreview ? (
+              <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+            ) : null}
           </div>
           {isAdmin ? (
             <Button asChild variant="outline" size="sm">
@@ -226,7 +259,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                       <td className="px-5 py-4">
                         <Link
                           className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
-                          href={`/assets/${asset.id}`}
+                          href={isPreview ? `/assets/${asset.id}?preview=1` : `/assets/${asset.id}`}
                         >
                           {asset.asset_name}
                         </Link>
@@ -250,7 +283,9 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                       <td className="px-5 py-4">
                         <div className="flex flex-wrap gap-2">
                           <Button asChild variant="outline" size="sm">
-                            <Link href={`/assets/${asset.id}`}>View</Link>
+                            <Link href={isPreview ? `/assets/${asset.id}?preview=1` : `/assets/${asset.id}`}>
+                              View
+                            </Link>
                           </Button>
                           {isAdmin && !asset.archived_at ? (
                             <form action={archiveAssetAction}>

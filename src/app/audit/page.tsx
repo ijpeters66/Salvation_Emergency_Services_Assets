@@ -12,6 +12,7 @@ import {
   formatAuditTimestamp,
 } from "@/lib/audit";
 import { getAuditFilterOptions, listAuditLogs } from "@/lib/audit/server";
+import { previewAuditEntries } from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -50,9 +51,10 @@ function buildSearchParams(
 
 export default async function AuditPage({ searchParams }: AuditPageProps) {
   const params = (await searchParams) ?? {};
+  const isPreview = getParam(params.preview) === "1";
   const user = await getCurrentUserContext();
 
-  if (user?.role !== "system_admin") {
+  if (!isPreview && user?.role !== "system_admin") {
     redirect("/dashboard");
   }
 
@@ -64,16 +66,35 @@ export default async function AuditPage({ searchParams }: AuditPageProps) {
     dateTo: getParam(params.dateTo) ?? "",
   };
   const selectedId = getParam(params.auditId) ?? "";
-  const [entries, options] = await Promise.all([
-    listAuditLogs({
-      userId: filters.userId || undefined,
-      actionType: filters.actionType || undefined,
-      recordType: filters.recordType || undefined,
-      dateFrom: filters.dateFrom || undefined,
-      dateTo: filters.dateTo || undefined,
-    }),
-    getAuditFilterOptions(),
-  ]);
+  const [entries, options] = isPreview
+    ? [
+        previewAuditEntries.filter((entry) => {
+          if (filters.userId && entry.user_id !== filters.userId) return false;
+          if (filters.actionType && entry.action_type !== filters.actionType) return false;
+          if (filters.recordType && entry.record_type !== filters.recordType) return false;
+          if (filters.dateFrom && entry.created_at.slice(0, 10) < filters.dateFrom) return false;
+          if (filters.dateTo && entry.created_at.slice(0, 10) > filters.dateTo) return false;
+          return true;
+        }),
+        {
+          users: [
+            { id: "preview-admin", label: "Alex Admin" },
+            { id: "preview-user", label: "Operations User" },
+          ],
+          actionTypes: [...new Set(previewAuditEntries.map((entry) => entry.action_type))],
+          recordTypes: [...new Set(previewAuditEntries.map((entry) => entry.record_type))],
+        },
+      ]
+    : await Promise.all([
+        listAuditLogs({
+          userId: filters.userId || undefined,
+          actionType: filters.actionType || undefined,
+          recordType: filters.recordType || undefined,
+          dateFrom: filters.dateFrom || undefined,
+          dateTo: filters.dateTo || undefined,
+        }),
+        getAuditFilterOptions(),
+      ]);
   const selectedEntry = entries.find((entry) => entry.id === selectedId) ?? entries[0] ?? null;
 
   return (
@@ -88,6 +109,9 @@ export default async function AuditPage({ searchParams }: AuditPageProps) {
             Review system activity, filter important changes, and inspect before/after values for
             compliance and troubleshooting.
           </p>
+          {isPreview ? (
+            <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+          ) : null}
         </div>
 
         <section className="rounded-md border border-[var(--border)] bg-white p-5">

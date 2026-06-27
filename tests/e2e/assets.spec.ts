@@ -1,21 +1,23 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test.skip("asset creation and detail view flow with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
+test("asset preview flow shows detail, child asset assignment, and QR label", async ({ page }) => {
+  await page.goto("/assets?preview=1");
+
+  await expect(page.getByRole("heading", { name: "Assets", exact: true })).toBeVisible();
+  await expect(page.getByText("Preview mode")).toBeVisible();
+  await page.getByRole("link", { name: "Support trailer" }).click();
+
+  await expect(page).toHaveURL(/\/assets\/preview-1\?preview=1/);
+  await expect(page.getByRole("heading", { name: "Support trailer" })).toBeVisible();
+  await expect(page.getByText("Child assets")).toBeVisible();
+  await expect(page.getByText("Generator")).toBeVisible();
+  await expect(page.getByText("Asset QR label")).toBeVisible();
 });
 
-test.skip("asset movement appears in history with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
-});
+test("plant and fleet preview details are reachable from the asset detail view", async ({ page }) => {
+  await page.goto("/assets/preview-2?preview=1");
 
-test.skip("assigning and unassigning child assets with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
-});
-
-test.skip("plant fleet section renders with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
-});
-
-test.skip("asset QR label appears on the detail page with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
+  await expect(page.getByRole("heading", { name: "Generator" })).toBeVisible();
+  await expect(page.getByText("Plant and fleet details")).toBeVisible();
+  await expect(page.getByText("Western District Fleet")).toBeVisible();
 });

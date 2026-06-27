@@ -15,6 +15,7 @@ import {
 import { listDeployments } from "@/lib/deployments/server";
 import { getMovementReasonLabels } from "@/lib/settings";
 import { listMovementReasons } from "@/lib/settings/server";
+import { previewDeployments, previewMovementReasons } from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,8 @@ type DeploymentsPageProps = {
 const statusMessages: Record<string, string> = {
   "queued-offline": "Deployment change saved offline and queued for sync.",
 };
+
+const previewNow = new Date("2026-06-27T00:00:00.000Z").getTime();
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -45,15 +48,38 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
   const status = getParam(query.status);
   const from = getParam(query.from);
   const overdueReturn = getParam(query.overdueReturn) === "1";
+  const isPreview = getParam(query.preview) === "1";
   const statusMessage = getParam(query.statusMessage);
   const statusFilter = deploymentStatuses.includes(status as DeploymentStatus)
     ? (status as DeploymentStatus)
     : undefined;
   const message = statusMessage ? statusMessages[statusMessage] : null;
-  const [visibleDeployments, movementReasons] = await Promise.all([
-    listDeployments({ status: statusFilter, from, overdueReturn }),
-    listMovementReasons(),
-  ]);
+  const [visibleDeployments, movementReasons] =
+    isPreview
+      ? [
+          previewDeployments.filter((deployment) => {
+            if (statusFilter && deployment.status !== statusFilter) return false;
+            if (from && deployment.start_datetime.slice(0, 10) < from) return false;
+            if (
+              overdueReturn &&
+              (!deployment.expected_return_datetime ||
+                new Date(deployment.expected_return_datetime).getTime() > previewNow)
+            ) {
+              return false;
+            }
+            return true;
+          }),
+          previewMovementReasons.map((label, index) => ({
+            id: `preview-reason-${index}`,
+            key: label.toLowerCase().replaceAll(/[^a-z0-9]+/g, "_"),
+            label,
+            archived_at: null,
+          })),
+        ]
+      : await Promise.all([
+          listDeployments({ status: statusFilter, from, overdueReturn }),
+          listMovementReasons(),
+        ]);
   const movementReasonLabels = getMovementReasonLabels(movementReasons);
 
   return (
@@ -66,10 +92,13 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
           <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
             Deployment records
           </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-            Plan, activate, return, and close field deployments before asset assignment is added.
-          </p>
-        </div>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
+              Plan, activate, return, and close field deployments before asset assignment is added.
+            </p>
+            {isPreview ? (
+              <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+            ) : null}
+          </div>
 
         {message ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
@@ -160,7 +189,9 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
                       <td className="px-5 py-4">
                         <Link
                           className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
-                          href={`/deployments/${deployment.id}`}
+                          href={
+                            isPreview ? `/deployments/${deployment.id}?preview=1` : `/deployments/${deployment.id}`
+                          }
                         >
                           {deployment.deployment_name}
                         </Link>

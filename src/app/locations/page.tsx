@@ -14,6 +14,7 @@ import { getCurrentUserContext } from "@/lib/auth";
 import { getPublicEnvStatus } from "@/lib/env";
 import { listLocations } from "@/lib/locations/server";
 import { locationTypeLabels, locationTypes } from "@/lib/locations/validation";
+import { previewLocations } from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -117,8 +118,10 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
   const params = (await searchParams) ?? {};
   const user = await getCurrentUserContext();
   const isAdmin = user?.role === "system_admin";
+  const isPreview = getParam(params.preview) === "1";
   const includeArchived = isAdmin && getParam(params.archived) === "1";
-  const locations = user ? await listLocations(includeArchived, user.role) : [];
+  const locations =
+    isPreview && !user ? [...previewLocations] : user ? await listLocations(includeArchived, user.role) : [];
   const status = getParam(params.status) ?? getParam(params.statusMessage);
   const message = status ? statusMessages[status] : null;
   const envConfigured = getPublicEnvStatus().configured;
@@ -137,6 +140,9 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
             <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
               Manage warehouses, storage facilities, and temporary deployment locations.
             </p>
+            {isPreview ? (
+              <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+            ) : null}
           </div>
           {isAdmin ? (
             <Button asChild variant="outline" size="sm">
@@ -205,7 +211,10 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                   {locations.map((location) => (
                     <tr key={location.id}>
                       <td className="px-5 py-4 font-medium text-[var(--ink)]">
-                        <Link className="hover:text-[var(--brand-red)]" href={`/locations/${location.id}`}>
+                        <Link
+                          className="hover:text-[var(--brand-red)]"
+                          href={isPreview ? `/locations/${location.id}?preview=1` : `/locations/${location.id}`}
+                        >
                           {location.name}
                         </Link>
                       </td>
@@ -247,7 +256,11 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                             </OfflineMutationForm>
                           </details>
                           <Button asChild variant="outline" size="sm">
-                            <Link href={`/locations/${location.id}`}>View</Link>
+                            <Link
+                              href={isPreview ? `/locations/${location.id}?preview=1` : `/locations/${location.id}`}
+                            >
+                              View
+                            </Link>
                           </Button>
                           {isAdmin && !location.archived_at ? (
                             <form action={archiveLocationAction}>

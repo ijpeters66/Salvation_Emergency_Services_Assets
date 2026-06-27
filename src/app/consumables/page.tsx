@@ -241,7 +241,11 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                 return (
                   <Link
                     className="rounded-md border border-[var(--border)] p-4 hover:bg-[var(--surface)]"
-                    href={`/consumables/items/${alert.threshold.consumable_item_id}`}
+                    href={
+                      isPreview
+                        ? `/consumables/items/${alert.threshold.consumable_item_id}?preview=1`
+                        : `/consumables/items/${alert.threshold.consumable_item_id}`
+                    }
                     key={alert.threshold.id}
                   >
                     <span className="block text-sm font-semibold text-[var(--ink)]">
@@ -495,7 +499,11 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                         <td className="px-5 py-4">
                           <Link
                             className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
-                            href={`/consumables/items/${item?.id ?? batch.item_id}`}
+                            href={
+                              isPreview
+                                ? `/consumables/items/${item?.id ?? batch.item_id}?preview=1`
+                                : `/consumables/items/${item?.id ?? batch.item_id}`
+                            }
                           >
                             {item?.name ?? "Unknown item"}
                           </Link>
@@ -519,7 +527,9 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                         <td className="px-5 py-4">
                           <div className="flex flex-wrap gap-2">
                             <Button asChild variant="outline" size="sm">
-                              <Link href={`/consumables/${batch.id}`}>View</Link>
+                              <Link href={isPreview ? `/consumables/${batch.id}?preview=1` : `/consumables/${batch.id}`}>
+                                View
+                              </Link>
                             </Button>
                             {isAdmin && !batch.archived_at ? (
                               <form action={archiveConsumableBatchAction}>

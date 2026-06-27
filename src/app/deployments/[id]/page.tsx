@@ -28,6 +28,15 @@ import { listLocations } from "@/lib/locations/server";
 import { toLocationOptions } from "@/lib/locations/service";
 import { getMovementReasonLabels } from "@/lib/settings";
 import { listMovementReasons } from "@/lib/settings/server";
+import {
+  getPreviewDeploymentById,
+  previewAssets,
+  previewConsumableBatches,
+  previewConsumableItems,
+  previewDeploymentAssets,
+  previewDeploymentConsumables,
+  previewMovementReasons,
+} from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -55,14 +64,210 @@ function dateTime(value: string | null) {
   }).format(new Date(value));
 }
 
+function PreviewDeploymentDetailPage({
+  deploymentId,
+  attachmentStatus,
+  statusMessage,
+}: {
+  deploymentId: string;
+  attachmentStatus: string | undefined;
+  statusMessage: string | undefined;
+}) {
+  const deployment = getPreviewDeploymentById(deploymentId);
+
+  if (!deployment) {
+    notFound();
+  }
+
+  const deploymentAssets = previewDeploymentAssets.filter((item) => item.deployment_id === deployment.id);
+  const deploymentConsumables = previewDeploymentConsumables.filter(
+    (item) => item.deployment_id === deployment.id,
+  );
+  const movementReasonLabels = [...previewMovementReasons];
+
+  return (
+    <AppShell>
+      <section className="grid gap-6">
+        <div>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/deployments?preview=1">
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Deployments
+            </Link>
+          </Button>
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
+            {deployment.deployment_id}
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
+            {deployment.deployment_name}
+          </h1>
+          <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+        </div>
+
+        {statusMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+            {statusMessage}
+          </p>
+        ) : null}
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Status</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {deploymentStatusLabels[deployment.status as DeploymentStatus] ?? deployment.status}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Location/site</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {deployment.deployment_location_site}
+            </p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Team</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">{deployment.team_name}</p>
+          </article>
+          <article className="rounded-md border border-[var(--border)] bg-white p-5">
+            <h2 className="text-sm font-medium text-[var(--muted)]">Start</h2>
+            <p className="mt-2 text-lg font-semibold text-[var(--ink)]">
+              {dateTime(deployment.start_datetime)}
+            </p>
+          </article>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment details</h2>
+          <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
+            <div>
+              <dt className="font-medium text-[var(--muted)]">Purpose/reason</dt>
+              <dd className="mt-1 text-[var(--ink)]">{deployment.purpose_reason}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-[var(--muted)]">Team leader</dt>
+              <dd className="mt-1 text-[var(--ink)]">{deployment.team_leader}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-[var(--muted)]">Contact number</dt>
+              <dd className="mt-1 text-[var(--ink)]">{deployment.contact_number}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-[var(--muted)]">Expected return</dt>
+              <dd className="mt-1 text-[var(--ink)]">{dateTime(deployment.expected_return_datetime)}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment assets</h2>
+          <div className="mt-4 grid gap-3">
+            {deploymentAssets.map((deploymentAsset) => (
+              <div className="rounded-md border border-[var(--border)] p-4" key={deploymentAsset.id}>
+                <p className="font-medium text-[var(--ink)]">
+                  {previewAssets.find((asset) => asset.id === deploymentAsset.asset_id)?.asset_name ??
+                    "Unknown asset"}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Checked out {dateTime(deploymentAsset.checked_out_at)}
+                </p>
+                <p className="mt-1 text-sm text-[var(--muted)]">{deploymentAsset.notes}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Issue consumables</h2>
+          <form className="mt-4 grid gap-3 md:grid-cols-3">
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Batch
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {previewConsumableBatches.map((batch) => (
+                  <option key={batch.id} value={batch.id}>
+                    {previewConsumableItems.find((item) => item.id === batch.item_id)?.name} ({batch.batch_lot_number})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Quantity
+              <input className="h-10 rounded-md border border-[var(--border)] px-3 text-base" defaultValue="4" />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Reason
+              <select className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base">
+                {movementReasonLabels.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="md:col-span-3">
+              <Button type="button">Issue consumables</Button>
+            </div>
+          </form>
+        </section>
+
+        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Issued consumables</h2>
+          {deploymentConsumables.length > 0 ? (
+            <div className="mt-4 grid gap-3">
+              {deploymentConsumables.map((record) => {
+                const batch = previewConsumableBatches.find((item) => item.id === record.consumable_batch_id);
+                const item = previewConsumableItems.find((candidate) => candidate.id === batch?.item_id);
+
+                return (
+                  <div className="rounded-md border border-[var(--border)] p-4" key={record.id}>
+                    <p className="font-medium text-[var(--ink)]">{item?.name ?? "Unknown batch"}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      Issued {record.quantity_issued} from {batch?.batch_lot_number} on {dateTime(record.issued_at)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
+              No consumables have been issued to this deployment yet.
+            </p>
+          )}
+        </section>
+
+        <AttachmentSection
+          attachments={[]}
+          ownerId={deployment.id}
+          ownerType="deployment"
+          redirectPath={`/deployments/${deployment.id}?preview=1`}
+          role="user"
+          status={attachmentStatus}
+          subtitle="Upload situation reports, tasking notes, and handover paperwork."
+          title="Deployment attachments"
+        />
+      </section>
+    </AppShell>
+  );
+}
+
 export default async function DeploymentDetailPage({
   params,
   searchParams,
 }: DeploymentDetailPageProps) {
   const { id } = await params;
   const query = (await searchParams) ?? {};
+  const isPreview = getParam(query.preview) === "1";
   const user = await getCurrentUserContext();
   const role = user?.role ?? "user";
+
+  if (isPreview && !user) {
+    return (
+      <PreviewDeploymentDetailPage
+        attachmentStatus={getParam(query.attachmentStatus)}
+        deploymentId={id}
+        statusMessage={getParam(query.statusMessage)}
+      />
+    );
+  }
+
   const [
     deployment,
     deploymentAssets,

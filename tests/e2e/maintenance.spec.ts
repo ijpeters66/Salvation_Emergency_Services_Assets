@@ -1,9 +1,10 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test.skip("due maintenance appears on the maintenance page with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
-});
+test("maintenance preview route shows due maintenance and approved vendors", async ({ page }) => {
+  await page.goto("/maintenance?preview=1");
 
-test.skip("maintenance record appears in asset history with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
+  await expect(page.getByRole("heading", { name: "Maintenance", exact: true })).toBeVisible();
+  await expect(page.getByText("Due maintenance")).toBeVisible();
+  await expect(page.getByText("Approved vendors")).toBeVisible();
+  await expect(page.getByText("Western District Fleet")).toBeVisible();
 });

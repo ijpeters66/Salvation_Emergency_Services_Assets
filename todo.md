@@ -75,8 +75,8 @@ Use this as the working checklist for the Salvation Army Emergency Services Asse
 - [x] Add mobile-friendly navigation.
 - [x] Add desktop-friendly navigation.
 - [x] Add protected route structure.
-- [ ] Add error boundaries where appropriate.
-- [ ] Add loading states.
+- [x] Add error boundaries where appropriate.
+- [x] Add loading states.
 - [x] Add empty states.
 - [x] Add form validation patterns.
 - [x] Add consistent date/time formatting.

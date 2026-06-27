@@ -13,6 +13,12 @@ import { getPlantExpiryAlerts } from "@/lib/assets/plant";
 import { listAssets, listPlantDetails } from "@/lib/assets/server";
 import { getScheduleAlertState } from "@/lib/maintenance/schedules";
 import { listMaintenanceSchedules, listMaintenanceVendors } from "@/lib/maintenance/server";
+import {
+  previewAssets,
+  previewMaintenanceSchedules,
+  previewMaintenanceVendors,
+  previewPlantDetails,
+} from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -117,14 +123,23 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
   const isAdmin = role === "system_admin";
   const includeArchived = isAdmin && getParam(params.archived) === "1";
   const alertFilter = getParam(params.alert) ?? "";
+  const isPreview = getParam(params.preview) === "1";
   const status = getParam(params.statusMessage);
   const message = status ? statusMessages[status] : null;
-  const [schedules, assets, plantDetails, vendors] = await Promise.all([
-    listMaintenanceSchedules(),
-    listAssets({}, role),
-    listPlantDetails(),
-    listMaintenanceVendors(includeArchived, role),
-  ]);
+  const [schedules, assets, plantDetails, vendors] =
+    isPreview && !user
+      ? [
+          [...previewMaintenanceSchedules],
+          [...previewAssets],
+          [...previewPlantDetails],
+          [...previewMaintenanceVendors],
+        ]
+      : await Promise.all([
+          listMaintenanceSchedules(),
+          listAssets({}, role),
+          listPlantDetails(),
+          listMaintenanceVendors(includeArchived, role),
+        ]);
   const assetById = new Map(assets.map((asset) => [asset.id, asset]));
   const plantByAssetId = new Map(plantDetails.map((details) => [details.asset_id, details]));
   const actionable = schedules
@@ -172,6 +187,9 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
           <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
             Review due soon and overdue maintenance schedules for assets and plant/fleet items.
           </p>
+          {isPreview ? (
+            <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
+          ) : null}
         </div>
 
         {message ? (
@@ -203,7 +221,9 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                       <td className="px-5 py-4">
                         <Link
                           className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
-                          href={`/assets/${schedule.asset_id}`}
+                          href={
+                            isPreview ? `/assets/${schedule.asset_id}?preview=1` : `/assets/${schedule.asset_id}`
+                          }
                         >
                           {asset?.asset_name ?? "Unknown asset"}
                         </Link>
@@ -251,8 +271,8 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                         <td className="px-5 py-4">
                           <Link
                             className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
-                            href={`/assets/${item.assetId}`}
-                          >
+                          href={isPreview ? `/assets/${item.assetId}?preview=1` : `/assets/${item.assetId}`}
+                        >
                             {item.assetName}
                           </Link>
                         </td>

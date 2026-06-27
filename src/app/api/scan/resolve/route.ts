@@ -5,6 +5,7 @@ import { getConsumableBatchByQrCodeValue } from "@/lib/consumables/server";
 import { parseQrPayload } from "@/lib/qr";
 import { getLocationById } from "@/lib/locations/server";
 import { qrScanActions, resolveScanDestination, type QrScanAction } from "@/lib/scan";
+import { resolvePreviewScanDestination } from "@/lib/workflow-preview";
 
 function isScanAction(value: string): value is QrScanAction {
   return qrScanActions.includes(value as QrScanAction);
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const payload = String(searchParams.get("payload") ?? "").trim();
   const actionValue = String(searchParams.get("action") ?? "view").trim();
+  const isPreview = searchParams.get("preview") === "1";
 
   if (!payload) {
     return NextResponse.json({ error: "QR payload is required." }, { status: 400 });
@@ -21,6 +23,16 @@ export async function GET(request: Request) {
 
   if (!isScanAction(actionValue)) {
     return NextResponse.json({ error: "Unsupported scan action." }, { status: 400 });
+  }
+
+  if (isPreview) {
+    const destination = resolvePreviewScanDestination(payload, actionValue);
+
+    if (!destination) {
+      return NextResponse.json({ error: "Preview scan could not be resolved." }, { status: 404 });
+    }
+
+    return NextResponse.json({ destination });
   }
 
   const parsed = parseQrPayload(payload);

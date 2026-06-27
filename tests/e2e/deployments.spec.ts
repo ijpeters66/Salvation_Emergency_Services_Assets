@@ -1,13 +1,13 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test.skip("create deployment and view detail with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
-});
+test("deployment preview route shows active deployment detail and issued stock context", async ({ page }) => {
+  await page.goto("/deployments?preview=1");
 
-test.skip("check out an asset from deployment detail with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
-});
+  await expect(page.getByRole("heading", { name: "Deployment records" })).toBeVisible();
+  await page.getByRole("link", { name: "Hamilton flood support" }).click();
 
-test.skip("issue consumables from deployment detail with mocked Supabase", async () => {
-  // Requires a server-action aware Supabase test double or a disposable test database.
+  await expect(page).toHaveURL(/\/deployments\/preview-deployment-1\?preview=1/);
+  await expect(page.getByText("Deployment assets")).toBeVisible();
+  await expect(page.getByText("Issue consumables")).toBeVisible();
+  await expect(page.getByText("Issued consumables")).toBeVisible();
 });
