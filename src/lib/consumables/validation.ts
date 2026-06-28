@@ -60,17 +60,21 @@ export function parseConsumableItemFormData(formData: FormData) {
 }
 
 export function parseConsumableBatchFormData(formData: FormData, itemName = "BATCH") {
-  const batchLotNumber = String(formData.get("batchLotNumber") ?? "");
+  const generatedBatchLotNumber = `AUTO-${Date.now()}`;
+  const batchLotNumber =
+    String(formData.get("batchLotNumber") ?? "").trim() || generatedBatchLotNumber;
+  const quantityReceived = formData.get("quantityReceived");
+  const quantityOnHand = formData.get("quantityOnHand") ?? quantityReceived;
   const qrCodeValue = String(formData.get("qrCodeValue") ?? "");
 
   return consumableBatchFormSchema.safeParse({
     itemId: formData.get("itemId"),
     batchLotNumber,
-    quantityReceived: formData.get("quantityReceived"),
-    quantityOnHand: formData.get("quantityOnHand"),
+    quantityReceived,
+    quantityOnHand,
     unitCost: formData.get("unitCost") ?? "",
     replacementCost: formData.get("replacementCost") ?? "",
-    dateReceived: formData.get("dateReceived"),
+    dateReceived: formData.get("dateReceived") || new Date().toISOString().slice(0, 10),
     supplierDonor: formData.get("supplierDonor") ?? "",
     expiryDate: formData.get("expiryDate") ?? "",
     locationId: formData.get("locationId"),

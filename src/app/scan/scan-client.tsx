@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Camera, LoaderCircle, QrCode, ScanLine } from "lucide-react";
+import jsQR from "jsqr";
 import { useRouter } from "next/navigation";
 
 import { ScanSupportNotice } from "@/components/scan-support-notice";
@@ -36,6 +37,7 @@ const actionLabels: Record<QrScanAction, string> = {
 export function ScanClient({ preview = false }: { preview?: boolean }) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const detectorRef = useRef<BarcodeDetectorInstance | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -110,7 +112,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
   );
 
   const scanCurrentFrame = useCallback(async () => {
-    if (!videoRef.current || !detectorRef.current || isResolving) {
+    if (!videoRef.current || isResolving) {
       queueNextFrame();
       return;
     }
@@ -124,8 +126,37 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
     lastDetectionRef.current = now;
 
     try {
-      const results = await detectorRef.current.detect(videoRef.current);
-      const payload = results.find((result) => result.rawValue)?.rawValue?.trim();
+      let payload: string | undefined;
+
+      if (detectorRef.current) {
+        const results = await detectorRef.current.detect(videoRef.current);
+        payload = results.find((result) => result.rawValue)?.rawValue?.trim();
+      } else {
+        const video = videoRef.current;
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+
+        if (!width || !height) {
+          queueNextFrame();
+          return;
+        }
+
+        const canvas = canvasRef.current ?? document.createElement("canvas");
+        canvasRef.current = canvas;
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+
+        if (!context) {
+          throw new Error("Canvas context unavailable");
+        }
+
+        context.drawImage(video, 0, 0, width, height);
+
+        const imageData = context.getImageData(0, 0, width, height);
+        payload = jsQR(imageData.data, width, height)?.data.trim();
+      }
 
       if (payload) {
         await resolvePayload(payload);
@@ -147,7 +178,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
   }, [scanCurrentFrame]);
 
   const startCamera = useCallback(async () => {
-    if (!support.hasCamera || !support.hasBarcodeDetector) {
+    if (!support.hasCamera) {
       setMessage("Camera scanning is not available here. Use manual QR entry instead.");
       return;
     }
@@ -162,11 +193,9 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
       });
       const BarcodeDetectorCtor = window.BarcodeDetector;
 
-      if (!BarcodeDetectorCtor) {
-        throw new Error("Barcode detector unavailable");
-      }
-
-      detectorRef.current = new BarcodeDetectorCtor({ formats: ["qr_code"] });
+      detectorRef.current = BarcodeDetectorCtor
+        ? new BarcodeDetectorCtor({ formats: ["qr_code"] })
+        : null;
       streamRef.current = stream;
 
       if (videoRef.current) {
@@ -182,7 +211,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
     } finally {
       setIsStartingCamera(false);
     }
-  }, [queueNextFrame, stopCamera, support.hasBarcodeDetector, support.hasCamera]);
+  }, [queueNextFrame, stopCamera, support.hasCamera]);
 
   return (
     <div className="grid gap-6">

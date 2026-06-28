@@ -1127,7 +1127,7 @@ export function buildPreviewReportSnapshot(): ReportSnapshot {
     consumableCategories: [
       {
         id: "cons-cat-1",
-        name: "Medical",
+        name: "Material Aid",
         description: null,
         archived_at: null,
         created_at: "",

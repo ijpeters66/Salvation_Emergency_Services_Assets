@@ -4,6 +4,7 @@ import {
   buildConsumableQrCodeValue,
   consumableBatchFormSchema,
   consumableItemFormSchema,
+  parseConsumableBatchFormData,
 } from "@/lib/consumables/validation";
 
 const validBatch = {
@@ -47,6 +48,25 @@ describe("consumable validation", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("defaults create-batch stock on hand from quantity received", () => {
+    const formData = new FormData();
+    formData.set("itemId", validBatch.itemId);
+    formData.set("quantityReceived", "9");
+    formData.set("unitCost", "");
+    formData.set("locationId", validBatch.locationId);
+
+    const result = parseConsumableBatchFormData(formData, "Nitrile gloves");
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.batchLotNumber).toMatch(/^AUTO-/);
+      expect(result.data.quantityReceived).toBe(9);
+      expect(result.data.quantityOnHand).toBe(9);
+      expect(result.data.dateReceived).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(result.data.replacementCost).toBeNull();
+    }
   });
 
   it("builds QR code values", () => {

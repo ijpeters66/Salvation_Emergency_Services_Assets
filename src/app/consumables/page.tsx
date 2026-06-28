@@ -68,11 +68,17 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
 
   const previewData = {
     categories: [
-      { id: "preview-cat-1", name: "Medical", archived_at: null },
+      { id: "preview-cat-1", name: "Material Aid", archived_at: null },
       { id: "preview-cat-2", name: "PPE", archived_at: null },
+      { id: "preview-cat-3", name: "Food/Water", archived_at: null },
     ],
     items: [
-      { id: "preview-item-1", name: "Trauma dressing", category_id: "preview-cat-1", archived_at: null },
+      {
+        id: "preview-item-1",
+        name: "Trauma dressing",
+        category_id: "preview-cat-1",
+        archived_at: null,
+      },
       { id: "preview-item-2", name: "Saline", category_id: "preview-cat-1", archived_at: null },
     ],
     locationRows: [
@@ -112,8 +118,18 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
       },
     ],
     thresholds: [
-      { id: "preview-threshold-1", consumable_item_id: "preview-item-1", location_id: "preview-loc-1", minimum_quantity: 4 },
-      { id: "preview-threshold-2", consumable_item_id: "preview-item-2", location_id: "preview-loc-2", minimum_quantity: 3 },
+      {
+        id: "preview-threshold-1",
+        consumable_item_id: "preview-item-1",
+        location_id: "preview-loc-1",
+        minimum_quantity: 4,
+      },
+      {
+        id: "preview-threshold-2",
+        consumable_item_id: "preview-item-2",
+        location_id: "preview-loc-2",
+        minimum_quantity: 3,
+      },
     ],
   };
 
@@ -150,15 +166,15 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
           [] as never[],
         ]
       : user
-    ? await Promise.all([
-        listConsumableCategories(includeArchived, role),
-        listConsumableItems(includeArchived, role),
-        listLocations(false, role),
-        listConsumableBatches({ locationId, search, lowQuantity, includeArchived }, role),
-        listStockThresholds(),
-        listMovementReasons(),
-      ])
-    : [[], [], [], [], [], []];
+        ? await Promise.all([
+            listConsumableCategories(includeArchived, role),
+            listConsumableItems(includeArchived, role),
+            listLocations(false, role),
+            listConsumableBatches({ locationId, search, lowQuantity, includeArchived }, role),
+            listStockThresholds(),
+            listMovementReasons(),
+          ])
+        : [[], [], [], [], [], []];
 
   const locations = toLocationOptions(locationRows);
   const itemById = new Map(items.map((item) => [item.id, item]));
@@ -408,7 +424,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create batch</h2>
           </div>
           <form action={createConsumableBatchAction} className="mt-4 grid gap-4">
-            <BatchFields items={items} locations={locations} />
+            <BatchFields items={items} locations={locations} mode="create" />
             <div>
               <Button type="submit" disabled={items.length === 0 || locations.length === 0}>
                 Create batch
@@ -481,7 +497,8 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             <div className="overflow-x-auto">
               <table className="w-full min-w-[72rem] border-collapse text-left text-sm">
                 <caption className="sr-only">
-                  Consumable batch register showing item, batch, location, quantity, value, expiry, and actions.
+                  Consumable batch register showing item, batch, location, quantity, value, expiry,
+                  and actions.
                 </caption>
                 <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
@@ -530,7 +547,13 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                         <td className="px-5 py-4">
                           <div className="flex flex-wrap gap-2">
                             <Button asChild variant="outline" size="sm">
-                              <Link href={isPreview ? `/consumables/${batch.id}?preview=1` : `/consumables/${batch.id}`}>
+                              <Link
+                                href={
+                                  isPreview
+                                    ? `/consumables/${batch.id}?preview=1`
+                                    : `/consumables/${batch.id}`
+                                }
+                              >
                                 View
                               </Link>
                             </Button>

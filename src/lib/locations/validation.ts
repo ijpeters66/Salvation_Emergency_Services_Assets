@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-export const locationTypes = ["warehouse", "storage_facility", "temporary_deployment"] as const;
+export const locationTypes = [
+  "warehouse",
+  "storage_facility",
+  "temporary_deployment",
+  "corps",
+] as const;
 
 export type LocationType = (typeof locationTypes)[number];
 
@@ -8,6 +13,7 @@ export const locationTypeLabels: Record<LocationType, string> = {
   warehouse: "Warehouse",
   storage_facility: "Storage facility",
   temporary_deployment: "Temporary deployment",
+  corps: "Corps",
 };
 
 const optionalText = z

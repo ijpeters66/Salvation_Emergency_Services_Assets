@@ -136,14 +136,20 @@ export const previewPlantDetails = [
 export const previewConsumableCategories = [
   {
     id: "preview-cons-cat-1",
-    name: "Medical",
-    description: "Medical and first-response consumables.",
+    name: "Material Aid",
+    description: "Material aid and relief consumables.",
     archived_at: null,
   },
   {
     id: "preview-cons-cat-2",
     name: "PPE",
     description: "Protective equipment and field consumables.",
+    archived_at: null,
+  },
+  {
+    id: "preview-cons-cat-3",
+    name: "Food/Water",
+    description: "Food, drinking water, and refreshment supplies.",
     archived_at: null,
   },
 ] as const;

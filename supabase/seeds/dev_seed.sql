@@ -27,8 +27,9 @@ insert into public.consumable_category (name, description, created_by, updated_b
 select *
 from (
   values
-    ('Medical', 'Medical and first-response consumables.'),
-    ('PPE', 'Protective equipment and field consumables.')
+    ('PPE', 'Protective equipment and field consumables.'),
+    ('Food/Water', 'Food, drinking water, and refreshment supplies.'),
+    ('Material Aid', 'Material aid and relief consumables.')
 ) as seed(name, description)
 cross join actor
 on conflict do nothing;

@@ -86,5 +86,5 @@ export function getScanSupportMessage({
     return "Camera access is not available here. Use manual QR entry instead.";
   }
 
-  return "This browser can access the camera, but barcode detection is not available. Use manual QR entry instead.";
+  return "Camera scanning is available using compatibility mode.";
 }

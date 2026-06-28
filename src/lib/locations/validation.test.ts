@@ -28,6 +28,18 @@ describe("location validation", () => {
     expect(result.notes).toBeNull();
   });
 
+  it("accepts corps as a location type", () => {
+    const result = locationFormSchema.safeParse({
+      name: "Warrnambool Corps",
+      type: "corps",
+      address: "",
+      state: "Victoria",
+      notes: "",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("rejects invalid location types", () => {
     const result = locationFormSchema.safeParse({
       name: "Invalid Site",

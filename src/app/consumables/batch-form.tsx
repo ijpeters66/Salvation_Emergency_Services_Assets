@@ -5,6 +5,7 @@ type BatchFieldsProps = {
   batch?: ConsumableBatchRow;
   items: ConsumableItemRow[];
   locations: LocationOption[];
+  mode?: "create" | "edit";
   lockQuantityOnHand?: boolean;
 };
 
@@ -16,8 +17,11 @@ export function BatchFields({
   batch,
   items,
   locations,
+  mode = "edit",
   lockQuantityOnHand = false,
 }: BatchFieldsProps) {
+  const isCreate = mode === "create";
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
@@ -38,15 +42,17 @@ export function BatchFields({
           ))}
         </select>
       </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Batch/lot number
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
-          defaultValue={batch?.batch_lot_number}
-          name="batchLotNumber"
-          required
-        />
-      </label>
+      {isCreate ? null : (
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+          Batch/lot number
+          <input
+            className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+            defaultValue={batch?.batch_lot_number}
+            name="batchLotNumber"
+            required
+          />
+        </label>
+      )}
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
         Quantity received
         <input
@@ -58,18 +64,20 @@ export function BatchFields({
           type="number"
         />
       </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Quantity on hand
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
-          defaultValue={batch?.quantity_on_hand ?? 0}
-          min="0"
-          name="quantityOnHand"
-          readOnly={lockQuantityOnHand}
-          required
-          type="number"
-        />
-      </label>
+      {isCreate ? null : (
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+          Quantity on hand
+          <input
+            className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+            defaultValue={batch?.quantity_on_hand ?? 0}
+            min="0"
+            name="quantityOnHand"
+            readOnly={lockQuantityOnHand}
+            required
+            type="number"
+          />
+        </label>
+      )}
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
         Unit cost
         <input
@@ -81,27 +89,31 @@ export function BatchFields({
           type="number"
         />
       </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Replacement cost
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
-          defaultValue={numberValue(batch?.replacement_cost)}
-          min="0"
-          name="replacementCost"
-          step="0.01"
-          type="number"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Date received
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
-          defaultValue={batch?.date_received}
-          name="dateReceived"
-          required
-          type="date"
-        />
-      </label>
+      {isCreate ? null : (
+        <>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Replacement cost
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+              defaultValue={numberValue(batch?.replacement_cost)}
+              min="0"
+              name="replacementCost"
+              step="0.01"
+              type="number"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Date received
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal outline-none focus:border-[var(--brand-red)]"
+              defaultValue={batch?.date_received}
+              name="dateReceived"
+              required
+              type="date"
+            />
+          </label>
+        </>
+      )}
       <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
         Expiry date
         <input

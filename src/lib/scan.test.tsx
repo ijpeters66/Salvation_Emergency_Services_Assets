@@ -55,4 +55,10 @@ describe("ScanSupportNotice", () => {
 
     expect(markup).toContain("manual QR entry");
   });
+
+  it("uses compatibility mode when camera access exists without native barcode detection", () => {
+    expect(getScanSupportMessage({ hasBarcodeDetector: false, hasCamera: true })).toBe(
+      "Camera scanning is available using compatibility mode.",
+    );
+  });
 });

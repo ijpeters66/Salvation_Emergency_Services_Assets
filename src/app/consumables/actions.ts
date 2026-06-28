@@ -99,7 +99,7 @@ export async function updateConsumableBatchAction(formData: FormData) {
     id,
     {
       ...parsed.data,
-      quantityOnHand: existingBatch.quantity_on_hand,
+      quantityOnHand: parsed.data.quantityReceived,
     },
     context.userId,
   );
