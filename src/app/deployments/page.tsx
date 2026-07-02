@@ -53,6 +53,8 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
   const statusFilter = deploymentStatuses.includes(status as DeploymentStatus)
     ? (status as DeploymentStatus)
     : undefined;
+  const hasActiveFilters = Boolean(statusFilter || from || overdueReturn);
+  const clearFiltersHref = isPreview ? "/deployments?preview=1" : "/deployments";
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const [visibleDeployments, movementReasons] =
     isPreview
@@ -92,13 +94,11 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
           <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
             Deployment records
           </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-              Plan, activate, return, and close field deployments before asset assignment is added.
-            </p>
-            {isPreview ? (
-              <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
-            ) : null}
-          </div>
+          <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
+            Plan, activate, return, and close field deployments before asset assignment is added.
+          </p>
+          {isPreview ? <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p> : null}
+        </div>
 
         {message ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
@@ -142,9 +142,32 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
               </Button>
             </div>
           </form>
+          {hasActiveFilters ? (
+            <div className="mt-4 flex flex-wrap items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm">
+              <span className="font-medium text-[var(--ink)]">Active filters</span>
+              {statusFilter ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Status: {deploymentStatusLabels[statusFilter]}
+                </span>
+              ) : null}
+              {from ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  From: {from}
+                </span>
+              ) : null}
+              {overdueReturn ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Overdue return only
+                </span>
+              ) : null}
+              <Button asChild size="sm" variant="outline" className="ml-auto">
+                <Link href={clearFiltersHref}>Clear filters</Link>
+              </Button>
+            </div>
+          ) : null}
         </section>
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section id="create-deployment" className="rounded-md border border-[var(--border)] bg-white p-5 scroll-mt-24">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create deployment</h2>
@@ -176,7 +199,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
                 <caption className="sr-only">
                   Deployment register showing deployment name, purpose, location, team, start time, and status.
                 </caption>
-                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                <thead className="sticky top-16 z-10 bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Deployment</th>
                     <th className="px-5 py-3 font-semibold">Purpose</th>
@@ -188,7 +211,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {visibleDeployments.map((deployment) => (
-                    <tr key={deployment.id}>
+                    <tr className="transition-colors hover:bg-[var(--surface)]" key={deployment.id}>
                       <td className="px-5 py-4">
                         <Link
                           className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
@@ -220,9 +243,20 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
               </table>
             </div>
           ) : (
-            <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
-              No deployments match the current filters.
-            </p>
+            <div className="grid gap-3 px-5 py-8">
+              <p className="text-sm font-medium text-[var(--ink)]">No deployments match the current filters.</p>
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                Clear the filters to return to the full deployment list or adjust the date range.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={clearFiltersHref}>Clear filters</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="#create-deployment">Create deployment</Link>
+                </Button>
+              </div>
+            </div>
           )}
         </section>
       </section>

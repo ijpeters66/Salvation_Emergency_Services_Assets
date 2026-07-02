@@ -10,6 +10,7 @@ import { AppShell } from "@/components/app-shell";
 import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Button } from "@/components/ui/button";
+import { FieldHint, FormSection } from "@/components/form-helpers";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPublicEnvStatus } from "@/lib/env";
 import { listLocations } from "@/lib/locations/server";
@@ -60,56 +61,81 @@ function LocationFields({
   };
 }) {
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Name
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.name}
-          name="name"
-          required
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Type
-        <select
-          className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.type ?? "warehouse"}
-          name="type"
-          required
-        >
-          {locationTypes.map((type) => (
-            <option key={type} value={type}>
-              {locationTypeLabels[type]}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Address
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.address ?? ""}
-          name="address"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        State
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.state ?? "Victoria"}
-          name="state"
-          required
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
-        Notes
-        <textarea
-          className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.notes ?? ""}
-          name="notes"
-        />
-      </label>
+    <div className="grid gap-4">
+      <FormSection
+        description="Use the clearest location name staff will recognise in the field."
+        title="Identity"
+      >
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Name
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.name}
+              name="name"
+              placeholder="Hamilton Depot"
+              required
+            />
+            <FieldHint>Short names are easier to scan on tablets and in tables.</FieldHint>
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Type
+            <select
+              className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.type ?? "warehouse"}
+              name="type"
+              required
+            >
+              {locationTypes.map((type) => (
+                <option key={type} value={type}>
+                  {locationTypeLabels[type]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </FormSection>
+
+      <FormSection
+        description="Address details help staff and reporting tools locate the site."
+        title="Address"
+      >
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Address
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.address ?? ""}
+              name="address"
+              placeholder="12 Example Rd"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            State
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.state ?? "Victoria"}
+              name="state"
+              required
+            />
+          </label>
+        </div>
+      </FormSection>
+
+      <FormSection
+        description="Notes are for access instructions, local quirks, or handover details."
+        title="Notes"
+      >
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+          Notes
+          <textarea
+            className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+            defaultValue={defaults?.notes ?? ""}
+            name="notes"
+            placeholder="Access notes, opening hours, or site-specific instructions"
+          />
+        </label>
+      </FormSection>
     </div>
   );
 }
@@ -200,7 +226,7 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                 <caption className="sr-only">
                   Location register showing name, type, address, state, status, and actions.
                 </caption>
-                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                <thead className="sticky top-16 z-10 bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Name</th>
                     <th className="px-5 py-3 font-semibold">Type</th>
@@ -212,7 +238,7 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {locations.map((location) => (
-                    <tr key={location.id}>
+                    <tr className="transition-colors hover:bg-[var(--surface)]" key={location.id}>
                       <td className="px-5 py-4 font-medium text-[var(--ink)]">
                         <Link
                           className="hover:text-[var(--brand-red)]"

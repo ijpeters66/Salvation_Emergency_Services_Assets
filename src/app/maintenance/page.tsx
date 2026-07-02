@@ -8,6 +8,7 @@ import {
   updateMaintenanceVendorAction,
 } from "@/app/maintenance/actions";
 import { Button } from "@/components/ui/button";
+import { FieldHint, FormSection } from "@/components/form-helpers";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPlantExpiryAlerts } from "@/lib/assets/plant";
 import { listAssets, listPlantDetails } from "@/lib/assets/server";
@@ -52,66 +53,96 @@ function VendorFields({
   };
 }) {
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Business name
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.business_name ?? ""}
-          name="businessName"
-          required
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Contact name
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.contact_name ?? ""}
-          name="contactName"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Phone
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.phone ?? ""}
-          name="phone"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Email
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.email ?? ""}
-          name="email"
-          type="email"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Address
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.address ?? ""}
-          name="address"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-        Website
-        <input
-          className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.website ?? ""}
-          name="website"
-          type="url"
-        />
-      </label>
-      <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
-        Notes
-        <textarea
-          className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-          defaultValue={defaults?.notes ?? ""}
-          name="notes"
-        />
-      </label>
+    <div className="grid gap-4">
+      <FormSection
+        description="Who the vendor is and how to contact them."
+        title="Identity and contact"
+      >
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Business name
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.business_name ?? ""}
+              name="businessName"
+              placeholder="Acme Service Centre"
+              required
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Contact name
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.contact_name ?? ""}
+              name="contactName"
+              placeholder="Primary contact"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Phone
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.phone ?? ""}
+              name="phone"
+              placeholder="03 5555 5555"
+              type="tel"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Email
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.email ?? ""}
+              name="email"
+              placeholder="service@example.com"
+              type="email"
+            />
+          </label>
+        </div>
+      </FormSection>
+
+      <FormSection
+        description="Optional details to help staff recognise the vendor later."
+        title="Address and website"
+      >
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Address
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.address ?? ""}
+              name="address"
+              placeholder="Street or mailing address"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+            Website
+            <input
+              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+              defaultValue={defaults?.website ?? ""}
+              name="website"
+              placeholder="https://..."
+              type="url"
+            />
+            <FieldHint>Use the full URL so it opens correctly from the browser.</FieldHint>
+          </label>
+        </div>
+      </FormSection>
+
+      <FormSection
+        description="Notes can hold preferred contacts, SLA details, or job booking guidance."
+        title="Notes"
+      >
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+          Notes
+          <textarea
+            className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
+            defaultValue={defaults?.notes ?? ""}
+            name="notes"
+            placeholder="Booking instructions or preferred contact method"
+          />
+        </label>
+      </FormSection>
     </div>
   );
 }
@@ -209,7 +240,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                 <caption className="sr-only">
                   Due maintenance schedule table showing asset, maintenance type, due date, due reading, and state.
                 </caption>
-                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                <thead className="sticky top-16 z-10 bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Asset</th>
                     <th className="px-5 py-3 font-semibold">Type</th>
@@ -220,7 +251,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {actionable.map(({ schedule, asset, alertState }) => (
-                    <tr key={schedule.id}>
+                    <tr className="transition-colors hover:bg-[var(--surface)]" key={schedule.id}>
                       <td className="px-5 py-4">
                         <Link
                           className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
@@ -251,7 +282,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
           )}
         </section>
 
-        {alertFilter === "expiry" ? (
+          {alertFilter === "expiry" ? (
           <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
             <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
               <Wrench className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
@@ -263,7 +294,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                   <caption className="sr-only">
                     Registration and insurance expiry alerts showing asset, alert type, date, and state.
                   </caption>
-                  <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                  <thead className="sticky top-16 z-10 bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                     <tr>
                       <th className="px-5 py-3 font-semibold">Asset</th>
                       <th className="px-5 py-3 font-semibold">Alert</th>
@@ -273,7 +304,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                   </thead>
                   <tbody className="divide-y divide-[var(--border)]">
                     {expiryAlerts.map((item, index) => (
-                      <tr key={`${item.assetId}:${item.alert.label}:${index}`}>
+                      <tr className="transition-colors hover:bg-[var(--surface)]" key={`${item.assetId}:${item.alert.label}:${index}`}>
                         <td className="px-5 py-4">
                           <Link
                             className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
@@ -332,7 +363,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                 <caption className="sr-only">
                   Approved maintenance vendors showing business details, contact information, notes, and actions.
                 </caption>
-                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                <thead className="sticky top-16 z-10 bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Business</th>
                     <th className="px-4 py-3 font-semibold">Contact</th>
@@ -345,7 +376,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {vendors.map((vendor) => (
-                    <tr key={vendor.id}>
+                    <tr className="transition-colors hover:bg-[var(--surface)]" key={vendor.id}>
                       <td className="px-4 py-3">
                         <div className="font-medium text-[var(--ink)]">{vendor.business_name}</div>
                         <div className="text-[var(--muted)]">{vendor.address || "No address"}</div>
@@ -407,9 +438,14 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
               </table>
             </div>
           ) : (
-            <p className="mt-5 text-sm leading-6 text-[var(--muted)]">
-              No approved maintenance vendors have been added yet.
-            </p>
+            <div className="mt-5 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
+              <p className="text-sm font-medium text-[var(--ink)]">
+                No approved maintenance vendors have been added yet.
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                Add a preferred provider so maintenance jobs and handover records have somewhere to point.
+              </p>
+            </div>
           )}
         </section>
       </section>

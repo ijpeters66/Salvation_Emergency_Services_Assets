@@ -41,12 +41,12 @@ This is a review of the current app UI/UX compared with current best practice fo
 
 ## Priority 2: Forms and Data Entry
 
-- [ ] Break large forms into clearer sections.
+- [x] Break large forms into clearer sections.
   - Asset, maintenance, and location forms are long and visually flat.
   - Best practice is progressive disclosure: group fields into logical blocks such as identity, logistics, financials, and notes.
   - Use section headings or accordions when a form grows past one screen.
 
-- [ ] Add helper text and examples to ambiguous fields.
+- [x] Add helper text and examples to ambiguous fields.
   - Fields like QR code value, status, maintenance dates, and financial values need more guidance.
   - Best practice is to reduce guessing with short examples and lightweight helper text.
   - Include expected formats, ownership rules, and whether a field is optional.
@@ -67,12 +67,12 @@ This is a review of the current app UI/UX compared with current best practice fo
 
 ## Priority 3: Tables, Browsing, and Scanning
 
-- [ ] Improve dense tables for operational use.
+- [x] Improve dense tables for operational use.
   - The asset, location, and maintenance tables are clean but feel static and wide.
   - Best practice is sticky table headers, stronger row affordances, and clearer grouping of the most important columns first.
   - Consider a mobile-friendly card layout for narrow screens instead of relying only on horizontal scroll.
 
-- [ ] Make filters easier to use and easier to reset.
+- [x] Make filters easier to use and easier to reset.
   - Filters are currently presented as a long row of controls.
   - Best practice is a filter bar with clear “active filters” chips and one-click reset.
   - Keep the current filter state visible so users do not have to infer why a list is empty.

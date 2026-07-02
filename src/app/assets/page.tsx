@@ -66,6 +66,10 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
   const statusMessage = getParam(params.statusMessage);
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
+  const hasActiveFilters = Boolean(
+    search || status !== "all" || categoryId || locationId || plantOnly || includeArchived,
+  );
+  const clearFiltersHref = isPreview ? "/assets?preview=1" : "/assets";
 
   let categories: AssetCategoryRow[] = [];
   let locations: LocationOption[] = [];
@@ -232,6 +236,44 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
               Apply
             </Button>
           </form>
+          {hasActiveFilters ? (
+            <div className="mt-4 flex flex-wrap items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm">
+              <span className="font-medium text-[var(--ink)]">Active filters</span>
+              {search ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Search: {search}
+                </span>
+              ) : null}
+              {status !== "all" ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Status: {assetStatusLabels[status]}
+                </span>
+              ) : null}
+              {categoryId ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Category selected
+                </span>
+              ) : null}
+              {locationId ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Location selected
+                </span>
+              ) : null}
+              {plantOnly ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Plant/fleet only
+                </span>
+              ) : null}
+              {includeArchived ? (
+                <span className="rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs text-[var(--muted)]">
+                  Archived included
+                </span>
+              ) : null}
+              <Button asChild className="ml-auto" size="sm" variant="outline">
+                <Link href={clearFiltersHref}>Clear filters</Link>
+              </Button>
+            </div>
+          ) : null}
         </section>
 
         <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
@@ -246,7 +288,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                 <caption className="sr-only">
                   Asset register showing asset name, category, location, status, value, and actions.
                 </caption>
-                <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
+                <thead className="sticky top-16 z-10 bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Asset</th>
                     <th className="px-5 py-3 font-semibold">Category</th>
@@ -258,7 +300,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {assets.map((asset) => (
-                    <tr key={asset.id}>
+                    <tr className="transition-colors hover:bg-[var(--surface)]" key={asset.id}>
                       <td className="px-5 py-4">
                         <Link
                           className="font-medium text-[var(--ink)] hover:text-[var(--brand-red)]"
@@ -318,7 +360,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                   <Link href="#create-asset">Jump to create asset</Link>
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link href="/assets">Clear filters</Link>
+                  <Link href={isPreview ? "/assets?preview=1" : "/assets"}>Clear filters</Link>
                 </Button>
               </div>
             </div>
