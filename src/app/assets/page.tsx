@@ -152,7 +152,7 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
           </p>
         ) : null}
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section id="create-asset" className="rounded-md border border-[var(--border)] bg-white p-5 scroll-mt-24">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create asset</h2>
@@ -307,10 +307,21 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
               </table>
             </div>
           ) : (
-            <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
-              No assets match the current view. Create the first asset once at least one location
-              exists.
-            </p>
+            <div className="grid gap-3 px-5 py-8">
+              <p className="text-sm font-medium text-[var(--ink)]">No assets match the current view.</p>
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                Create the first asset once at least one location exists, or clear the active filters
+                to widen the list.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="#create-asset">Jump to create asset</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/assets">Clear filters</Link>
+                </Button>
+              </div>
+            </div>
           )}
         </section>
       </section>

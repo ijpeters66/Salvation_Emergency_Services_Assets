@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LogOut, QrCode, ShieldCheck, UserRound } from "lucide-react";
 
+import { AppShellNav } from "@/components/app-shell-nav";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/app/login/actions";
 import { getCurrentUserContext } from "@/lib/auth";
@@ -17,7 +18,13 @@ export async function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-white">
+      <a
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[var(--ink)] focus:shadow-lg"
+        href="#main-content"
+      >
+        Skip to content
+      </a>
+      <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-white/95 backdrop-blur">
         <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link className="flex min-w-0 items-center gap-3" href="/dashboard">
             <span className="flex size-9 items-center justify-center rounded-md bg-[var(--brand-red)] text-white">
@@ -66,29 +73,11 @@ export async function AppShell({ children }: AppShellProps) {
 
       <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[17rem_1fr]">
         <aside className="border-b border-[var(--border)] bg-white lg:border-b-0 lg:border-r">
-          <nav aria-label="Main navigation" className="grid gap-1 p-3 lg:sticky lg:top-16">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  className="grid grid-cols-[2rem_1fr] gap-2 rounded-md px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--surface)]"
-                  href={item.href}
-                  key={item.href}
-                >
-                  <Icon className="mt-0.5 size-4 text-[var(--brand-red)]" aria-hidden="true" />
-                  <span>
-                    <span className="block font-medium">{item.title}</span>
-                    <span className="hidden text-xs leading-5 text-[var(--muted)] sm:block lg:hidden xl:block">
-                      {item.description}
-                    </span>
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
+          <AppShellNav items={navItems} />
         </aside>
-        <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main id="main-content" className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">
+          {children}
+        </main>
       </div>
     </div>
   );

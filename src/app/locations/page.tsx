@@ -166,7 +166,7 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
           </p>
         ) : null}
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section id="create-location" className="rounded-md border border-[var(--border)] bg-white p-5 scroll-mt-24">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create location</h2>
@@ -282,10 +282,21 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
               </table>
             </div>
           ) : (
-            <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
-              No locations are available yet. Create the first warehouse, storage facility, or
-              temporary deployment location to start the register.
-            </p>
+            <div className="grid gap-3 px-5 py-8">
+              <p className="text-sm font-medium text-[var(--ink)]">No locations are available yet.</p>
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                Create the first warehouse, storage facility, or temporary deployment location to start the
+                register.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="#create-location">Jump to create location</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/dashboard">Back to dashboard</Link>
+                </Button>
+              </div>
+            </div>
           )}
         </section>
       </section>

@@ -93,6 +93,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const availableReports = reportDefinitions.filter((report) => canAccessReport(report.id, role));
   const selectedReport = snapshot ? buildReport(snapshot, filters) : null;
   const statusOptions = getStatusOptions(filters.reportId);
+  const clearFiltersHref = isPreview ? "/reports?preview=1" : "/reports";
 
   return (
     <AppShell>
@@ -327,14 +328,35 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 </table>
               </div>
             ) : (
-              <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
-                No records match the current filters.
-              </p>
+              <div className="grid gap-3 px-5 py-8">
+                <div>
+                  <p className="text-sm font-medium text-[var(--ink)]">No records match the current filters.</p>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                    Clear the current filters or choose a different report to get back to a useful dataset.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={clearFiltersHref}>Clear filters</Link>
+                  </Button>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/reports?reportId=${availableReports[0]?.id ?? "asset-register"}${isPreview ? "&preview=1" : ""}`}>
+                      Reset report
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             )
           ) : (
-            <p className="px-5 py-8 text-sm leading-6 text-[var(--muted)]">
-              Sign in or open preview mode to generate report data.
-            </p>
+            <div className="grid gap-3 px-5 py-8">
+              <p className="text-sm font-medium text-[var(--ink)]">
+                Sign in or open preview mode to generate report data.
+              </p>
+              <p className="max-w-2xl text-sm leading-6 text-[var(--muted)]">
+                Reporting stays read-only until the data connection is available, so this view will wait for a live
+                session or preview data.
+              </p>
+            </div>
           )}
         </section>
       </section>
