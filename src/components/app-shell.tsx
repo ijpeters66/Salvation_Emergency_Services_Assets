@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LogOut, QrCode, ShieldCheck, UserRound } from "lucide-react";
+import Image from "next/image";
+import { LogOut, QrCode, UserRound } from "lucide-react";
 
 import { AppShellNav } from "@/components/app-shell-nav";
 import { Button } from "@/components/ui/button";
@@ -33,8 +34,14 @@ export async function AppShell({ children }: AppShellProps) {
       <header className="sticky top-0 z-20 border-b border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/82 backdrop-blur-xl">
         <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link className="flex min-w-0 items-center gap-3" href="/dashboard">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-[var(--brand-red)] text-white shadow-sm">
-              <ShieldCheck className="size-5" aria-hidden="true" />
+            <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-[color-mix(in_srgb,var(--border)_75%,white)]">
+              <Image
+                alt="SAES logo"
+                className="h-full w-full object-contain p-1"
+                height={36}
+                src="/saes-logo.png"
+                width={36}
+              />
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold tracking-tight text-[var(--ink)]">

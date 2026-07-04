@@ -1,6 +1,6 @@
 const SHELL_CACHE = "saes-shell-v1";
 const DATA_CACHE = "saes-data-v1";
-const APP_SHELL_URLS = ["/login", "/health", "/manifest.webmanifest", "/icon-192.svg", "/icon-512.svg"];
+const APP_SHELL_URLS = ["/login", "/health", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { loginAction } from "@/app/login/actions";
@@ -40,8 +40,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4 py-10">
       <section className="w-full max-w-md rounded-md border border-[var(--border)] bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-md bg-[var(--brand-red)] text-white">
-            <ShieldCheck className="size-5" aria-hidden="true" />
+          <span className="flex size-10 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-[color-mix(in_srgb,var(--border)_75%,white)]">
+            <Image alt="SAES logo" className="h-full w-full object-contain p-1" height={40} src="/saes-logo.png" width={40} />
           </span>
           <div>
             <p className="text-sm font-semibold text-[var(--brand-red)]">SAES Asset Register</p>
