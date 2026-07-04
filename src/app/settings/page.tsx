@@ -14,6 +14,7 @@ import {
 } from "@/app/settings/actions";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { AppShell } from "@/components/app-shell";
+import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getRoleOptions } from "@/lib/settings";
@@ -75,27 +76,30 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   return (
     <AppShell>
       <section className="grid gap-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
-            System administration
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
-            Settings
-          </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-            Manage user access, operational categories, configurable movement reasons, and report
-            branding for the SAES asset register.
-          </p>
-        </div>
+        <PageHero
+          aside={
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,white)] bg-white/70 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                System administration
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                Manage user access, operational categories, configurable movement reasons, and report branding.
+              </p>
+            </div>
+          }
+          description="Manage user access, operational categories, configurable movement reasons, and report branding for the SAES asset register."
+          eyebrow="System administration"
+          title="Settings"
+        />
 
         {message ? (
-          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
             {message}
           </p>
         ) : null}
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <section className="panel-card p-5">
             <div className="flex items-center gap-2">
               <Users className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">User management</h2>
@@ -160,7 +164,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             </div>
           </section>
 
-          <aside className="rounded-md border border-[var(--border)] bg-white p-5">
+          <aside className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
               <Palette className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Report branding</h2>

@@ -84,22 +84,22 @@ This is a review of the current app UI/UX compared with current best practice fo
 
 ## Priority 4: Visual Design and Brand Polish
 
-- [ ] Strengthen the visual hierarchy without over-styling.
+- [x] Strengthen the visual hierarchy without over-styling.
   - The current UI is functional, but many surfaces have the same weight.
   - Best practice is to use a small number of elevation levels, stronger typographic scale, and one or two emphasis colors.
   - Reserve red for brand and critical states so it stays meaningful.
 
-- [ ] Reduce the “all-white card” repetition.
+- [x] Reduce the “all-white card” repetition.
   - Repeated white panels make the interface feel flat and generic.
   - Best practice is to vary section treatment subtly with background tone, borders, spacing, or card headers.
   - Add more breathing room between major regions and use visual landmarks more deliberately.
 
-- [ ] Introduce a more intentional hero pattern on primary pages.
+- [x] Introduce a more intentional hero pattern on primary pages.
   - Dashboard and top-level modules would benefit from a stronger page intro area.
   - Best practice is a compact page header with title, purpose, and one or two primary actions.
   - Use the intro area to tell the user what matters on this page right now.
 
-- [ ] Review typography scale and content density.
+- [x] Review typography scale and content density.
   - Some labels and descriptions are a little small or visually close to surrounding text.
   - Best practice is better spacing between headings, helper text, and body text so users can scan quickly.
   - Use sentence case for most UI labels unless there is a strong reason not to.

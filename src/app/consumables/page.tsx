@@ -10,6 +10,7 @@ import {
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
+import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
@@ -207,37 +208,40 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   return (
     <AppShell>
       <section className="grid gap-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
-              Consumable stock
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
-              Consumables
-            </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-              Manage consumable items and batches with quantities, value, expiry, location, and QR
-              traceability.
-            </p>
-          </div>
-          {isAdmin ? (
-            <Button asChild variant="outline" size="sm">
-              <Link href={includeArchived ? "/consumables" : "/consumables?archived=1"}>
-                <Archive className="size-4" aria-hidden="true" />
-                {includeArchived ? "Hide archived" : "View archived"}
-              </Link>
-            </Button>
-          ) : null}
-        </div>
+        <PageHero
+          actions={
+            isAdmin ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={includeArchived ? "/consumables" : "/consumables?archived=1"}>
+                  <Archive className="size-4" aria-hidden="true" />
+                  {includeArchived ? "Hide archived" : "View archived"}
+                </Link>
+              </Button>
+            ) : null
+          }
+          aside={
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,white)] bg-white/70 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                {isPreview ? "Preview mode" : "Consumable stock"}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                Manage consumable items and batches with quantities, value, expiry, location, and QR traceability.
+              </p>
+            </div>
+          }
+          description="Manage consumable items and batches with quantities, value, expiry, location, and QR traceability."
+          eyebrow="Consumable stock"
+          title="Consumables"
+        />
 
         {!envConfigured ? (
-          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm text-[var(--muted)]">
+          <p className="panel-card-soft p-4 text-sm text-[var(--muted)]">
             Supabase is not configured yet, so live consumable records cannot be loaded.
           </p>
         ) : null}
 
         {message ? (
-          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
             {message}
             {issuedSummary ? (
               <span className="mt-1 block text-[var(--muted)]">
@@ -247,7 +251,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
           </p>
         ) : null}
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card p-5">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Stock alerts</h2>
           {filteredStockAlerts.length > 0 ? (
             <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -287,7 +291,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
           )}
         </section>
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card-soft p-5">
           <div className="flex items-center gap-2">
             <PackageCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Issue consumables</h2>
@@ -375,7 +379,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
           </form>
         </section>
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card p-5">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create consumable item</h2>
@@ -419,7 +423,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
           </form>
         </section>
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card-soft p-5">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create batch</h2>
@@ -489,7 +493,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
           </form>
         </section>
 
-        <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/88 shadow-sm">
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
             <PackageCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Batch list</h2>

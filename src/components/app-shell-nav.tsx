@@ -35,9 +35,9 @@ function NavContent({ items }: AppShellNavProps) {
           <Link
             aria-current={active ? "page" : undefined}
             className={cn(
-              "grid grid-cols-[2rem_1fr] gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+              "grid min-h-11 grid-cols-[2rem_1fr] gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
               active
-                ? "border border-[var(--brand-red)] bg-[color-mix(in_srgb,var(--brand-red)_10%,white)] text-[var(--ink)]"
+                ? "border border-[var(--brand-red)] bg-[color-mix(in_srgb,var(--brand-red)_10%,white)] text-[var(--ink)] shadow-sm"
                 : "text-[var(--foreground)] hover:bg-[var(--surface)]",
             )}
             href={item.href}
@@ -66,7 +66,7 @@ export function AppShellNav(props: AppShellNavProps) {
 
   return (
     <>
-      <details className="group border-b border-[var(--border)] bg-white lg:hidden">
+      <details className="group border-b border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/70 lg:hidden">
         <summary className="flex h-14 list-none items-center justify-between gap-3 px-4 text-sm font-medium text-[var(--ink)] outline-none">
           <span className="truncate">Menu</span>
           <span className="flex min-w-0 items-center gap-2 text-xs font-medium text-[var(--muted)]">

@@ -17,21 +17,25 @@ export async function AppShell({ children }: AppShellProps) {
   const navItems = getRoleAwareNavItems(user?.role ?? "user");
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="relative isolate min-h-screen overflow-x-hidden bg-[var(--background)] text-[var(--foreground)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(225,45,60,0.08),transparent_26%),radial-gradient(circle_at_top_right,rgba(0,127,175,0.08),transparent_24%)]"
+      />
       <a
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[var(--ink)] focus:shadow-lg"
         href="#main-content"
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/82 backdrop-blur-xl">
         <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link className="flex min-w-0 items-center gap-3" href="/dashboard">
-            <span className="flex size-9 items-center justify-center rounded-md bg-[var(--brand-red)] text-white">
+            <span className="flex size-9 items-center justify-center rounded-lg bg-[var(--brand-red)] text-white shadow-sm">
               <ShieldCheck className="size-5" aria-hidden="true" />
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-[var(--ink)]">
+              <span className="block truncate text-sm font-semibold tracking-tight text-[var(--ink)]">
                 SAES Asset Register
               </span>
               <span className="block truncate text-xs text-[var(--muted)]">
@@ -72,11 +76,11 @@ export async function AppShell({ children }: AppShellProps) {
       </header>
 
       <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[17rem_1fr]">
-        <aside className="border-b border-[var(--border)] bg-white lg:border-b-0 lg:border-r">
+        <aside className="border-b border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/72 backdrop-blur lg:border-b-0 lg:border-r">
           <AppShellNav items={navItems} />
         </aside>
-        <main id="main-content" className="min-w-0 px-4 py-6 sm:px-6 lg:px-8">
-          {children}
+        <main id="main-content" className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+          <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-6">{children}</div>
         </main>
       </div>
     </div>

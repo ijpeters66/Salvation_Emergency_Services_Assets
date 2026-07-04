@@ -9,6 +9,7 @@ import {
 } from "@/app/maintenance/actions";
 import { MaintenanceVendorForm } from "@/app/maintenance/vendor-form";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
+import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPlantExpiryAlerts } from "@/lib/assets/plant";
@@ -101,28 +102,29 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
   return (
     <AppShell>
       <section className="grid gap-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
-            Maintenance and compliance
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
-            Maintenance
-          </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-            Review due soon and overdue maintenance schedules for assets and plant/fleet items.
-          </p>
-          {isPreview ? (
-            <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p>
-          ) : null}
-        </div>
+        <PageHero
+          aside={
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,white)] bg-white/70 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                {isPreview ? "Preview mode" : "Due soon and overdue"}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                Review maintenance schedules for assets and plant/fleet items before they become blockers.
+              </p>
+            </div>
+          }
+          description="Review due soon and overdue maintenance schedules for assets and plant/fleet items."
+          eyebrow="Maintenance and compliance"
+          title="Maintenance"
+        />
 
         {message ? (
-          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
             {message}
           </p>
         ) : null}
 
-        <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/88 shadow-sm">
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
             <Wrench className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Due maintenance</h2>
@@ -176,7 +178,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
         </section>
 
           {alertFilter === "expiry" ? (
-          <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/88 shadow-sm">
             <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">
               <Wrench className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Registration and insurance expiry</h2>
@@ -222,7 +224,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
           </section>
         ) : null}
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card-soft p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-center gap-2">
               <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
@@ -301,7 +303,7 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                               <PencilLine className="size-4" aria-hidden="true" />
                               Edit
                             </summary>
-                            <div className="mt-3 grid w-[min(42rem,85vw)] gap-4 rounded-md border border-[var(--border)] bg-white p-4 shadow-sm">
+                              <div className="mt-3 grid w-[min(42rem,85vw)] gap-4 rounded-xl border border-[var(--border)] bg-white p-4 shadow-sm">
                               <MaintenanceVendorForm
                                 action={updateMaintenanceVendorAction}
                                 defaults={vendor}

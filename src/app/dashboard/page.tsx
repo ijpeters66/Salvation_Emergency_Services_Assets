@@ -3,6 +3,7 @@ import { AlertTriangle, ClipboardCheck, Package, QrCode, Route, Truck } from "lu
 
 import { AppShell } from "@/components/app-shell";
 import { DashboardTile } from "@/components/dashboard/dashboard-tile";
+import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getDashboardData, getDashboardPreviewData } from "@/lib/dashboard";
@@ -54,68 +55,75 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <AppShell>
       <section className="grid gap-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
-              Operational overview
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
-              Dashboard
-            </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-              Live operational summary for assets, consumables, maintenance, deployments, and recent activity.
-            </p>
-          </div>
-          <div className="rounded-md border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--muted)]">
-            {isPreview
-              ? "Preview mode"
-              : `Signed in as ${user?.displayName ?? user?.email ?? "Operational user"}`}
-          </div>
-        </div>
+        <PageHero
+          actions={
+            <>
+              <Button asChild>
+                <Link href="/scan">
+                  <QrCode className="size-4" aria-hidden="true" />
+                  Open scan
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/assets">
+                  <Package className="size-4" aria-hidden="true" />
+                  Review assets
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/maintenance">
+                  <ClipboardCheck className="size-4" aria-hidden="true" />
+                  Check maintenance
+                </Link>
+              </Button>
+            </>
+          }
+          aside={
+            <div className="grid gap-2 rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,white)] bg-white/70 p-4 text-left shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                Current context
+              </p>
+              <p className="text-sm font-medium text-[var(--ink)]">
+                {isPreview
+                  ? "Preview mode"
+                  : `Signed in as ${user?.displayName ?? user?.email ?? "Operational user"}`}
+              </p>
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                Live operational summary for assets, consumables, maintenance, deployments, and recent activity.
+              </p>
+            </div>
+          }
+          description="Live operational summary for assets, consumables, maintenance, deployments, and recent activity."
+          eyebrow="Operational overview"
+          title="Dashboard"
+        />
 
         {dashboard.errorMessage ? (
-          <p className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
+          <p className="panel-card border-amber-200 bg-amber-50/90 p-4 text-sm font-medium text-amber-900">
             {dashboard.errorMessage}
           </p>
         ) : null}
 
-        <section className="grid gap-4 rounded-2xl border border-[var(--border)] bg-[linear-gradient(135deg,rgba(225,45,60,0.08),rgba(255,255,255,0.98))] p-5 shadow-sm lg:grid-cols-[1.4fr_1fr] lg:p-6">
+        <section className="page-hero grid gap-4 p-5 lg:grid-cols-[1.4fr_1fr] lg:p-6">
           <div className="grid gap-3">
-            <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
+            <p className="section-kicker text-xs font-semibold text-[var(--brand-red)]">
               What needs attention now
             </p>
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">Start with the urgent work</h2>
-              <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">
+              <h2 className="text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
+                Start with the urgent work
+              </h2>
+              <p className="max-w-3xl text-sm leading-7 text-[var(--muted)]">
                 Keep the team moving by handling overdue maintenance, low stock, and live deployments before the
                 rest of the register.
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 lg:justify-end">
-            <Button asChild>
-              <Link href="/scan">
-                <QrCode className="size-4" aria-hidden="true" />
-                Open scan
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/assets">
-                <Package className="size-4" aria-hidden="true" />
-                Review assets
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/maintenance">
-                <ClipboardCheck className="size-4" aria-hidden="true" />
-                Check maintenance
-              </Link>
-            </Button>
-          </div>
+          <div />
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-          <div className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="panel-card p-5">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
@@ -129,7 +137,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <div className="mt-4 grid gap-3">
                 {attentionItems.map((item) => (
                   <Link
-                    className="rounded-md border border-[var(--border)] p-4 transition-colors hover:bg-[var(--surface)]"
+                    className="rounded-xl border border-[color-mix(in_srgb,var(--border)_84%,white)] p-4 transition-colors hover:bg-[var(--surface)]"
                     href={item.href}
                     key={item.label}
                   >
@@ -142,7 +150,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="mt-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-sm font-medium text-[var(--ink)]">Nothing is overdue right now.</p>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   Use the scan flow or create new records to keep the register moving.
@@ -151,7 +159,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             )}
           </div>
 
-          <div className="rounded-md border border-[var(--border)] bg-white p-5">
+          <div className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
               <ClipboardCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Operational shortcuts</h2>
@@ -217,7 +225,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <section className="panel-card p-5">
             <div className="flex items-center gap-2">
               <Package className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Assets by status</h2>
@@ -226,7 +234,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {dashboard.assetStatusSummary.map((item) => (
                   <Link
-                    className="rounded-md border border-[var(--border)] p-4 hover:bg-[var(--surface)]"
+                    className="rounded-xl border border-[color-mix(in_srgb,var(--border)_84%,white)] p-4 hover:bg-[var(--surface)]"
                     href={item.href}
                     key={item.status}
                   >
@@ -236,7 +244,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="mt-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-sm font-medium text-[var(--ink)]">No active assets are available yet.</p>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   Once assets are added, this section will group them by status for quicker scanning.
@@ -248,7 +256,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             )}
           </section>
 
-          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <section className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
               <ClipboardCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Foundation checks</h2>
@@ -265,7 +273,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <section className="panel-card p-5">
             <div className="flex items-center gap-2">
               <Route className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Recent asset movements</h2>
@@ -274,7 +282,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <div className="mt-4 grid gap-3">
                 {dashboard.recentAssetMovements.map((movement) => (
                   <Link
-                    className="rounded-md border border-[var(--border)] p-4 hover:bg-[var(--surface)]"
+                    className="rounded-xl border border-[color-mix(in_srgb,var(--border)_84%,white)] p-4 hover:bg-[var(--surface)]"
                     href={movement.href}
                     key={movement.id}
                   >
@@ -284,7 +292,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="mt-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-sm font-medium text-[var(--ink)]">No asset movements have been recorded yet.</p>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   When an asset is moved, returned, or deployed, the latest change will appear here.
@@ -293,7 +301,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             )}
           </section>
 
-          <section className="rounded-md border border-[var(--border)] bg-white p-5">
+          <section className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
               <Package className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
               <h2 className="text-lg font-semibold text-[var(--ink)]">Recent stock movements</h2>
@@ -302,7 +310,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <div className="mt-4 grid gap-3">
                 {dashboard.recentStockMovements.map((movement) => (
                   <Link
-                    className="rounded-md border border-[var(--border)] p-4 hover:bg-[var(--surface)]"
+                    className="rounded-xl border border-[color-mix(in_srgb,var(--border)_84%,white)] p-4 hover:bg-[var(--surface)]"
                     href={movement.href}
                     key={movement.id}
                   >
@@ -312,7 +320,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-md border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="mt-4 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-sm font-medium text-[var(--ink)]">No stock movements have been recorded yet.</p>
                 <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                   Issuing or receiving consumables will start the movement history for this register.

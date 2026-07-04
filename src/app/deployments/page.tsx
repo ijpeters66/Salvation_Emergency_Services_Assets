@@ -6,6 +6,7 @@ import { DeploymentFields } from "@/app/deployments/deployment-fields";
 import { AppShell } from "@/components/app-shell";
 import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
+import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import {
   deploymentStatusLabels,
@@ -87,26 +88,29 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
   return (
     <AppShell>
       <section className="grid gap-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
-            Deployments
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
-            Deployment records
-          </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-            Plan, activate, return, and close field deployments before asset assignment is added.
-          </p>
-          {isPreview ? <p className="mt-3 text-sm font-medium text-[var(--muted)]">Preview mode</p> : null}
-        </div>
+        <PageHero
+          aside={
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,white)] bg-white/70 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                {isPreview ? "Preview mode" : "Field operations"}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                Plan, activate, return, and close deployments before asset assignment is added.
+              </p>
+            </div>
+          }
+          description="Plan, activate, return, and close field deployments before asset assignment is added."
+          eyebrow="Deployments"
+          title="Deployment records"
+        />
 
         {message ? (
-          <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
+          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
             {message}
           </p>
         ) : null}
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card-soft p-5">
           <div className="flex items-center gap-2">
             <CalendarDays className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Filters</h2>
@@ -167,7 +171,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
           ) : null}
         </section>
 
-        <section id="create-deployment" className="rounded-md border border-[var(--border)] bg-white p-5 scroll-mt-24">
+        <section id="create-deployment" className="panel-card p-5 scroll-mt-24">
           <div className="flex items-center gap-2">
             <Plus className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Create deployment</h2>
@@ -189,7 +193,7 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
 
         <OfflineSyncPanel entityTypes={["deployment"]} title="Offline deployment changes" />
 
-        <section className="overflow-hidden rounded-md border border-[var(--border)] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/88 shadow-sm">
           <div className="border-b border-[var(--border)] px-5 py-4">
             <h2 className="text-lg font-semibold text-[var(--ink)]">Deployment list</h2>
           </div>

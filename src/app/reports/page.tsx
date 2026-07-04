@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BarChart3, Download, ExternalLink, FileSpreadsheet, FileText, Filter } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
@@ -98,35 +99,35 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   return (
     <AppShell>
       <section className="grid gap-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-red)]">
-              Reporting and exports
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-normal text-[var(--ink)]">
-              Reports
-            </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--muted)]">
-              Generate operational CSV exports for assets, consumables, maintenance, deployments,
-              and audit-ready reporting.
-            </p>
-          </div>
-          <div className="rounded-md border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--muted)]">
-            {isPreview
-              ? "Preview mode"
-              : user
-                ? `Signed in as ${user.displayName ?? user.email}`
-                : "Sign in to export live operational data"}
-          </div>
-        </div>
+        <PageHero
+          aside={
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,white)] bg-white/70 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                {isPreview
+                  ? "Preview mode"
+                  : user
+                    ? "Signed in"
+                    : "Export access"}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                {user
+                  ? `Signed in as ${user.displayName ?? user.email}`
+                  : "Sign in to export live operational data"}
+              </p>
+            </div>
+          }
+          description="Generate operational CSV exports for assets, consumables, maintenance, deployments, and audit-ready reporting."
+          eyebrow="Reporting and exports"
+          title="Reports"
+        />
 
         {!parseResult.success ? (
-          <p className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
+          <p className="panel-card border-amber-200 bg-amber-50/90 p-4 text-sm font-medium text-amber-900">
             {parseResult.error.issues[0]?.message ?? "Check the report filters and try again."}
           </p>
         ) : null}
 
-        <section className="rounded-md border border-[var(--border)] bg-white p-5">
+        <section className="panel-card-soft p-5">
           <div className="flex items-center gap-2">
             <Filter className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Filters</h2>
