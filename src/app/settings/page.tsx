@@ -253,7 +253,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
             <div className="mt-5 rounded-md border border-[var(--border)] bg-[var(--surface)] p-4">
               <div className="flex items-center gap-3">
-                <Image alt="SAES report mark" height={40} src="/saes-report-mark.svg" width={40} />
+                <Image alt="SAES logo" height={96} src="/saes-logo.png" width={96} />
                 <div>
                   <p className="font-semibold text-[var(--ink)]">{branding.organizationName}</p>
                   <p className="text-sm text-[var(--muted)]">{branding.productName}</p>
