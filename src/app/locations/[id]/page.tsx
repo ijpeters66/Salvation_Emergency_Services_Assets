@@ -54,6 +54,7 @@ export default async function LocationDetailPage({
   const qrPayload = buildLocationQrCodeValue(location.id);
   const activeLocations = locationRows.filter((candidate) => !candidate.archived_at).length;
   const scanAction = getParam(query.scanAction);
+  const scanMessage = getParam(query.scanMessage);
   const attachmentStatus = getParam(query.attachmentStatus);
 
   return (
@@ -104,6 +105,12 @@ export default async function LocationDetailPage({
         {scanAction ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             {scanActionMessages[scanAction] ?? "Scan action received."}
+          </p>
+        ) : null}
+
+        {scanMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-medium text-[var(--ink)]">
+            {scanMessage}
           </p>
         ) : null}
 

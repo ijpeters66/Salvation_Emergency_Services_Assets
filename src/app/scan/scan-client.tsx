@@ -93,7 +93,11 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
         const response = await fetch(
           `/api/scan/resolve?payload=${encodeURIComponent(payload)}&action=${encodeURIComponent(selectedAction)}${preview ? "&preview=1" : ""}`,
         );
-        const data = (await response.json()) as { destination?: string; error?: string };
+        const data = (await response.json()) as {
+          destination?: string;
+          error?: string;
+          scanMessage?: string;
+        };
 
         if (!response.ok || !data.destination) {
           setMessage(data.error ?? "The scanned code could not be resolved.");
@@ -101,7 +105,13 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
         }
 
         stopCamera();
-        router.push(data.destination);
+        const destinationUrl = new URL(data.destination, window.location.origin);
+
+        if (data.scanMessage) {
+          destinationUrl.searchParams.set("scanMessage", data.scanMessage);
+        }
+
+        router.push(`${destinationUrl.pathname}${destinationUrl.search}${destinationUrl.hash}`);
       } catch {
         setMessage("The scan could not be resolved. Check your connection and try again.");
       } finally {

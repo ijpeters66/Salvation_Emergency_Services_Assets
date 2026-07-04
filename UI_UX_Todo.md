@@ -77,7 +77,7 @@ This is a review of the current app UI/UX compared with current best practice fo
   - Best practice is a filter bar with clear “active filters” chips and one-click reset.
   - Keep the current filter state visible so users do not have to infer why a list is empty.
 
-- [ ] Improve scan entry and post-scan feedback.
+- [x] Improve scan entry and post-scan feedback.
   - The scan flow should feel like the fastest path in the app.
   - Best practice is a large target, immediate confirmation, and a very clear result state after a QR scan.
   - If the scanned item is found, route the user directly to the relevant record with a success banner.

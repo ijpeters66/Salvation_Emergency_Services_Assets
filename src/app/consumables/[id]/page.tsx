@@ -80,11 +80,13 @@ function PreviewBatchDetailPage({
   batchId,
   attachmentStatus,
   statusMessage,
+  scanMessage,
   scanAction,
 }: {
   batchId: string;
   attachmentStatus: string | undefined;
   statusMessage: string | undefined;
+  scanMessage: string | undefined;
   scanAction: string | undefined;
 }) {
   const batch = getPreviewConsumableBatchById(batchId);
@@ -125,6 +127,12 @@ function PreviewBatchDetailPage({
         {message ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             {message}
+          </p>
+        ) : null}
+
+        {scanMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-medium text-[var(--ink)]">
+            {scanMessage}
           </p>
         ) : null}
 
@@ -268,6 +276,7 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
         attachmentStatus={getParam(query.attachmentStatus)}
         batchId={id}
         scanAction={getParam(query.scanAction)}
+        scanMessage={getParam(query.scanMessage)}
         statusMessage={getParam(query.statusMessage)}
       />
     );
@@ -293,6 +302,7 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
   const totalValue = calculateBatchValue(batch.quantity_on_hand, batch.unit_cost);
   const deploymentById = new Map(deployments.map((deployment) => [deployment.id, deployment]));
   const scanAction = getParam(query.scanAction);
+  const scanMessage = getParam(query.scanMessage);
   const attachmentStatus = getParam(query.attachmentStatus);
   const statusMessage = getParam(query.statusMessage);
   const message = statusMessage ? statusMessages[statusMessage] : null;
@@ -333,6 +343,12 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
         {message ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             {message}
+          </p>
+        ) : null}
+
+        {scanMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-medium text-[var(--ink)]">
+            {scanMessage}
           </p>
         ) : null}
 

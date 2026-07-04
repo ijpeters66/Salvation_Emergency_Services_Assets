@@ -105,11 +105,13 @@ function PreviewAssetDetailPage({
   assetId,
   statusMessage,
   attachmentStatus,
+  scanMessage,
   scanAction,
 }: {
   assetId: string;
   statusMessage: string | undefined;
   attachmentStatus: string | undefined;
+  scanMessage: string | undefined;
   scanAction: string | undefined;
 }) {
   const asset = getPreviewAssetById(assetId);
@@ -158,6 +160,12 @@ function PreviewAssetDetailPage({
         {statusMessage ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             Asset {statusMessage}.
+          </p>
+        ) : null}
+
+        {scanMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-medium text-[var(--ink)]">
+            {scanMessage}
           </p>
         ) : null}
 
@@ -434,6 +442,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
         assetId={id}
         attachmentStatus={getParam(query.attachmentStatus)}
         scanAction={getParam(query.scanAction)}
+        scanMessage={getParam(query.scanMessage)}
         statusMessage={getParam(query.statusMessage)}
       />
     );
@@ -491,6 +500,7 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
   );
   const statusMessage = getParam(query.statusMessage);
   const attachmentStatus = getParam(query.attachmentStatus);
+  const scanMessage = getParam(query.scanMessage);
   const plantAlerts = getPlantExpiryAlerts(plantDetails);
   const currentMaintenanceReading =
     plantDetails?.odometer_reading ?? plantDetails?.hour_meter_reading ?? null;
@@ -533,6 +543,12 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
         {statusMessage ? (
           <p className="rounded-md border border-[var(--border)] bg-white p-4 text-sm font-medium text-[var(--ink)]">
             Asset {statusMessage}.
+          </p>
+        ) : null}
+
+        {scanMessage ? (
+          <p className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-medium text-[var(--ink)]">
+            {scanMessage}
           </p>
         ) : null}
 

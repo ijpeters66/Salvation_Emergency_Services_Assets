@@ -8,4 +8,5 @@ test("preview scan manual entry routes to the preview asset detail page", async 
 
   await expect(page).toHaveURL(/\/assets\/preview-1\?preview=1/);
   await expect(page.getByRole("heading", { name: "Support trailer" })).toBeVisible();
+  await expect(page.getByText("Support trailer opened.")).toBeVisible();
 });
