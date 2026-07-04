@@ -13,6 +13,8 @@ const {
   listAssetCategoriesForSettingsMock,
   listConsumableCategoriesForSettingsMock,
   listMovementReasonsMock,
+  getPublicEnvStatusMock,
+  getSupabaseProjectRefMock,
 } = vi.hoisted(() => ({
     redirectMock: vi.fn(),
     getCurrentUserContextMock: vi.fn(),
@@ -22,6 +24,8 @@ const {
     listAssetCategoriesForSettingsMock: vi.fn(),
     listConsumableCategoriesForSettingsMock: vi.fn(),
     listMovementReasonsMock: vi.fn(),
+    getPublicEnvStatusMock: vi.fn(),
+    getSupabaseProjectRefMock: vi.fn(),
   }));
 
 vi.mock("next/navigation", () => ({
@@ -38,6 +42,11 @@ vi.mock("@/components/app-shell", () => ({
 
 vi.mock("@/lib/auth", () => ({
   getCurrentUserContext: getCurrentUserContextMock,
+}));
+
+vi.mock("@/lib/env", () => ({
+  getPublicEnvStatus: getPublicEnvStatusMock,
+  getSupabaseProjectRef: getSupabaseProjectRefMock,
 }));
 
 vi.mock("@/lib/settings/server", () => ({
@@ -59,6 +68,8 @@ describe("SettingsPage", () => {
     listAssetCategoriesForSettingsMock.mockReset();
     listConsumableCategoriesForSettingsMock.mockReset();
     listMovementReasonsMock.mockReset();
+    getPublicEnvStatusMock.mockReset();
+    getSupabaseProjectRefMock.mockReset();
   });
 
   it("redirects non-admin users back to the dashboard", async () => {
@@ -122,6 +133,8 @@ describe("SettingsPage", () => {
         archived_at: null,
       },
     ]);
+    getPublicEnvStatusMock.mockReturnValue({ configured: true, missing: [] });
+    getSupabaseProjectRefMock.mockReturnValue("tuiemqkkmgqarwvhwvwr");
 
     const markup = renderToStaticMarkup(await SettingsPage({}));
 
@@ -129,6 +142,8 @@ describe("SettingsPage", () => {
     expect(markup).toContain("Search users");
     expect(markup).toContain("Reset password");
     expect(markup).toContain("User management");
+    expect(markup).toContain("Current Supabase project");
+    expect(markup).toContain("tuiemqkkmgqarwvhwvwr");
     expect(markup).toContain("Report branding");
     expect(markup).toContain("Movement reasons");
     expect(markup).toContain("Custom Ops");

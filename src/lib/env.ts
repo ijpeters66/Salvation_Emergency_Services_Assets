@@ -31,3 +31,17 @@ export function getPublicEnvStatus(env: NodeJS.ProcessEnv = process.env): EnvSta
 export function getPublicEnv(env: NodeJS.ProcessEnv = process.env): PublicEnv {
   return publicEnvSchema.parse(env);
 }
+
+export function getSupabaseProjectRef(env: NodeJS.ProcessEnv = process.env) {
+  const result = publicEnvSchema.safeParse(env);
+
+  if (!result.success) {
+    return null;
+  }
+
+  try {
+    return new URL(result.data.NEXT_PUBLIC_SUPABASE_URL).hostname.split(".")[0] ?? null;
+  } catch {
+    return null;
+  }
+}

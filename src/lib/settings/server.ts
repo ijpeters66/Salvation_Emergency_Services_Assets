@@ -65,20 +65,10 @@ export async function listSettingsUsers() {
     return rows;
   }
 
-  const [{ data: authUsers }, { data: roleRows }] = await Promise.all([
-    adminClient.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    }),
-    supabase.from("role").select("id, key, name"),
-  ]);
-
-  const defaultUserRole = roleRows?.find((role) => role.key === "user") ?? roleRows?.[0];
-
-  if (!defaultUserRole) {
-    return rows;
-  }
-
+  const { data: authUsers } = await adminClient.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
   const emailByUserId = new Map(
     authUsers?.users.map((user) => [user.id, user.email ?? null]) ?? [],
   );
@@ -113,19 +103,22 @@ export async function listSettingsUsers() {
       user_id: user.id,
       email: authUser?.email ?? null,
       display_name: authUser?.displayName ?? authUser?.email ?? null,
-      role_id: defaultUserRole.id,
-      role_key: defaultUserRole.key,
-      role_name: defaultUserRole.name,
+      role_id: "",
+      role_key: "user",
+      role_name: "User",
       is_active: true,
     };
   }) ?? [];
 
   const unmatchedProfiles = rows.filter((row) => !authByUserId.has(row.user_id));
 
-  return [...mergedRows, ...unmatchedProfiles.map((row) => ({
-    ...row,
-    email: emailByUserId.get(row.user_id) ?? null,
-  }))];
+  return [
+    ...mergedRows,
+    ...unmatchedProfiles.map((row) => ({
+      ...row,
+      email: emailByUserId.get(row.user_id) ?? null,
+    })),
+  ];
 }
 
 export async function listMovementReasons(includeArchived = false, role: UserRole = "user") {

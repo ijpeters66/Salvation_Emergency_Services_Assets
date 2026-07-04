@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getPublicEnvStatus } from "@/lib/env";
+import { getPublicEnvStatus, getSupabaseProjectRef } from "@/lib/env";
 
 describe("getPublicEnvStatus", () => {
   it("reports configured when public Supabase variables are valid", () => {
@@ -23,5 +23,14 @@ describe("getPublicEnvStatus", () => {
     expect(status.configured).toBe(false);
     expect(status.missing).toContain("NEXT_PUBLIC_SUPABASE_URL");
     expect(status.missing).toContain("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  });
+
+  it("extracts the Supabase project ref from the public URL", () => {
+    expect(
+      getSupabaseProjectRef({
+        NEXT_PUBLIC_SUPABASE_URL: "https://tuiemqkkmgqarwvhwvwr.supabase.co",
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key",
+      }),
+    ).toBe("tuiemqkkmgqarwvhwvwr");
   });
 });

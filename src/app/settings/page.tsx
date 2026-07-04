@@ -19,6 +19,7 @@ import { PageHero } from "@/components/page-hero";
 import { SettingsUserManagement } from "@/components/settings-user-management";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
+import { getPublicEnvStatus, getSupabaseProjectRef } from "@/lib/env";
 import { filterSettingsUsers, getRoleOptions } from "@/lib/settings";
 import {
   getStoredReportBrandingSettings,
@@ -65,6 +66,8 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
   const statusMessage = getParam(params.statusMessage) ?? "";
   const userSearch = getParam(params.userSearch) ?? "";
+  const envStatus = getPublicEnvStatus();
+  const supabaseProjectRef = getSupabaseProjectRef();
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const [branding, users, roles, assetCategories, consumableCategories, movementReasons] =
     await Promise.all([
@@ -102,6 +105,21 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             {message}
           </Notice>
         ) : null}
+
+        <Notice title="Current Supabase project" variant={envStatus.configured ? "info" : "warning"}>
+          {envStatus.configured && supabaseProjectRef ? (
+            <>
+              This UAT build is connected to <strong>{supabaseProjectRef}</strong>. If admin users
+              were created in a different Supabase project, they will not appear in user search
+              here.
+            </>
+          ) : (
+            <>
+              Supabase is not fully configured, so the current project cannot be identified from
+              this environment.
+            </>
+          )}
+        </Notice>
 
         <section className="panel-card p-5">
           <div className="flex items-center gap-2">
