@@ -9,6 +9,7 @@ import {
 } from "@/app/consumables/actions";
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
@@ -558,13 +559,16 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
                               </Link>
                             </Button>
                             {isAdmin && !batch.archived_at ? (
-                              <form action={archiveConsumableBatchAction}>
+                              <ConfirmActionForm
+                                action={archiveConsumableBatchAction}
+                                confirmMessage={`Archive batch ${batch.batch_lot_number}?`}
+                              >
                                 <input name="id" type="hidden" value={batch.id} />
                                 <Button type="submit" variant="outline" size="sm">
                                   <Archive className="size-4" aria-hidden="true" />
                                   Archive
                                 </Button>
-                              </form>
+                              </ConfirmActionForm>
                             ) : null}
                           </div>
                         </td>

@@ -6,15 +6,16 @@ import {
   updateLocationAction,
   archiveLocationAction,
 } from "@/app/locations/actions";
+import { LocationFields } from "@/app/locations/location-fields";
 import { AppShell } from "@/components/app-shell";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Button } from "@/components/ui/button";
-import { FieldHint, FormSection } from "@/components/form-helpers";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPublicEnvStatus } from "@/lib/env";
 import { listLocations } from "@/lib/locations/server";
-import { locationTypeLabels, locationTypes } from "@/lib/locations/validation";
+import { locationTypeLabels } from "@/lib/locations/validation";
 import { previewLocations } from "@/lib/workflow-preview";
 
 export const dynamic = "force-dynamic";
@@ -47,97 +48,6 @@ function formatDate(value: string | null) {
     month: "short",
     year: "numeric",
   }).format(new Date(value));
-}
-
-function LocationFields({
-  defaults,
-}: {
-  defaults?: {
-    name: string;
-    type: string;
-    address: string | null;
-    state: string;
-    notes: string | null;
-  };
-}) {
-  return (
-    <div className="grid gap-4">
-      <FormSection
-        description="Use the clearest location name staff will recognise in the field."
-        title="Identity"
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Name
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.name}
-              name="name"
-              placeholder="Hamilton Depot"
-              required
-            />
-            <FieldHint>Short names are easier to scan on tablets and in tables.</FieldHint>
-          </label>
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Type
-            <select
-              className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.type ?? "warehouse"}
-              name="type"
-              required
-            >
-              {locationTypes.map((type) => (
-                <option key={type} value={type}>
-                  {locationTypeLabels[type]}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </FormSection>
-
-      <FormSection
-        description="Address details help staff and reporting tools locate the site."
-        title="Address"
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Address
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.address ?? ""}
-              name="address"
-              placeholder="12 Example Rd"
-            />
-          </label>
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            State
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.state ?? "Victoria"}
-              name="state"
-              required
-            />
-          </label>
-        </div>
-      </FormSection>
-
-      <FormSection
-        description="Notes are for access instructions, local quirks, or handover details."
-        title="Notes"
-      >
-        <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-          Notes
-          <textarea
-            className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-            defaultValue={defaults?.notes ?? ""}
-            name="notes"
-            placeholder="Access notes, opening hours, or site-specific instructions"
-          />
-        </label>
-      </FormSection>
-    </div>
-  );
 }
 
 export default async function LocationsPage({ searchParams }: LocationsPageProps) {
@@ -292,13 +202,16 @@ export default async function LocationsPage({ searchParams }: LocationsPageProps
                             </Link>
                           </Button>
                           {isAdmin && !location.archived_at ? (
-                            <form action={archiveLocationAction}>
+                            <ConfirmActionForm
+                              action={archiveLocationAction}
+                              confirmMessage={`Archive ${location.name}?`}
+                            >
                               <input name="id" type="hidden" value={location.id} />
                               <Button type="submit" variant="outline" size="sm">
                                 <Archive className="size-4" aria-hidden="true" />
                                 Archive
                               </Button>
-                            </form>
+                            </ConfirmActionForm>
                           ) : null}
                         </div>
                       </td>

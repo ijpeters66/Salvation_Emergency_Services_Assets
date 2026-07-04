@@ -12,6 +12,7 @@ import {
   saveReportBrandingAction,
   updateUserAccessAction,
 } from "@/app/settings/actions";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
@@ -279,13 +280,16 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     </p>
                   </div>
                   {!category.archived_at ? (
-                    <form action={archiveAssetCategoryAdminAction}>
+                    <ConfirmActionForm
+                      action={archiveAssetCategoryAdminAction}
+                      confirmMessage={`Archive ${category.name}?`}
+                    >
                       <input name="id" type="hidden" value={category.id} />
                       <Button size="sm" type="submit" variant="outline">
                         <Archive className="size-4" aria-hidden="true" />
                         Archive
                       </Button>
-                    </form>
+                    </ConfirmActionForm>
                   ) : null}
                 </div>
               ))}
@@ -324,13 +328,16 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     </p>
                   </div>
                   {!category.archived_at ? (
-                    <form action={archiveConsumableCategoryAdminAction}>
+                    <ConfirmActionForm
+                      action={archiveConsumableCategoryAdminAction}
+                      confirmMessage={`Archive ${category.name}?`}
+                    >
                       <input name="id" type="hidden" value={category.id} />
                       <Button size="sm" type="submit" variant="outline">
                         <Archive className="size-4" aria-hidden="true" />
                         Archive
                       </Button>
-                    </form>
+                    </ConfirmActionForm>
                   ) : null}
                 </div>
               ))}
@@ -385,13 +392,16 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     </p>
                   </div>
                   {!reason.archived_at ? (
-                    <form action={archiveMovementReasonAction}>
+                    <ConfirmActionForm
+                      action={archiveMovementReasonAction}
+                      confirmMessage={`Archive ${reason.label}?`}
+                    >
                       <input name="id" type="hidden" value={reason.id} />
                       <Button size="sm" type="submit" variant="outline">
                         <Archive className="size-4" aria-hidden="true" />
                         Archive
                       </Button>
-                    </form>
+                    </ConfirmActionForm>
                   ) : null}
                 </div>
               ))}

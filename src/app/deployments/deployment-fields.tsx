@@ -1,6 +1,9 @@
+"use client";
+
 import { deploymentStatusLabels, deploymentStatuses } from "@/lib/deployments/service";
 import { defaultMovementReasonSeeds } from "@/lib/settings";
 import { FieldHint, FormSection } from "@/components/form-helpers";
+import { FieldError, useFieldError } from "@/components/form-validation";
 
 type DeploymentFieldValue = {
   deployment_id: string;
@@ -25,6 +28,14 @@ export function DeploymentFields({
   deployment?: DeploymentFieldValue;
   movementReasons?: string[];
 }) {
+  const deploymentIdError = useFieldError("deploymentId");
+  const deploymentNameError = useFieldError("deploymentName");
+  const purposeReasonError = useFieldError("purposeReason");
+  const deploymentLocationSiteError = useFieldError("deploymentLocationSite");
+  const teamNameError = useFieldError("teamName");
+  const startDatetimeError = useFieldError("startDatetime");
+  const statusError = useFieldError("status");
+
   const toLocal = (value: string | null | undefined) => (value ? value.slice(0, 16) : "");
 
   return (
@@ -37,27 +48,32 @@ export function DeploymentFields({
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Deployment ID
             <input
+              aria-invalid={Boolean(deploymentIdError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="deploymentId"
               defaultValue={deployment?.deployment_id ?? ""}
               placeholder="DEP-2026-001"
               required
             />
+            <FieldError name="deploymentId" />
             <FieldHint>Keep this short and unique for phone, radio, and QR references.</FieldHint>
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Name
             <input
+              aria-invalid={Boolean(deploymentNameError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="deploymentName"
               defaultValue={deployment?.deployment_name ?? ""}
               placeholder="Flood response - Hamilton"
               required
             />
+            <FieldError name="deploymentName" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
             Purpose/reason
             <select
+              aria-invalid={Boolean(purposeReasonError)}
               className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="purposeReason"
               defaultValue={deployment?.purpose_reason ?? ""}
@@ -72,6 +88,7 @@ export function DeploymentFields({
                 </option>
               ))}
             </select>
+            <FieldError name="purposeReason" />
           </label>
         </div>
       </FormSection>
@@ -84,22 +101,26 @@ export function DeploymentFields({
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Location/site
             <input
+              aria-invalid={Boolean(deploymentLocationSiteError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="deploymentLocationSite"
               defaultValue={deployment?.deployment_location_site ?? ""}
               placeholder="Hamilton Fire Station"
               required
             />
+            <FieldError name="deploymentLocationSite" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Team name
             <input
+              aria-invalid={Boolean(teamNameError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="teamName"
               defaultValue={deployment?.team_name ?? ""}
               placeholder="Crew A"
               required
             />
+            <FieldError name="teamName" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Team leader
@@ -132,12 +153,14 @@ export function DeploymentFields({
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Start
             <input
+              aria-invalid={Boolean(startDatetimeError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="startDatetime"
               type="datetime-local"
               defaultValue={toLocal(deployment?.start_datetime)}
               required
             />
+            <FieldError name="startDatetime" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Expected return
@@ -168,6 +191,7 @@ export function DeploymentFields({
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Status
             <select
+              aria-invalid={Boolean(statusError)}
               className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               name="status"
               defaultValue={deployment?.status ?? "planned"}
@@ -178,6 +202,7 @@ export function DeploymentFields({
                 </option>
               ))}
             </select>
+            <FieldError name="status" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
             Notes

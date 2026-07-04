@@ -3,6 +3,7 @@ import { Archive, Filter, Package, Plus } from "lucide-react";
 
 import { archiveAssetAction, createAssetAction } from "@/app/assets/actions";
 import { AssetFields } from "@/app/assets/asset-form";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { AppShell } from "@/components/app-shell";
 import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
@@ -333,13 +334,16 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
                             </Link>
                           </Button>
                           {isAdmin && !asset.archived_at ? (
-                            <form action={archiveAssetAction}>
+                            <ConfirmActionForm
+                              action={archiveAssetAction}
+                              confirmMessage={`Archive ${asset.asset_name}?`}
+                            >
                               <input name="id" type="hidden" value={asset.id} />
                               <Button type="submit" variant="outline" size="sm">
                                 <Archive className="size-4" aria-hidden="true" />
                                 Archive
                               </Button>
-                            </form>
+                            </ConfirmActionForm>
                           ) : null}
                         </div>
                       </td>

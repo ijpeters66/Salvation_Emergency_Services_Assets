@@ -7,8 +7,9 @@ import {
   createMaintenanceVendorAction,
   updateMaintenanceVendorAction,
 } from "@/app/maintenance/actions";
+import { MaintenanceVendorForm } from "@/app/maintenance/vendor-form";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { Button } from "@/components/ui/button";
-import { FieldHint, FormSection } from "@/components/form-helpers";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPlantExpiryAlerts } from "@/lib/assets/plant";
 import { listAssets, listPlantDetails } from "@/lib/assets/server";
@@ -38,114 +39,6 @@ const statusMessages: Record<string, string> = {
 type MaintenancePageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
-
-function VendorFields({
-  defaults,
-}: {
-  defaults?: {
-    business_name: string;
-    contact_name: string | null;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-    website: string | null;
-    notes: string | null;
-  };
-}) {
-  return (
-    <div className="grid gap-4">
-      <FormSection
-        description="Who the vendor is and how to contact them."
-        title="Identity and contact"
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Business name
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.business_name ?? ""}
-              name="businessName"
-              placeholder="Acme Service Centre"
-              required
-            />
-          </label>
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Contact name
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.contact_name ?? ""}
-              name="contactName"
-              placeholder="Primary contact"
-            />
-          </label>
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Phone
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.phone ?? ""}
-              name="phone"
-              placeholder="03 5555 5555"
-              type="tel"
-            />
-          </label>
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Email
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.email ?? ""}
-              name="email"
-              placeholder="service@example.com"
-              type="email"
-            />
-          </label>
-        </div>
-      </FormSection>
-
-      <FormSection
-        description="Optional details to help staff recognise the vendor later."
-        title="Address and website"
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Address
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.address ?? ""}
-              name="address"
-              placeholder="Street or mailing address"
-            />
-          </label>
-          <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-            Website
-            <input
-              className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-              defaultValue={defaults?.website ?? ""}
-              name="website"
-              placeholder="https://..."
-              type="url"
-            />
-            <FieldHint>Use the full URL so it opens correctly from the browser.</FieldHint>
-          </label>
-        </div>
-      </FormSection>
-
-      <FormSection
-        description="Notes can hold preferred contacts, SLA details, or job booking guidance."
-        title="Notes"
-      >
-        <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
-          Notes
-          <textarea
-            className="min-h-20 rounded-md border border-[var(--border)] px-3 py-2 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
-            defaultValue={defaults?.notes ?? ""}
-            name="notes"
-            placeholder="Booking instructions or preferred contact method"
-          />
-        </label>
-      </FormSection>
-    </div>
-  );
-}
 
 export default async function MaintenancePage({ searchParams }: MaintenancePageProps) {
   const params = (await searchParams) ?? {};
@@ -350,12 +243,12 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
             ) : null}
           </div>
 
-          <form action={createMaintenanceVendorAction} className="mt-5 grid gap-4">
-            <VendorFields />
-            <div>
-              <Button type="submit">Add approved vendor</Button>
-            </div>
-          </form>
+          <div className="mt-5">
+            <MaintenanceVendorForm
+              action={createMaintenanceVendorAction}
+              submitLabel="Add approved vendor"
+            />
+          </div>
 
           {vendors.length > 0 ? (
             <div className="mt-6 overflow-x-auto">
@@ -408,27 +301,26 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
                               <PencilLine className="size-4" aria-hidden="true" />
                               Edit
                             </summary>
-                            <form
-                              action={updateMaintenanceVendorAction}
-                              className="mt-3 grid w-[min(42rem,85vw)] gap-4 rounded-md border border-[var(--border)] bg-white p-4 shadow-sm"
-                            >
-                              <input name="vendorId" type="hidden" value={vendor.id} />
-                              <VendorFields defaults={vendor} />
-                              <div>
-                                <Button size="sm" type="submit">
-                                  Save changes
-                                </Button>
-                              </div>
-                            </form>
+                            <div className="mt-3 grid w-[min(42rem,85vw)] gap-4 rounded-md border border-[var(--border)] bg-white p-4 shadow-sm">
+                              <MaintenanceVendorForm
+                                action={updateMaintenanceVendorAction}
+                                defaults={vendor}
+                                submitLabel="Save changes"
+                                vendorId={vendor.id}
+                              />
+                            </div>
                           </details>
                           {isAdmin && !vendor.archived_at ? (
-                            <form action={archiveMaintenanceVendorAction}>
+                            <ConfirmActionForm
+                              action={archiveMaintenanceVendorAction}
+                              confirmMessage={`Archive ${vendor.business_name}?`}
+                            >
                               <input name="id" type="hidden" value={vendor.id} />
                               <Button size="sm" type="submit" variant="outline">
                                 <Archive className="size-4" aria-hidden="true" />
                                 Archive
                               </Button>
-                            </form>
+                            </ConfirmActionForm>
                           ) : null}
                         </div>
                       </td>

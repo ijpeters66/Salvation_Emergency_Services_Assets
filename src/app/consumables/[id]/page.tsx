@@ -9,6 +9,7 @@ import {
 } from "@/app/consumables/actions";
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { AttachmentSection } from "@/components/attachment-section";
 import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
@@ -316,13 +317,16 @@ export default async function BatchDetailPage({ params, searchParams }: BatchDet
             </h1>
           </div>
           {isAdmin && !batch.archived_at ? (
-            <form action={archiveConsumableBatchAction}>
+            <ConfirmActionForm
+              action={archiveConsumableBatchAction}
+              confirmMessage={`Archive batch ${batch.batch_lot_number}?`}
+            >
               <input name="id" type="hidden" value={batch.id} />
               <Button type="submit" variant="outline" size="sm">
                 <Archive className="size-4" aria-hidden="true" />
                 Archive
               </Button>
-            </form>
+            </ConfirmActionForm>
           ) : null}
         </div>
 

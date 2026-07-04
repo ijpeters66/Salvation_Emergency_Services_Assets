@@ -6,6 +6,7 @@ import {
   deleteAttachmentAction,
   uploadAttachmentAction,
 } from "@/app/attachments/actions";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { Button } from "@/components/ui/button";
 import {
   ACCEPTED_ATTACHMENT_MIME_TYPES,
@@ -129,24 +130,30 @@ export function AttachmentSection({
                         </Button>
                       ) : null}
                       {!attachment.archived_at ? (
-                        <form action={archiveAttachmentAction}>
+                        <ConfirmActionForm
+                          action={archiveAttachmentAction}
+                          confirmMessage={`Archive ${attachment.file_name}?`}
+                        >
                           <input name="attachmentId" type="hidden" value={attachment.id} />
                           <input name="redirectPath" type="hidden" value={redirectPath} />
                           <Button size="sm" type="submit" variant="outline">
                             <Archive className="size-4" aria-hidden="true" />
                             Archive
                           </Button>
-                        </form>
+                        </ConfirmActionForm>
                       ) : null}
                       {role === "system_admin" ? (
-                        <form action={deleteAttachmentAction}>
+                        <ConfirmActionForm
+                          action={deleteAttachmentAction}
+                          confirmMessage={`Permanently delete ${attachment.file_name}? This cannot be undone.`}
+                        >
                           <input name="attachmentId" type="hidden" value={attachment.id} />
                           <input name="redirectPath" type="hidden" value={redirectPath} />
                           <Button size="sm" type="submit" variant="outline">
                             <Trash2 className="size-4" aria-hidden="true" />
                             Delete
                           </Button>
-                        </form>
+                        </ConfirmActionForm>
                       ) : null}
                     </div>
                   </td>

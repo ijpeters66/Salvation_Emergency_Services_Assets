@@ -9,6 +9,7 @@ import {
   unassignChildAssetAction,
   updateAssetAction,
 } from "@/app/assets/actions";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 import {
   createMaintenanceRecordAction,
   upsertMaintenanceScheduleAction,
@@ -519,13 +520,13 @@ export default async function AssetDetailPage({ params, searchParams }: AssetDet
             </h1>
           </div>
           {isAdmin && !asset.archived_at ? (
-            <form action={archiveAssetAction}>
+            <ConfirmActionForm action={archiveAssetAction} confirmMessage={`Archive ${asset.asset_name}?`}>
               <input name="id" type="hidden" value={asset.id} />
               <Button type="submit" variant="outline" size="sm">
                 <Archive className="size-4" aria-hidden="true" />
                 Archive
               </Button>
-            </form>
+            </ConfirmActionForm>
           ) : null}
         </div>
 

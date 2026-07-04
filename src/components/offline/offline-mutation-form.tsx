@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import {
   createOfflineMutation,
@@ -12,6 +12,13 @@ import {
   type OfflineEntityType,
   type OfflineMutationOperation,
 } from "@/lib/offline/indexed-db";
+import { assetFormSchema, buildQrCodeValue } from "@/lib/assets/validation";
+import { plantDetailsSchema } from "@/lib/assets/plant";
+import { deploymentFormSchema } from "@/lib/deployments/service";
+import { isStockMovementType } from "@/lib/domain-types";
+import { locationFormSchema } from "@/lib/locations/validation";
+import { maintenanceRecordSchema } from "@/lib/maintenance/records";
+import { issuesToFieldErrors, FormValidationProvider, type FieldErrors } from "@/components/form-validation";
 
 type OfflineMutationFormProps = {
   action: (formData: FormData) => void | Promise<void>;
@@ -25,6 +32,108 @@ type OfflineMutationFormProps = {
   parentEntityType?: OfflineEntityType;
   parentEntityIdField?: string;
 };
+
+function validateOfflineMutation(entityType: OfflineEntityType, formData: FormData): FieldErrors {
+  switch (entityType) {
+    case "asset": {
+      const uniqueAssetId = String(formData.get("uniqueAssetId") ?? "");
+      const assetResult = assetFormSchema.safeParse({
+        uniqueAssetId,
+        assetName: formData.get("assetName"),
+        categoryId: formData.get("categoryId"),
+        currentLocationId: formData.get("currentLocationId"),
+        status: formData.get("status"),
+        qrCodeValue: String(formData.get("qrCodeValue") ?? "").trim() || buildQrCodeValue(uniqueAssetId),
+        description: formData.get("description") ?? "",
+        serialNumber: formData.get("serialNumber") ?? "",
+        make: formData.get("make") ?? "",
+        model: formData.get("model") ?? "",
+        purchaseDate: formData.get("purchaseDate") ?? "",
+        purchaseCost: formData.get("purchaseCost") ?? "",
+        replacementValue: formData.get("replacementValue") ?? "",
+        currentValue: formData.get("currentValue") ?? "",
+        notes: formData.get("notes") ?? "",
+      });
+      const plantResult = plantDetailsSchema.safeParse({
+        isPlant: formData.get("isPlant") === "on",
+        registrationNumber: formData.get("registrationNumber") ?? "",
+        registrationExpiry: formData.get("registrationExpiry") ?? "",
+        insuranceExpiry: formData.get("insuranceExpiry") ?? "",
+        roadworthyComplianceDate: formData.get("roadworthyComplianceDate") ?? "",
+        odometerReading: formData.get("odometerReading") ?? "",
+        hourMeterReading: formData.get("hourMeterReading") ?? "",
+        fuelType: formData.get("fuelType") ?? "",
+        serviceProvider: formData.get("serviceProvider") ?? "",
+      });
+      return {
+        ...(assetResult.success ? {} : issuesToFieldErrors(assetResult.error.issues)),
+        ...(plantResult.success ? {} : issuesToFieldErrors(plantResult.error.issues)),
+      };
+    }
+    case "deployment": {
+      const result = deploymentFormSchema.safeParse({
+        deploymentId: formData.get("deploymentId"),
+        deploymentName: formData.get("deploymentName"),
+        purposeReason: formData.get("purposeReason"),
+        deploymentLocationSite: formData.get("deploymentLocationSite"),
+        teamName: formData.get("teamName"),
+        teamLeader: formData.get("teamLeader") ?? "",
+        contactNumber: formData.get("contactNumber") ?? "",
+        startDatetime: formData.get("startDatetime"),
+        expectedReturnDatetime: formData.get("expectedReturnDatetime") ?? "",
+        actualReturnDatetime: formData.get("actualReturnDatetime") ?? "",
+        status: formData.get("status"),
+        notes: formData.get("notes") ?? "",
+        damageFaultNotes: formData.get("damageFaultNotes") ?? "",
+      });
+      return result.success ? {} : issuesToFieldErrors(result.error.issues);
+    }
+    case "location": {
+      const result = locationFormSchema.safeParse({
+        name: formData.get("name"),
+        type: formData.get("type"),
+        address: formData.get("address") ?? "",
+        state: formData.get("state") || "Victoria",
+        notes: formData.get("notes") ?? "",
+      });
+      return result.success ? {} : issuesToFieldErrors(result.error.issues);
+    }
+    case "stock_movement": {
+      const errors: FieldErrors = {};
+      const movementType = String(formData.get("movementType") ?? "");
+      const quantity = Number(formData.get("quantity") ?? 0);
+      const reason = String(formData.get("reason") ?? "").trim();
+
+      if (!isStockMovementType(movementType)) {
+        errors.movementType = "Choose a stock movement type.";
+      }
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        errors.quantity = "Quantity must be greater than zero.";
+      }
+      if (!reason) {
+        errors.reason = "Reason is required.";
+      }
+
+      return errors;
+    }
+    case "maintenance_record": {
+      const result = maintenanceRecordSchema.safeParse({
+        assetId: formData.get("assetId"),
+        maintenanceScheduleId: formData.get("maintenanceScheduleId") ?? "",
+        date: formData.get("date"),
+        serviceType: formData.get("serviceType"),
+        description: formData.get("description"),
+        cost: formData.get("cost") ?? "",
+        supplierProvider: formData.get("supplierProvider"),
+        odometerHourReading: formData.get("odometerHourReading") ?? "",
+        notes: formData.get("notes") ?? "",
+      });
+      return result.success ? {} : issuesToFieldErrors(result.error.issues);
+    }
+    default:
+      return {};
+  }
+}
 
 function formDataToObject(formData: FormData) {
   const output: Record<string, unknown> = {};
@@ -63,6 +172,7 @@ export function OfflineMutationForm({
   parentEntityIdField,
 }: OfflineMutationFormProps) {
   const router = useRouter();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const offlineStatusPath = useMemo(() => {
     const separator = redirectPath.includes("?") ? "&" : "?";
     return `${redirectPath}${separator}statusMessage=queued-offline`;
@@ -73,14 +183,22 @@ export function OfflineMutationForm({
       action={action}
       className={className}
       onSubmit={async (event) => {
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        const validationErrors = validateOfflineMutation(entityType, formData);
+        setFieldErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+          event.preventDefault();
+          return;
+        }
+
         if (typeof navigator === "undefined" || navigator.onLine) {
           return;
         }
 
         event.preventDefault();
 
-        const form = event.currentTarget;
-        const formData = new FormData(form);
         const entityId =
           (operationType === "update" ? String(formData.get(entityIdField) ?? "") : "") ||
           `offline-${crypto.randomUUID()}`;
@@ -116,7 +234,7 @@ export function OfflineMutationForm({
         router.refresh();
       }}
     >
-      {children}
+      <FormValidationProvider errors={fieldErrors}>{children}</FormValidationProvider>
     </form>
   );
 }

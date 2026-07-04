@@ -51,17 +51,17 @@ This is a review of the current app UI/UX compared with current best practice fo
   - Best practice is to reduce guessing with short examples and lightweight helper text.
   - Include expected formats, ownership rules, and whether a field is optional.
 
-- [ ] Improve inline validation and error messaging.
+- [x] Improve inline validation and error messaging.
   - Current messages are mostly top-level and generic.
   - Best practice is to show field-level errors close to the problem, and keep the copy specific.
   - Distinguish validation errors from network/auth errors and save conflicts.
 
-- [ ] Add confirmation for destructive or high-risk actions.
+- [x] Add confirmation for destructive or high-risk actions.
   - Archive actions are easy to trigger from tables.
   - Best practice is to confirm irreversible or operationally sensitive changes, especially on mobile and for admin actions.
   - Include the record name in the confirmation so the user knows exactly what will happen.
 
-- [ ] Make date and numeric input handling more forgiving.
+- [x] Make date and numeric input handling more forgiving.
   - Best practice is to use the right input patterns, default formats, and clear units.
   - Currency, meter readings, and dates should be obvious at the point of entry.
 

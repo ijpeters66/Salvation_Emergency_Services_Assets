@@ -1,9 +1,12 @@
-import type { AssetRow, AssetCategoryRow } from "@/lib/assets/service";
+"use client";
+
+import type { AssetCategoryRow, AssetRow } from "@/lib/assets/service";
 import type { PlantDetailsRow } from "@/lib/assets/plant";
 import { assetStatusLabels } from "@/lib/assets/validation";
 import { assetStatuses } from "@/lib/domain-types";
 import type { LocationOption } from "@/lib/locations/service";
 import { FieldHint, FormSection } from "@/components/form-helpers";
+import { FieldError, useFieldError } from "@/components/form-validation";
 
 type AssetFormProps = {
   asset?: AssetRow;
@@ -17,6 +20,21 @@ function moneyValue(value: number | null | undefined) {
 }
 
 export function AssetFields({ asset, plantDetails, categories, locations }: AssetFormProps) {
+  const uniqueAssetIdError = useFieldError("uniqueAssetId");
+  const assetNameError = useFieldError("assetName");
+  const categoryIdError = useFieldError("categoryId");
+  const currentLocationIdError = useFieldError("currentLocationId");
+  const statusError = useFieldError("status");
+  const purchaseCostError = useFieldError("purchaseCost");
+  const replacementValueError = useFieldError("replacementValue");
+  const currentValueError = useFieldError("currentValue");
+  const registrationNumberError = useFieldError("registrationNumber");
+  const registrationExpiryError = useFieldError("registrationExpiry");
+  const insuranceExpiryError = useFieldError("insuranceExpiry");
+  const roadworthyComplianceDateError = useFieldError("roadworthyComplianceDate");
+  const odometerReadingError = useFieldError("odometerReading");
+  const hourMeterReadingError = useFieldError("hourMeterReading");
+
   return (
     <div className="grid gap-4">
       <FormSection
@@ -27,27 +45,32 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Unique asset ID
             <input
+              aria-invalid={Boolean(uniqueAssetIdError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={asset?.unique_asset_id}
               name="uniqueAssetId"
               placeholder="SAES-TRAILER-001"
               required
             />
+            <FieldError name="uniqueAssetId" />
             <FieldHint>Use the same ID printed on the QR label and kept stable over time.</FieldHint>
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Asset name
             <input
+              aria-invalid={Boolean(assetNameError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={asset?.asset_name}
               name="assetName"
               placeholder="Trailer 2"
               required
             />
+            <FieldError name="assetName" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Category
             <select
+              aria-invalid={Boolean(categoryIdError)}
               className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={asset?.category_id ?? ""}
               name="categoryId"
@@ -62,10 +85,12 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
                 </option>
               ))}
             </select>
+            <FieldError name="categoryId" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Current location
             <select
+              aria-invalid={Boolean(currentLocationIdError)}
               className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={asset?.current_location_id ?? ""}
               name="currentLocationId"
@@ -80,6 +105,7 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
                 </option>
               ))}
             </select>
+            <FieldError name="currentLocationId" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             QR code value
@@ -94,6 +120,7 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Status
             <select
+              aria-invalid={Boolean(statusError)}
               className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={asset?.status ?? "available"}
               name="status"
@@ -105,6 +132,7 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
                 </option>
               ))}
             </select>
+            <FieldError name="status" />
           </label>
         </div>
       </FormSection>
@@ -162,6 +190,7 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Purchase cost
             <input
+              aria-invalid={Boolean(purchaseCostError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={moneyValue(asset?.purchase_cost)}
               min="0"
@@ -170,11 +199,13 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
               type="number"
               inputMode="decimal"
             />
+            <FieldError name="purchaseCost" />
             <FieldHint>Enter AUD only. Leave blank if the cost is unknown.</FieldHint>
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Replacement value
             <input
+              aria-invalid={Boolean(replacementValueError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={moneyValue(asset?.replacement_value)}
               min="0"
@@ -183,10 +214,12 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
               type="number"
               inputMode="decimal"
             />
+            <FieldError name="replacementValue" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Current value
             <input
+              aria-invalid={Boolean(currentValueError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={moneyValue(asset?.current_value)}
               min="0"
@@ -195,6 +228,7 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
               type="number"
               inputMode="decimal"
             />
+            <FieldError name="currentValue" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)] md:col-span-2">
             Description
@@ -229,42 +263,51 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Registration number
             <input
+              aria-invalid={Boolean(registrationNumberError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={plantDetails?.registration_number ?? ""}
               name="registrationNumber"
               placeholder="ABC-123"
             />
+            <FieldError name="registrationNumber" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Registration expiry
             <input
+              aria-invalid={Boolean(registrationExpiryError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={plantDetails?.registration_expiry ?? ""}
               name="registrationExpiry"
               type="date"
             />
+            <FieldError name="registrationExpiry" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Insurance expiry
             <input
+              aria-invalid={Boolean(insuranceExpiryError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={plantDetails?.insurance_expiry ?? ""}
               name="insuranceExpiry"
               type="date"
             />
+            <FieldError name="insuranceExpiry" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Roadworthy/compliance date
             <input
+              aria-invalid={Boolean(roadworthyComplianceDateError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={plantDetails?.roadworthy_compliance_date ?? ""}
               name="roadworthyComplianceDate"
               type="date"
             />
+            <FieldError name="roadworthyComplianceDate" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Odometer reading
             <input
+              aria-invalid={Boolean(odometerReadingError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={plantDetails?.odometer_reading ?? ""}
               min="0"
@@ -272,11 +315,13 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
               type="number"
               inputMode="numeric"
             />
+            <FieldError name="odometerReading" />
             <FieldHint>Record whole kilometres only.</FieldHint>
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Hour meter reading
             <input
+              aria-invalid={Boolean(hourMeterReadingError)}
               className="h-10 rounded-md border border-[var(--border)] px-3 text-base font-normal text-[var(--foreground)] outline-none focus:border-[var(--brand-red)]"
               defaultValue={plantDetails?.hour_meter_reading ?? ""}
               min="0"
@@ -285,6 +330,7 @@ export function AssetFields({ asset, plantDetails, categories, locations }: Asse
               type="number"
               inputMode="decimal"
             />
+            <FieldError name="hourMeterReading" />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
             Fuel type
