@@ -11,6 +11,7 @@ import { MaintenanceVendorForm } from "@/app/maintenance/vendor-form";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
+import { ShortcutLinks } from "@/components/shortcut-links";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPlantExpiryAlerts } from "@/lib/assets/plant";
@@ -99,6 +100,32 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
         ? item.alert.status === "due_soon" || item.alert.status === "overdue"
         : true,
     );
+  const savedViews = [
+    {
+      label: "All active",
+      description: "Return to the main maintenance list.",
+      href: isPreview ? "/maintenance?preview=1" : "/maintenance",
+      selected: !alertFilter,
+    },
+    {
+      label: "Due soon",
+      description: "Open schedules inside the reminder window.",
+      href: isPreview ? "/maintenance?alert=due-soon&preview=1" : "/maintenance?alert=due-soon",
+      selected: alertFilter === "due-soon",
+    },
+    {
+      label: "Overdue",
+      description: "See the schedules that need action first.",
+      href: isPreview ? "/maintenance?alert=overdue&preview=1" : "/maintenance?alert=overdue",
+      selected: alertFilter === "overdue",
+    },
+    {
+      label: "Compliance expiry",
+      description: "Review registrations and insurance dates.",
+      href: isPreview ? "/maintenance?alert=expiry&preview=1" : "/maintenance?alert=expiry",
+      selected: alertFilter === "expiry",
+    },
+  ];
 
   return (
     <AppShell>
@@ -124,6 +151,12 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
             {message}
           </Notice>
         ) : null}
+
+        <ShortcutLinks
+          description="Saved views for the checks crews reach for most often."
+          items={savedViews}
+          title="Saved views"
+        />
 
         <section className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/88 shadow-sm">
           <div className="flex items-center gap-2 border-b border-[var(--border)] px-5 py-4">

@@ -15,6 +15,8 @@ export async function AppShell({ children }: AppShellProps) {
   const user = await getCurrentUserContext();
   const profileLabel = getProfileLabel(user);
   const navItems = getRoleAwareNavItems(user?.role ?? "user");
+  const roleContext =
+    user?.role === "system_admin" ? "Admin tools visible" : user ? "Operational user view" : "Login required";
 
   return (
     <div className="relative isolate min-h-screen overflow-x-hidden bg-[var(--background)] text-[var(--foreground)]">
@@ -51,6 +53,9 @@ export async function AppShell({ children }: AppShellProps) {
                   {profileLabel.primary}
                 </span>
                 <span className="block text-xs text-[var(--muted)]">{profileLabel.secondary}</span>
+              </span>
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--brand-red)_20%,var(--border))] bg-[color-mix(in_srgb,var(--brand-red)_7%,white)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-red-dark)]">
+                {roleContext}
               </span>
             </div>
             {user ? (

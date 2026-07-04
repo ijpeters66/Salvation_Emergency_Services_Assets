@@ -37,6 +37,6 @@ export function getProfileLabel(user: AuthUserContext | null) {
 
   return {
     primary: user.displayName || user.email,
-    secondary: user.role === "system_admin" ? "System Admin" : "User",
+    secondary: user.role === "system_admin" ? "System admin" : "Operational user",
   };
 }

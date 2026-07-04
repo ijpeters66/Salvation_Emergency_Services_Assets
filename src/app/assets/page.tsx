@@ -9,6 +9,7 @@ import { OfflineMutationForm } from "@/components/offline/offline-mutation-form"
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
 import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
+import { ShortcutLinks } from "@/components/shortcut-links";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { listAssetCategories, listAssets } from "@/lib/assets/server";
@@ -73,6 +74,42 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
     search || status !== "all" || categoryId || locationId || plantOnly || includeArchived,
   );
   const clearFiltersHref = isPreview ? "/assets?preview=1" : "/assets";
+  const savedViews = [
+    {
+      label: "All assets",
+      description: "Return to the full register.",
+      href: clearFiltersHref,
+      selected: !hasActiveFilters,
+    },
+    {
+      label: "Available",
+      description: "Show assets ready to use.",
+      href: isPreview ? "/assets?status=available&preview=1" : "/assets?status=available",
+      selected: status === "available",
+    },
+    {
+      label: "Deployed",
+      description: "See assets currently in the field.",
+      href: isPreview ? "/assets?status=deployed&preview=1" : "/assets?status=deployed",
+      selected: status === "deployed",
+    },
+    {
+      label: "Plant and fleet",
+      description: "Focus on vehicles, generators, and other plant items.",
+      href: isPreview ? "/assets?plantOnly=1&preview=1" : "/assets?plantOnly=1",
+      selected: plantOnly,
+    },
+    ...(isAdmin
+      ? [
+          {
+            label: "Archived",
+            description: "Review retired records only.",
+            href: isPreview ? "/assets?archived=1&preview=1" : "/assets?archived=1",
+            selected: includeArchived,
+          },
+        ]
+      : []),
+  ];
 
   let categories: AssetCategoryRow[] = [];
   let locations: LocationOption[] = [];
@@ -159,6 +196,12 @@ export default async function AssetsPage({ searchParams }: AssetsPageProps) {
             {message}
           </Notice>
         ) : null}
+
+        <ShortcutLinks
+          description="Saved views for the filters people reach for most often."
+          items={savedViews}
+          title="Saved views"
+        />
 
         <section id="create-asset" className="panel-card p-5 scroll-mt-24">
           <div className="flex items-center gap-2">

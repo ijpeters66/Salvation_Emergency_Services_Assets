@@ -50,7 +50,18 @@ describe("auth state helpers", () => {
       }),
     ).toEqual({
       primary: "Alex Admin",
-      secondary: "System Admin",
+      secondary: "System admin",
+    });
+
+    expect(
+      getProfileLabel({
+        email: "user@example.com",
+        displayName: null,
+        role: "user",
+      }),
+    ).toEqual({
+      primary: "user@example.com",
+      secondary: "Operational user",
     });
   });
 });

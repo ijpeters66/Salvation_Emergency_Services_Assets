@@ -4,11 +4,12 @@ import { AlertTriangle, ClipboardCheck, Package, QrCode, Route, Truck } from "lu
 import { AppShell } from "@/components/app-shell";
 import { DashboardTile } from "@/components/dashboard/dashboard-tile";
 import { PageHero } from "@/components/page-hero";
+import { ShortcutLinks } from "@/components/shortcut-links";
 import { Notice } from "@/components/notice";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getDashboardData, getDashboardPreviewData } from "@/lib/dashboard";
-import { setupChecks } from "@/lib/navigation";
+import { onboardingSteps } from "@/lib/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,30 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const isPreview = getParam(params.preview) === "1";
   const user = await getCurrentUserContext();
   const role = user?.role ?? "user";
+  const isAdmin = role === "system_admin";
   const dashboard = isPreview ? getDashboardPreviewData() : await getDashboardData(role);
+  const savedViews = [
+    {
+      label: "Overdue maintenance",
+      description: "Jump to the schedules that need attention first.",
+      href: "/maintenance?alert=overdue",
+    },
+    {
+      label: "Low stock",
+      description: "Open the consumable batches that need replenishing.",
+      href: "/consumables?alert=low-stock",
+    },
+    {
+      label: "Active deployments",
+      description: "Review gear and stock currently in the field.",
+      href: "/deployments?status=active",
+    },
+    {
+      label: "Assets by status",
+      description: "See available, deployed, or maintenance items at a glance.",
+      href: "/assets",
+    },
+  ];
   const attentionItems = [
     {
       label: "Overdue maintenance",
@@ -123,6 +147,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <div />
         </section>
 
+        <ShortcutLinks
+          description="Saved views for the work people repeat most often."
+          items={savedViews}
+          title="Saved views"
+        />
+
         <section className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
           <div className="panel-card p-5">
             <div className="flex items-center justify-between gap-3">
@@ -163,29 +193,44 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <div className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
               <ClipboardCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-[var(--ink)]">Operational shortcuts</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Getting started</h2>
             </div>
             {!dashboard.hasOperationalData ? (
-              <div className="mt-4 grid gap-3">
+              <div className="mt-4 grid gap-4">
                 <p className="text-sm leading-6 text-[var(--muted)]">
-                  Start with the foundation records so the dashboard can show live operational data.
+                  Start with the setup order that matches the field workflow: locations first, then
+                  categories, then assets and stock.
                 </p>
-                <div className="grid gap-2">
+                <div className="grid gap-3">
+                  {onboardingSteps.map((step, index) => (
+                    <Link
+                      className="rounded-xl border border-[color-mix(in_srgb,var(--border)_84%,white)] bg-white/80 p-4 transition-colors hover:bg-[var(--surface)]"
+                      href={step.href}
+                      key={step.title}
+                    >
+                      <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                        Step {index + 1}
+                      </span>
+                      <span className="mt-1 block font-medium text-[var(--ink)]">{step.title}</span>
+                      <span className="mt-1 block text-sm leading-6 text-[var(--muted)]">
+                        {step.description}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/locations">Create the first location</Link>
+                    <Link href="/locations">Start with locations</Link>
                   </Button>
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/assets">Create the first asset</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/consumables">Add consumable stock</Link>
+                    <Link href="/settings">Set up categories</Link>
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="mt-4 grid gap-2">
                 <p className="text-sm leading-6 text-[var(--muted)]">
-                  The register is live. Use the shortcuts below to jump straight into the highest-value workflows.
+                  The register is live. Use the saved views above, then jump into the highest-value workflows.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm">
@@ -225,6 +270,34 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           ))}
         </div>
 
+        {dashboard.hasOperationalData ? (
+          <section className="panel-card-soft p-5">
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--ink)]">First-time checklist</h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                  Useful when you are onboarding a new crew member or setting up a fresh site.
+                </p>
+              </div>
+            </div>
+            <ol className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {onboardingSteps.map((step, index) => (
+                <li
+                  className="rounded-xl border border-[color-mix(in_srgb,var(--border)_84%,white)] bg-white/80 p-4"
+                  key={step.title}
+                >
+                  <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-red)]">
+                    Step {index + 1}
+                  </span>
+                  <span className="mt-1 block font-medium text-[var(--ink)]">{step.title}</span>
+                  <span className="mt-1 block text-sm leading-6 text-[var(--muted)]">{step.description}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
         <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
           <section className="panel-card p-5">
             <div className="flex items-center gap-2">
@@ -260,16 +333,28 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <section className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
               <ClipboardCheck className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-[var(--ink)]">Foundation checks</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">
+                {isAdmin ? "Admin context" : "Operational context"}
+              </h2>
             </div>
-            <ul className="mt-3 grid gap-2 text-sm text-[var(--muted)]">
-              {setupChecks.map((item) => (
-                <li className="flex items-center gap-2" key={item}>
-                  <span className="size-1.5 rounded-full bg-[var(--brand-red)]" aria-hidden="true" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+              {isAdmin
+                ? "You can manage users, categories, thresholds, and reports from Settings. Ordinary users do not see those screens."
+                : "You are in the field operator view. Admin screens stay hidden so the daily workflow stays simple."}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {isAdmin ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/settings">Open Settings</Link>
+                </Button>
+              ) : null}
+              <Button asChild variant="outline" size="sm">
+                <Link href="/scan">Open scan flow</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/reports">Open reports</Link>
+              </Button>
+            </div>
           </section>
         </div>
 

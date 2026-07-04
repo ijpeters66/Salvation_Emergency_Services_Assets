@@ -12,6 +12,7 @@ import { AppShell } from "@/components/app-shell";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
+import { ShortcutLinks } from "@/components/shortcut-links";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import {
@@ -68,6 +69,7 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
   const issuedSummary = getParam(params.issuedSummary);
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const envConfigured = getPublicEnvStatus().configured;
+  const clearFiltersHref = isPreview ? "/consumables?preview=1" : "/consumables";
 
   const previewData = {
     categories: [
@@ -205,6 +207,42 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
       ? batches.filter((batch) => filteredAlertKeys.has(`${batch.item_id}:${batch.location_id}`))
       : batches;
   const movementReasonLabels = getMovementReasonLabels(movementReasons);
+  const savedViews = [
+    {
+      label: "All stock",
+      description: "Return to the full consumable register.",
+      href: clearFiltersHref,
+      selected: !locationId && !categoryId && !search && !lowQuantity && !alertFilter && !includeArchived,
+    },
+    {
+      label: "Low stock",
+      description: "Open the batches that have crossed their minimum level.",
+      href: isPreview ? "/consumables?alert=low-stock&preview=1" : "/consumables?alert=low-stock",
+      selected: alertFilter === "low-stock",
+    },
+    {
+      label: "Out of stock",
+      description: "See items with nothing left on hand.",
+      href: isPreview ? "/consumables?alert=out-of-stock&preview=1" : "/consumables?alert=out-of-stock",
+      selected: alertFilter === "out-of-stock",
+    },
+    {
+      label: "Low quantity",
+      description: "Focus on batches with smaller on-hand quantities.",
+      href: isPreview ? "/consumables?lowQuantity=1&preview=1" : "/consumables?lowQuantity=1",
+      selected: lowQuantity,
+    },
+    ...(isAdmin
+      ? [
+          {
+            label: "Archived",
+            description: "Review retired batches only.",
+            href: isPreview ? "/consumables?archived=1&preview=1" : "/consumables?archived=1",
+            selected: includeArchived,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <AppShell>
@@ -251,6 +289,12 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
             ) : null}
           </Notice>
         ) : null}
+
+        <ShortcutLinks
+          description="Saved views for the stock checks people repeat every day."
+          items={savedViews}
+          title="Saved views"
+        />
 
         <section className="panel-card p-5">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Stock alerts</h2>
