@@ -1,56 +1,33 @@
 "use client";
 
 import { Search, Users } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { resetUserPasswordAction, updateUserAccessAction } from "@/app/settings/actions";
 import { Button } from "@/components/ui/button";
+import { filterSettingsUsers } from "@/lib/settings";
 import type { SettingsUserRow } from "@/lib/settings/server";
 
-type RoleOption = {
-  id: string;
-  key: string;
-  name: string;
-};
-
-type RoleLabel = {
-  value: string;
-  label: string;
-};
+export { filterSettingsUsers } from "@/lib/settings";
 
 type SettingsUserManagementProps = {
   users: SettingsUserRow[];
-  roles: RoleOption[];
-  roleOptions: RoleLabel[];
+  roles: Array<{ id: string; key: string; name: string }>;
+  roleOptions: Array<{ value: string; label: string }>;
+  initialSearch: string;
 };
-
-export function filterSettingsUsers(
-  users: SettingsUserRow[],
-  roleOptions: RoleLabel[],
-  search: string,
-) {
-  const normalizedSearch = search.trim().toLowerCase();
-
-  if (!normalizedSearch) {
-    return users;
-  }
-
-  return users.filter((profile) => {
-    const roleLabel =
-      roleOptions.find((option) => option.value === profile.role_key)?.label ?? profile.role_name;
-
-    return [profile.display_name, profile.email, profile.user_id, roleLabel]
-      .filter(Boolean)
-      .some((value) => value?.toLowerCase().includes(normalizedSearch));
-  });
-}
 
 export function SettingsUserManagement({
   users,
   roles,
   roleOptions,
+  initialSearch,
 }: SettingsUserManagementProps) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
   const visibleUsers = filterSettingsUsers(users, roleOptions, search);
   const roleNameByKey = new Map(roleOptions.map((option) => [option.value, option.label]));
 
@@ -63,7 +40,7 @@ export function SettingsUserManagement({
       <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
         Search user accounts by name, role, or ID, then update access below.
       </p>
-      <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+      <form className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-end" method="get">
         <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
           Search users
           <div className="relative">
@@ -73,6 +50,7 @@ export function SettingsUserManagement({
             />
             <input
               className="h-10 w-full rounded-md border border-[var(--border)] bg-white pl-9 pr-3 text-base outline-none focus:border-[var(--brand-red)]"
+              name="userSearch"
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Name, email, role, or user ID"
               value={search}
@@ -83,7 +61,17 @@ export function SettingsUserManagement({
           Showing <span className="font-medium text-[var(--ink)]">{visibleUsers.length}</span> of{" "}
           <span className="font-medium text-[var(--ink)]">{users.length}</span> users
         </div>
-      </div>
+        <Button type="submit" variant="outline">
+          Search
+        </Button>
+        {search ? (
+          <Button asChild variant="ghost">
+            <Link href="/settings">Clear</Link>
+          </Button>
+        ) : (
+          <span />
+        )}
+      </form>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[42rem] border-collapse text-left text-sm">
           <thead className="bg-[var(--surface)] text-xs uppercase text-[var(--muted)]">

@@ -132,6 +132,35 @@ export function parseUserRoleFormData(formData: FormData) {
   };
 }
 
+export function filterSettingsUsers<
+  T extends {
+    display_name: string | null;
+    email: string | null;
+    user_id: string;
+    role_key: string;
+    role_name: string;
+  },
+>(
+  users: T[],
+  roleOptions: Array<{ value: string; label: string }>,
+  search: string,
+) {
+  const normalizedSearch = search.trim().toLowerCase();
+
+  if (!normalizedSearch) {
+    return users;
+  }
+
+  return users.filter((profile) => {
+    const roleLabel =
+      roleOptions.find((option) => option.value === profile.role_key)?.label ?? profile.role_name;
+
+    return [profile.display_name, profile.email, profile.user_id, roleLabel]
+      .filter(Boolean)
+      .some((value) => value?.toLowerCase().includes(normalizedSearch));
+  });
+}
+
 export function validateReportBrandingSettings(input: ReportBrandingSettings) {
   return brandingSettingsSchema.safeParse(input);
 }

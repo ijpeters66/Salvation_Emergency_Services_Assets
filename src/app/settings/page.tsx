@@ -19,7 +19,7 @@ import { PageHero } from "@/components/page-hero";
 import { SettingsUserManagement } from "@/components/settings-user-management";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
-import { getRoleOptions } from "@/lib/settings";
+import { filterSettingsUsers, getRoleOptions } from "@/lib/settings";
 import {
   getStoredReportBrandingSettings,
   listAssetCategoriesForSettings,
@@ -64,6 +64,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   }
 
   const statusMessage = getParam(params.statusMessage) ?? "";
+  const userSearch = getParam(params.userSearch) ?? "";
   const message = statusMessage ? statusMessages[statusMessage] : null;
   const [branding, users, roles, assetCategories, consumableCategories, movementReasons] =
     await Promise.all([
@@ -75,6 +76,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
       listMovementReasons(true, "system_admin"),
     ]);
   const roleOptions = getRoleOptions();
+  const visibleUsers = filterSettingsUsers(users, roleOptions, userSearch);
 
   return (
     <AppShell>
@@ -175,7 +177,12 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <SettingsUserManagement roleOptions={roleOptions} roles={roles} users={users} />
+          <SettingsUserManagement
+            initialSearch={userSearch}
+            roleOptions={roleOptions}
+            roles={roles}
+            users={visibleUsers}
+          />
 
           <aside className="panel-card-soft p-5">
             <div className="flex items-center gap-2">
