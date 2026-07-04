@@ -4,6 +4,7 @@ import { AlertTriangle, ClipboardCheck, Package, QrCode, Route, Truck } from "lu
 import { AppShell } from "@/components/app-shell";
 import { DashboardTile } from "@/components/dashboard/dashboard-tile";
 import { PageHero } from "@/components/page-hero";
+import { Notice } from "@/components/notice";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getDashboardData, getDashboardPreviewData } from "@/lib/dashboard";
@@ -99,9 +100,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         />
 
         {dashboard.errorMessage ? (
-          <p className="panel-card border-amber-200 bg-amber-50/90 p-4 text-sm font-medium text-amber-900">
+          <Notice title="Dashboard data issue" variant="warning">
             {dashboard.errorMessage}
-          </p>
+          </Notice>
         ) : null}
 
         <section className="page-hero grid gap-4 p-5 lg:grid-cols-[1.4fr_1fr] lg:p-6">

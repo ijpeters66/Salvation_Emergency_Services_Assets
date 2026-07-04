@@ -14,6 +14,7 @@ import {
 } from "@/app/settings/actions";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
 import { AppShell } from "@/components/app-shell";
+import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
@@ -93,9 +94,9 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         />
 
         {message ? (
-          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
+          <Notice title="Settings update" variant="info">
             {message}
-          </p>
+          </Notice>
         ) : null}
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">

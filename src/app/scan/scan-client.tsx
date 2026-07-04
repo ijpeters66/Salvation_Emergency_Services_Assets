@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { ScanSupportNotice } from "@/components/scan-support-notice";
 import { Button } from "@/components/ui/button";
+import { Notice } from "@/components/notice";
 import { qrScanActions, type QrScanAction } from "@/lib/scan";
 
 type BarcodeDetectorResult = {
@@ -225,7 +226,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
 
   return (
     <div className="grid gap-6">
-      <section className="rounded-md border border-[var(--border)] bg-white p-5">
+      <section className="panel-card p-5">
         <div className="flex items-center gap-2">
           <QrCode className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
           <h2 className="text-lg font-semibold text-[var(--ink)]">Scan action</h2>
@@ -249,7 +250,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <article className="rounded-md border border-[var(--border)] bg-white p-5">
+        <article className="panel-card p-5">
           <div className="flex items-center gap-2">
             <Camera className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
             <h2 className="text-lg font-semibold text-[var(--ink)]">Camera scanner</h2>
@@ -259,7 +260,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
               hasBarcodeDetector={support.hasBarcodeDetector}
               hasCamera={support.hasCamera}
             />
-            <div className="overflow-hidden rounded-md border border-[var(--border)] bg-[var(--surface)]">
+            <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               <video
                 className="aspect-[4/3] w-full bg-[var(--surface)] object-cover"
                 muted
@@ -283,7 +284,7 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
           </div>
         </article>
 
-        <article className="rounded-md border border-[var(--border)] bg-white p-5">
+        <article className="panel-card-soft p-5">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Manual fallback</h2>
           <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
             Paste or type the QR payload when camera access is not available. This also works as a
@@ -317,9 +318,9 @@ export function ScanClient({ preview = false }: { preview?: boolean }) {
             </div>
           </form>
           {message ? (
-            <p className="mt-4 rounded-md border border-[var(--border)] bg-[var(--surface)] p-3 text-sm leading-6 text-[var(--ink)]">
+            <Notice className="mt-4" title="Scan feedback" variant="warning">
               {message}
-            </p>
+            </Notice>
           ) : null}
         </article>
       </section>

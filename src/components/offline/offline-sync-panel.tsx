@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, Clock3, RefreshCcw } from "lucide-react";
+import { AlertTriangle, Clock3 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Notice } from "@/components/notice";
 import {
   listOptimisticRecords,
   type OfflineEntityType,
@@ -77,15 +78,14 @@ export function OfflineSyncPanel({
   }
 
   return (
-    <section className="rounded-md border border-[var(--border)] bg-white p-4">
-      <div className="flex items-center gap-2">
-        <RefreshCcw className="size-4 text-[var(--brand-red)]" aria-hidden="true" />
-        <h2 className="text-sm font-semibold text-[var(--ink)]">{title}</h2>
-      </div>
+    <section className="grid gap-3">
+      <Notice title={title} variant="warning">
+        Pending offline changes will sync when the device is back online.
+      </Notice>
       <div className="mt-3 grid gap-3">
         {records.map((record) => (
           <div
-            className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm shadow-sm"
             key={record.key}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">

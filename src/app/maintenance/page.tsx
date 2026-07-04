@@ -9,6 +9,7 @@ import {
 } from "@/app/maintenance/actions";
 import { MaintenanceVendorForm } from "@/app/maintenance/vendor-form";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
+import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
@@ -119,9 +120,9 @@ export default async function MaintenancePage({ searchParams }: MaintenancePageP
         />
 
         {message ? (
-          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
+          <Notice title="Maintenance update" variant="info">
             {message}
-          </p>
+          </Notice>
         ) : null}
 
         <section className="overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_85%,white)] bg-white/88 shadow-sm">

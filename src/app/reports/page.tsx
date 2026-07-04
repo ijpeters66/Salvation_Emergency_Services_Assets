@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BarChart3, Download, ExternalLink, FileSpreadsheet, FileText, Filter } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
+import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
@@ -122,9 +123,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         />
 
         {!parseResult.success ? (
-          <p className="panel-card border-amber-200 bg-amber-50/90 p-4 text-sm font-medium text-amber-900">
+          <Notice title="Report filter issue" variant="error">
             {parseResult.error.issues[0]?.message ?? "Check the report filters and try again."}
-          </p>
+          </Notice>
         ) : null}
 
         <section className="panel-card-soft p-5">

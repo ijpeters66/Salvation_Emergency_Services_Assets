@@ -147,11 +147,12 @@ export function OfflineRuntime() {
     <div className="pointer-events-none fixed bottom-4 right-4 z-50">
       <div
         aria-live="polite"
+        role="status"
         className={[
-          "flex items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium shadow-sm",
+          "flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-xs font-medium shadow-sm",
           isOnline
-            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-            : "border-amber-200 bg-amber-50 text-amber-900",
+            ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+            : "border-amber-200 bg-amber-50 text-amber-950",
         ].join(" ")}
         data-testid="offline-status-indicator"
       >

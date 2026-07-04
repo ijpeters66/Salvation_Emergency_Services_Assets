@@ -10,6 +10,7 @@ import {
 import { BatchFields } from "@/app/consumables/batch-form";
 import { AppShell } from "@/components/app-shell";
 import { ConfirmActionForm } from "@/components/confirm-action-form";
+import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
@@ -235,20 +236,20 @@ export default async function ConsumablesPage({ searchParams }: ConsumablesPageP
         />
 
         {!envConfigured ? (
-          <p className="panel-card-soft p-4 text-sm text-[var(--muted)]">
+          <Notice title="Live data unavailable" variant="warning">
             Supabase is not configured yet, so live consumable records cannot be loaded.
-          </p>
+          </Notice>
         ) : null}
 
         {message ? (
-          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
+          <Notice title="Consumable update" variant="info">
             {message}
             {issuedSummary ? (
               <span className="mt-1 block text-[var(--muted)]">
                 Issued batches: {issuedSummary}
               </span>
             ) : null}
-          </p>
+          </Notice>
         ) : null}
 
         <section className="panel-card p-5">

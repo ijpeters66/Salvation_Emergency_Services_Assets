@@ -6,6 +6,7 @@ import { DeploymentFields } from "@/app/deployments/deployment-fields";
 import { AppShell } from "@/components/app-shell";
 import { OfflineMutationForm } from "@/components/offline/offline-mutation-form";
 import { OfflineSyncPanel } from "@/components/offline/offline-sync-panel";
+import { Notice } from "@/components/notice";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import {
@@ -105,9 +106,9 @@ export default async function DeploymentsPage({ searchParams }: DeploymentsPageP
         />
 
         {message ? (
-          <p className="panel-card p-4 text-sm font-medium text-[var(--ink)]">
+          <Notice title="Deployment update" variant="info">
             {message}
-          </p>
+          </Notice>
         ) : null}
 
         <section className="panel-card-soft p-5">

@@ -106,19 +106,19 @@ This is a review of the current app UI/UX compared with current best practice fo
 
 ## Priority 5: Accessibility and Interaction Quality
 
-- [ ] Verify contrast and focus states across all pages.
+- [x] Verify contrast and focus states across all pages.
   - Best practice is strong visible focus indicators, especially for keyboard users.
   - Check text on subtle backgrounds, alert colors, and disabled states.
 
-- [ ] Ensure touch targets are comfortably sized.
+- [x] Ensure touch targets are comfortably sized.
   - Best practice is a minimum usable tap target for buttons, row actions, and nav items.
   - This matters especially for staff using tablets or phones in the field.
 
-- [ ] Add a skip-to-content link and stronger semantic landmarks.
+- [x] Add a skip-to-content link and stronger semantic landmarks.
   - Best practice for internal apps still includes fast keyboard navigation.
   - A skip link, clear main landmark, and predictable heading structure make the app easier to use.
 
-- [ ] Improve consistency of success and error patterns.
+- [x] Improve consistency of success and error patterns.
   - Best practice is one system for banners, toasts, inline errors, and loading states.
   - Right now the copy and emphasis vary a bit from page to page.
 
