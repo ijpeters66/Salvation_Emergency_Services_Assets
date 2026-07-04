@@ -15,6 +15,7 @@ type AppUserProfileUpdate = Database["public"]["Tables"]["app_user_profile"]["Up
 
 export type SettingsUserRow = {
   user_id: string;
+  email: string | null;
   display_name: string | null;
   role_id: string;
   role_key: string;
@@ -57,7 +58,25 @@ export async function listSettingsUsers() {
     return [];
   }
 
-  return (data ?? []) as SettingsUserRow[];
+  const rows = (data ?? []) as SettingsUserRow[];
+  const adminClient = createSupabaseAdminClient();
+
+  if (!adminClient) {
+    return rows;
+  }
+
+  const { data: authUsers } = await adminClient.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  const emailByUserId = new Map(
+    authUsers?.users.map((user) => [user.id, user.email ?? null]) ?? [],
+  );
+
+  return rows.map((row) => ({
+    ...row,
+    email: emailByUserId.get(row.user_id) ?? null,
+  }));
 }
 
 export async function listMovementReasons(includeArchived = false, role: UserRole = "user") {

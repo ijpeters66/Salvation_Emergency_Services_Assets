@@ -24,23 +24,34 @@ type SettingsUserManagementProps = {
   roleOptions: RoleLabel[];
 };
 
+export function filterSettingsUsers(
+  users: SettingsUserRow[],
+  roleOptions: RoleLabel[],
+  search: string,
+) {
+  const normalizedSearch = search.trim().toLowerCase();
+
+  if (!normalizedSearch) {
+    return users;
+  }
+
+  return users.filter((profile) => {
+    const roleLabel =
+      roleOptions.find((option) => option.value === profile.role_key)?.label ?? profile.role_name;
+
+    return [profile.display_name, profile.email, profile.user_id, roleLabel]
+      .filter(Boolean)
+      .some((value) => value?.toLowerCase().includes(normalizedSearch));
+  });
+}
+
 export function SettingsUserManagement({
   users,
   roles,
   roleOptions,
 }: SettingsUserManagementProps) {
   const [search, setSearch] = useState("");
-  const normalizedSearch = search.trim().toLowerCase();
-
-  const visibleUsers = normalizedSearch
-    ? users.filter((profile) => {
-        const roleLabel =
-          roleOptions.find((option) => option.value === profile.role_key)?.label ?? profile.role_name;
-        return [profile.display_name, profile.user_id, roleLabel]
-          .filter(Boolean)
-          .some((value) => value?.toLowerCase().includes(normalizedSearch));
-      })
-    : users;
+  const visibleUsers = filterSettingsUsers(users, roleOptions, search);
   const roleNameByKey = new Map(roleOptions.map((option) => [option.value, option.label]));
 
   return (
@@ -91,6 +102,9 @@ export function SettingsUserManagement({
                     <span className="block font-medium text-[var(--ink)]">
                       {profile.display_name ?? `User ${profile.user_id.slice(0, 8)}`}
                     </span>
+                    {profile.email ? (
+                      <span className="block text-xs text-[var(--muted)]">{profile.email}</span>
+                    ) : null}
                     <span className="block text-xs text-[var(--muted)]">{profile.user_id}</span>
                   </td>
                   <td className="px-4 py-4 text-[var(--muted)]">
