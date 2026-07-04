@@ -24,6 +24,10 @@ function getErrorMessage(error: string | undefined) {
     return "This user profile has been deactivated. Contact a system admin for access.";
   }
 
+  if (error === "profile") {
+    return "This account does not have an active SAES profile yet. Ask a system admin to set it up.";
+  }
+
   return null;
 }
 
