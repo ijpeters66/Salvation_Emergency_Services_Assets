@@ -124,21 +124,27 @@ This is a review of the current app UI/UX compared with current best practice fo
 
 ## Priority 6: Product UX Improvements
 
-- [ ] Add saved views or shortcuts for common operational tasks.
+- [x] Add saved views or shortcuts for common operational tasks.
   - Best practice in admin tools is to reduce repeated filtering and searching.
   - Save common states like overdue maintenance, low stock, or active deployments.
 
-- [ ] Make role differences clearer.
+- [x] Make role differences clearer.
   - System admin and regular user experiences should feel intentionally different where needed.
   - Best practice is to keep admin actions discoverable but not noisy for normal users.
 
-- [ ] Add lightweight onboarding for first-time use.
+- [x] Add lightweight onboarding for first-time use.
   - Best practice is a short “getting started” path when there is no data yet.
   - Explain the order of setup: locations, categories, assets, then maintenance and deployments.
 
-- [ ] Review page-level terminology for plain language.
+- [x] Review page-level terminology for plain language.
   - Keep wording consistent across modules.
   - Best practice is to use the terms staff already use in the field, not internal technical labels.
+
+- [x] Priority 6 is complete.
+  - Saved views are available across the key operational screens.
+  - Role cues are clearer in the shell and dashboard.
+  - The dashboard now includes a setup path for first-time users.
+  - Page copy has been tightened for plain-language scanning.
 
 ## Suggested Build Order
 

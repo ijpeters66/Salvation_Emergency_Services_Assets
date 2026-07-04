@@ -2,21 +2,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  BarChart3,
+  ChevronDown,
+  FileClock,
+  Gauge,
+  MapPinned,
+  Package,
+  PackageCheck,
+  QrCode,
+  Settings,
+  Truck,
+  Wrench,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   description: string;
   href: string;
-  icon: LucideIcon;
+  iconName: keyof typeof iconMap;
   title: string;
 };
 
 type AppShellNavProps = {
   items: readonly NavItem[];
 };
+
+const iconMap = {
+  BarChart3,
+  FileClock,
+  Gauge,
+  MapPinned,
+  Package,
+  PackageCheck,
+  QrCode,
+  Settings,
+  Truck,
+  Wrench,
+} satisfies Record<string, LucideIcon>;
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -28,7 +53,7 @@ function NavContent({ items }: AppShellNavProps) {
   return (
     <div className="grid gap-1">
       {items.map((item) => {
-        const Icon = item.icon;
+        const Icon = iconMap[item.iconName];
         const active = isActive(pathname, item.href);
 
         return (
@@ -44,7 +69,10 @@ function NavContent({ items }: AppShellNavProps) {
             key={item.href}
           >
             <Icon
-              className={cn("mt-0.5 size-4", active ? "text-[var(--brand-red-dark)]" : "text-[var(--brand-red)]")}
+              className={cn(
+                "mt-0.5 size-4",
+                active ? "text-[var(--brand-red-dark)]" : "text-[var(--brand-red)]",
+              )}
               aria-hidden="true"
             />
             <span>
