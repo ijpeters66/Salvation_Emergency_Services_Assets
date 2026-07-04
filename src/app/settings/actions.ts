@@ -10,9 +10,11 @@ import {
   parseBrandingSettingsFormData,
   parseCategoryFormData,
   parseMovementReasonFormData,
+  parseUserCreateFormData,
   parseUserRoleFormData,
 } from "@/lib/settings";
 import {
+  createSupabaseAdminClient,
   createSupabaseSettingsDependencies,
   getCurrentSupabaseUserId,
 } from "@/lib/settings/server";
@@ -37,7 +39,120 @@ async function getAdminMutationContext() {
   return {
     userId,
     dependencies: createSupabaseSettingsDependencies(),
+    adminClient: createSupabaseAdminClient(),
   };
+}
+
+export async function createUserAccessAction(formData: FormData) {
+  const parsed = parseUserCreateFormData(formData);
+  const context = await getAdminMutationContext();
+
+  if (!parsed.success) {
+    redirectToSettings("auth-error");
+  }
+
+  if (!context || !context.adminClient) {
+    redirectToSettings("auth-error");
+  }
+
+  if (!("data" in parsed)) {
+    redirectToSettings("auth-error");
+  }
+
+  const adminContext = context!;
+  if (!adminContext.adminClient) {
+    redirectToSettings("auth-error");
+  }
+  const adminClient = adminContext.adminClient!;
+  const parsedData = parsed.data!;
+  const roleId = await adminContext.dependencies.getRoleIdByKey(parsedData.role);
+
+  if (!roleId) {
+    redirectToSettings("save-error");
+  }
+  const resolvedRoleId = roleId as string;
+
+  const { data: users, error: listError } = await adminClient.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+
+  if (listError) {
+    redirectToSettings("save-error");
+  }
+
+  const existingUser = users.users.find((candidate) => candidate.email?.toLowerCase() === parsedData.email.toLowerCase());
+
+  let userId = existingUser?.id ?? undefined;
+
+  if (existingUser && userId) {
+    const { error: updateError } = await adminClient.auth.admin.updateUserById(userId, {
+      password: parsedData.password,
+      email_confirm: true,
+      user_metadata: {
+        display_name: parsedData.displayName ?? parsedData.email,
+      },
+    });
+
+    if (updateError) {
+      redirectToSettings("save-error");
+    }
+  } else {
+    const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
+      email: parsedData.email,
+      password: parsedData.password,
+      email_confirm: true,
+      user_metadata: {
+        display_name: parsedData.displayName ?? parsedData.email,
+      },
+    });
+
+    if (createError) {
+      redirectToSettings("save-error");
+    }
+
+    userId = createdUser.user?.id ?? undefined;
+  }
+
+  if (!userId) {
+    redirectToSettings("save-error");
+  }
+  const resolvedUserId = userId as string;
+
+  const { data, error } = await adminClient
+    .from("app_user_profile")
+    .upsert(
+      {
+        user_id: resolvedUserId,
+        role_id: resolvedRoleId,
+        display_name: parsedData.displayName,
+        is_active: parsedData.isActive,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    )
+    .select("*")
+    .single();
+
+  if (error || !data) {
+    redirectToSettings("save-error");
+  }
+
+  await adminContext.dependencies.writeAuditLog({
+    userId: adminContext.userId,
+    actionType: "settings.user.create",
+    recordType: "app_user_profile",
+    recordId: resolvedUserId,
+    newValue: {
+      email: parsedData.email,
+      display_name: parsedData.displayName,
+      role: parsedData.role,
+      is_active: parsedData.isActive,
+    },
+  });
+
+  revalidatePath("/settings");
+  redirectToSettings("user-created");
 }
 
 export async function updateUserAccessAction(formData: FormData) {

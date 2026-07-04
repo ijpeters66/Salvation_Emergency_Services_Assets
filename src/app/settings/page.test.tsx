@@ -125,6 +125,7 @@ describe("SettingsPage", () => {
 
     const markup = renderToStaticMarkup(await SettingsPage({}));
 
+    expect(markup).toContain("Create user");
     expect(markup).toContain("User management");
     expect(markup).toContain("Report branding");
     expect(markup).toContain("Movement reasons");

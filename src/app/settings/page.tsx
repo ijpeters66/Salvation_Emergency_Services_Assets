@@ -8,6 +8,7 @@ import {
   archiveMovementReasonAction,
   createAssetCategoryAdminAction,
   createConsumableCategoryAdminAction,
+  createUserAccessAction,
   createMovementReasonAction,
   saveReportBrandingAction,
   updateUserAccessAction,
@@ -38,6 +39,7 @@ const statusMessages: Record<string, string> = {
   "auth-error": "You need an active system admin session to change settings.",
   "save-error": "The settings change could not be saved. Check the data and Supabase setup.",
   "self-lockout": "You cannot remove your own system admin access or deactivate your own profile.",
+  "user-created": "User login created or refreshed.",
   "user-saved": "User access updated.",
   "branding-saved": "Report branding saved.",
   "asset-category-saved": "Asset category added.",
@@ -98,6 +100,79 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             {message}
           </Notice>
         ) : null}
+
+        <section className="panel-card p-5">
+          <div className="flex items-center gap-2">
+            <Users className="size-5 text-[var(--brand-red)]" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-[var(--ink)]">Create user</h2>
+          </div>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">
+            Add a new login for an admin or user, or refresh an existing email with a new password
+            and role.
+          </p>
+          <form action={createUserAccessAction} className="mt-4 grid gap-4 xl:grid-cols-2">
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Email
+              <input
+                autoComplete="email"
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base outline-none focus:border-[var(--brand-red)]"
+                name="email"
+                placeholder="new.user@example.com"
+                required
+                type="email"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Display name
+              <input
+                autoComplete="name"
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base outline-none focus:border-[var(--brand-red)]"
+                name="displayName"
+                placeholder="Optional display name"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Role
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base outline-none focus:border-[var(--brand-red)]"
+                defaultValue="user"
+                name="role"
+              >
+                {roleOptions.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)]">
+              Temporary password
+              <input
+                autoComplete="new-password"
+                className="h-10 rounded-md border border-[var(--border)] px-3 text-base outline-none focus:border-[var(--brand-red)]"
+                minLength={8}
+                name="password"
+                placeholder="Set a temporary password"
+                required
+                type="password"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[var(--ink)] xl:col-span-2">
+              Status
+              <select
+                className="h-10 rounded-md border border-[var(--border)] bg-white px-3 text-base outline-none focus:border-[var(--brand-red)]"
+                defaultValue="1"
+                name="isActive"
+              >
+                <option value="1">Active</option>
+                <option value="0">Deactivate</option>
+              </select>
+            </label>
+            <div className="xl:col-span-2">
+              <Button type="submit">Create user</Button>
+            </div>
+          </form>
+        </section>
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <section className="panel-card p-5">

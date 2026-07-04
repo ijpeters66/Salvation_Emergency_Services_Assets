@@ -41,6 +41,17 @@ export const categoryFormSchema = z.object({
     .transform((value) => (value.length > 0 ? value : null)),
 });
 
+export const userCreateFormSchema = z.object({
+  email: z.string().trim().email("Enter a valid email address."),
+  displayName: z
+    .string()
+    .trim()
+    .transform((value) => (value.length > 0 ? value : null)),
+  password: z.string().trim().min(8, "Password must be at least 8 characters."),
+  role: z.enum(userRoles),
+  isActive: z.boolean(),
+});
+
 export function normaliseMovementReasonKey(label: string) {
   return label
     .trim()
@@ -74,6 +85,16 @@ export function parseCategoryFormData(formData: FormData) {
   return categoryFormSchema.safeParse({
     name: formData.get("name"),
     description: formData.get("description") ?? "",
+  });
+}
+
+export function parseUserCreateFormData(formData: FormData) {
+  return userCreateFormSchema.safeParse({
+    email: formData.get("email"),
+    displayName: formData.get("displayName") ?? "",
+    password: formData.get("password"),
+    role: formData.get("role"),
+    isActive: String(formData.get("isActive") ?? "1") === "1",
   });
 }
 

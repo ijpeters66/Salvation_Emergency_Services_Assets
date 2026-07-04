@@ -5,6 +5,7 @@ const {
   revalidatePathMock,
   getCurrentUserContextMock,
   getCurrentSupabaseUserIdMock,
+  createSupabaseAdminClientMock,
   createSupabaseSettingsDependenciesMock,
   getPublicEnvStatusMock,
 } = vi.hoisted(() => ({
@@ -12,6 +13,7 @@ const {
   revalidatePathMock: vi.fn(),
   getCurrentUserContextMock: vi.fn(),
   getCurrentSupabaseUserIdMock: vi.fn(),
+  createSupabaseAdminClientMock: vi.fn(),
   createSupabaseSettingsDependenciesMock: vi.fn(),
   getPublicEnvStatusMock: vi.fn(),
 }));
@@ -33,11 +35,12 @@ vi.mock("@/lib/env", () => ({
 }));
 
 vi.mock("@/lib/settings/server", () => ({
+  createSupabaseAdminClient: createSupabaseAdminClientMock,
   createSupabaseSettingsDependencies: createSupabaseSettingsDependenciesMock,
   getCurrentSupabaseUserId: getCurrentSupabaseUserIdMock,
 }));
 
-import { updateUserAccessAction } from "@/app/settings/actions";
+import { createUserAccessAction, updateUserAccessAction } from "@/app/settings/actions";
 
 function buildFormData(overrides?: {
   userId?: string;
@@ -57,6 +60,7 @@ describe("settings actions", () => {
     revalidatePathMock.mockReset();
     getCurrentUserContextMock.mockReset();
     getCurrentSupabaseUserIdMock.mockReset();
+    createSupabaseAdminClientMock.mockReset();
     createSupabaseSettingsDependenciesMock.mockReset();
     getPublicEnvStatusMock.mockReset();
     redirectMock.mockImplementation((location: string) => {
@@ -137,6 +141,84 @@ describe("settings actions", () => {
       expect.objectContaining({
         actionType: "settings.user.update",
         recordId: "target-user",
+      }),
+    );
+    expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
+  });
+
+  it("creates a new user login and profile", async () => {
+    const authAdmin = {
+      listUsers: vi.fn().mockResolvedValue({
+        data: { users: [] },
+        error: null,
+      }),
+      createUser: vi.fn().mockResolvedValue({
+        data: { user: { id: "new-user" } },
+        error: null,
+      }),
+      updateUserById: vi.fn(),
+    };
+    const upsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: { user_id: "new-user" },
+          error: null,
+        }),
+      }),
+    });
+    const getRoleIdByKey = vi.fn().mockResolvedValue("role-2");
+    const writeAuditLog = vi.fn().mockResolvedValue({ ok: true });
+
+    getPublicEnvStatusMock.mockReturnValue({ configured: true, missing: [] });
+    getCurrentUserContextMock.mockResolvedValue({
+      email: "admin@example.com",
+      displayName: "Admin",
+      role: "system_admin",
+    });
+    getCurrentSupabaseUserIdMock.mockResolvedValue("admin-user");
+    createSupabaseAdminClientMock.mockReturnValue({
+      auth: { admin: authAdmin },
+      from: vi.fn().mockReturnValue({ upsert }),
+    });
+    createSupabaseSettingsDependenciesMock.mockReturnValue({
+      getRoleIdByKey,
+      updateUserProfile: vi.fn(),
+      writeAuditLog,
+    });
+
+    const formData = new FormData();
+    formData.set("email", "new.user@example.com");
+    formData.set("displayName", "New User");
+    formData.set("password", "temporary123");
+    formData.set("role", "user");
+    formData.set("isActive", "1");
+
+    await expect(createUserAccessAction(formData)).rejects.toThrow(
+      "redirect:/settings?statusMessage=user-created",
+    );
+
+    expect(authAdmin.listUsers).toHaveBeenCalled();
+    expect(authAdmin.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "new.user@example.com",
+        password: "temporary123",
+        email_confirm: true,
+      }),
+    );
+    expect(getRoleIdByKey).toHaveBeenCalledWith("user");
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: "new-user",
+        role_id: "role-2",
+        display_name: "New User",
+        is_active: true,
+      }),
+      expect.any(Object),
+    );
+    expect(writeAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionType: "settings.user.create",
+        recordId: "new-user",
       }),
     );
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");

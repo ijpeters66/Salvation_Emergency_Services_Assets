@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/domain-types";
 import { getPublicEnvStatus } from "@/lib/env";
 import type { ReportBrandingSettings } from "@/lib/report-branding";
+import { createClient } from "@supabase/supabase-js";
 
 type AssetCategoryInsert = Database["public"]["Tables"]["asset_category"]["Insert"];
 type ConsumableCategoryInsert = Database["public"]["Tables"]["consumable_category"]["Insert"];
@@ -137,6 +138,22 @@ export async function getStoredReportBrandingSettings() {
     ...defaults,
     ...(data.value as Partial<ReportBrandingSettings>),
   };
+}
+
+export function createSupabaseAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return null;
+  }
+
+  return createClient<Database>(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
 
 export function createSupabaseSettingsDependencies() {
