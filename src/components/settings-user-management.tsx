@@ -106,6 +106,11 @@ export function SettingsUserManagement({
                     <div className="grid gap-3">
                       <form action={updateUserAccessAction} className="flex flex-wrap gap-2">
                         <input name="userId" type="hidden" value={profile.user_id} />
+                        <input
+                          name="displayName"
+                          type="hidden"
+                          value={profile.display_name ?? profile.email ?? ""}
+                        />
                         <select
                           className="h-9 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand-red)]"
                           defaultValue={profile.role_key}

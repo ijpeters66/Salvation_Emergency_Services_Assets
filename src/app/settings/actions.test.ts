@@ -93,6 +93,16 @@ describe("settings actions", () => {
       role: "system_admin",
     });
     getCurrentSupabaseUserIdMock.mockResolvedValue("admin-user");
+    createSupabaseAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          listUsers: vi.fn(),
+          createUser: vi.fn(),
+          updateUserById: vi.fn(),
+        },
+      },
+      from: vi.fn(),
+    });
     createSupabaseSettingsDependenciesMock.mockReturnValue({
       getRoleIdByKey: vi.fn(),
       updateUserProfile: vi.fn(),
@@ -107,9 +117,13 @@ describe("settings actions", () => {
   });
 
   it("updates another user role and revalidates settings pages", async () => {
-    const updateUserProfile = vi.fn().mockResolvedValue({
-      data: { user_id: "target-user" },
-      error: null,
+    const upsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: { user_id: "target-user" },
+          error: null,
+        }),
+      }),
     });
     const getRoleIdByKey = vi.fn().mockResolvedValue("role-2");
     const writeAuditLog = vi.fn().mockResolvedValue({ ok: true });
@@ -121,9 +135,18 @@ describe("settings actions", () => {
       role: "system_admin",
     });
     getCurrentSupabaseUserIdMock.mockResolvedValue("admin-user");
+    createSupabaseAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          listUsers: vi.fn(),
+          createUser: vi.fn(),
+          updateUserById: vi.fn(),
+        },
+      },
+      from: vi.fn().mockReturnValue({ upsert }),
+    });
     createSupabaseSettingsDependenciesMock.mockReturnValue({
       getRoleIdByKey,
-      updateUserProfile,
       writeAuditLog,
     });
 
@@ -134,12 +157,13 @@ describe("settings actions", () => {
     ).rejects.toThrow("redirect:/settings?statusMessage=user-saved");
 
     expect(getRoleIdByKey).toHaveBeenCalledWith("system_admin");
-    expect(updateUserProfile).toHaveBeenCalledWith(
-      "target-user",
+    expect(upsert).toHaveBeenCalledWith(
       expect.objectContaining({
+        user_id: "target-user",
         role_id: "role-2",
         is_active: true,
       }),
+      expect.any(Object),
     );
     expect(writeAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({

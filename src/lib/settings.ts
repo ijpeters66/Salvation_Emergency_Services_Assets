@@ -114,6 +114,7 @@ export function parseUserRoleFormData(formData: FormData) {
   const userId = String(formData.get("userId") ?? "").trim();
   const role = String(formData.get("role") ?? "").trim();
   const isActive = String(formData.get("isActive") ?? "1") === "1";
+  const displayName = String(formData.get("displayName") ?? "").trim();
 
   if (!userId || !isUserRole(role)) {
     return {
@@ -128,6 +129,7 @@ export function parseUserRoleFormData(formData: FormData) {
       userId,
       role: role as UserRole,
       isActive,
+      displayName: displayName.length > 0 ? displayName : null,
     },
   };
 }

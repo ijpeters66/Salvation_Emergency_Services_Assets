@@ -218,6 +218,10 @@ export async function updateUserAccessAction(formData: FormData) {
   }
 
   const adminContext = context!;
+  if (!adminContext.adminClient) {
+    redirectToSettings("auth-error");
+  }
+  const adminClient = adminContext.adminClient!;
   const parsedData = parsed.data!;
 
   if (parsedData.userId === adminContext.userId) {
@@ -226,11 +230,27 @@ export async function updateUserAccessAction(formData: FormData) {
     }
   }
 
-  const { data, error } = await adminContext.dependencies.updateUserProfile(parsedData.userId, {
-    role_id: (await adminContext.dependencies.getRoleIdByKey(parsedData.role)) ?? undefined,
-    is_active: parsedData.isActive,
-    updated_at: new Date().toISOString(),
-  });
+  const roleId = await adminContext.dependencies.getRoleIdByKey(parsedData.role);
+
+  if (!roleId) {
+    redirectToSettings("save-error");
+  }
+  const resolvedRoleId = roleId as string;
+
+  const { data, error } = await adminClient
+    .from("app_user_profile")
+    .upsert(
+      {
+        user_id: parsedData.userId,
+        role_id: resolvedRoleId,
+        display_name: parsedData.displayName,
+        is_active: parsedData.isActive,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    )
+    .select("*")
+    .single();
 
   if (error || !data) {
     redirectToSettings("save-error");

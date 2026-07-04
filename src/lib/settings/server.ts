@@ -65,18 +65,67 @@ export async function listSettingsUsers() {
     return rows;
   }
 
-  const { data: authUsers } = await adminClient.auth.admin.listUsers({
-    page: 1,
-    perPage: 1000,
-  });
+  const [{ data: authUsers }, { data: roleRows }] = await Promise.all([
+    adminClient.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    }),
+    supabase.from("role").select("id, key, name"),
+  ]);
+
+  const defaultUserRole = roleRows?.find((role) => role.key === "user") ?? roleRows?.[0];
+
+  if (!defaultUserRole) {
+    return rows;
+  }
+
   const emailByUserId = new Map(
     authUsers?.users.map((user) => [user.id, user.email ?? null]) ?? [],
   );
+  const authByUserId = new Map(
+    authUsers?.users.map((user) => [
+      user.id,
+      {
+        email: user.email ?? null,
+        displayName:
+          typeof user.user_metadata?.display_name === "string" &&
+          user.user_metadata.display_name.trim().length > 0
+            ? user.user_metadata.display_name.trim()
+            : null,
+      },
+    ]) ?? [],
+  );
+  const rowsByUserId = new Map(rows.map((row) => [row.user_id, row]));
 
-  return rows.map((row) => ({
+  const mergedRows = authUsers?.users.map((user) => {
+    const profile = rowsByUserId.get(user.id);
+
+    if (profile) {
+      return {
+        ...profile,
+        email: emailByUserId.get(user.id) ?? null,
+      };
+    }
+
+    const authUser = authByUserId.get(user.id);
+
+    return {
+      user_id: user.id,
+      email: authUser?.email ?? null,
+      display_name: authUser?.displayName ?? authUser?.email ?? null,
+      role_id: defaultUserRole.id,
+      role_key: defaultUserRole.key,
+      role_name: defaultUserRole.name,
+      is_active: true,
+    };
+  }) ?? [];
+
+  const unmatchedProfiles = rows.filter((row) => !authByUserId.has(row.user_id));
+
+  return [...mergedRows, ...unmatchedProfiles.map((row) => ({
     ...row,
     email: emailByUserId.get(row.user_id) ?? null,
-  }));
+  }))];
 }
 
 export async function listMovementReasons(includeArchived = false, role: UserRole = "user") {
