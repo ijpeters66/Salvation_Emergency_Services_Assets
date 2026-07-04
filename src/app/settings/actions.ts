@@ -11,6 +11,7 @@ import {
   parseCategoryFormData,
   parseMovementReasonFormData,
   parseUserCreateFormData,
+  parseUserPasswordResetFormData,
   parseUserRoleFormData,
 } from "@/lib/settings";
 import {
@@ -153,6 +154,51 @@ export async function createUserAccessAction(formData: FormData) {
 
   revalidatePath("/settings");
   redirectToSettings("user-created");
+}
+
+export async function resetUserPasswordAction(formData: FormData) {
+  const parsed = parseUserPasswordResetFormData(formData);
+  const context = await getAdminMutationContext();
+
+  if (!parsed.success) {
+    redirectToSettings("auth-error");
+  }
+
+  if (!context || !context.adminClient) {
+    redirectToSettings("auth-error");
+  }
+
+  if (!("data" in parsed)) {
+    redirectToSettings("auth-error");
+  }
+
+  const adminContext = context!;
+  if (!adminContext.adminClient) {
+    redirectToSettings("auth-error");
+  }
+  const adminClient = adminContext.adminClient!;
+  const parsedData = parsed.data!;
+
+  const { error } = await adminClient.auth.admin.updateUserById(parsedData.userId, {
+    password: parsedData.password,
+  });
+
+  if (error) {
+    redirectToSettings("save-error");
+  }
+
+  await adminContext.dependencies.writeAuditLog({
+    userId: adminContext.userId,
+    actionType: "settings.user.password_reset",
+    recordType: "app_user_profile",
+    recordId: parsedData.userId,
+    newValue: {
+      password_reset: true,
+    },
+  });
+
+  revalidatePath("/settings");
+  redirectToSettings("user-password-reset");
 }
 
 export async function updateUserAccessAction(formData: FormData) {

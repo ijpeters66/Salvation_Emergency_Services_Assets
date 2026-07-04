@@ -3,7 +3,7 @@
 import { Search, Users } from "lucide-react";
 import { useState } from "react";
 
-import { updateUserAccessAction } from "@/app/settings/actions";
+import { resetUserPasswordAction, updateUserAccessAction } from "@/app/settings/actions";
 import { Button } from "@/components/ui/button";
 import type { SettingsUserRow } from "@/lib/settings/server";
 
@@ -101,31 +101,48 @@ export function SettingsUserManagement({
                     {profile.is_active ? "Active" : "Deactivated"}
                   </td>
                   <td className="px-4 py-4">
-                    <form action={updateUserAccessAction} className="flex flex-wrap gap-2">
-                      <input name="userId" type="hidden" value={profile.user_id} />
-                      <select
-                        className="h-9 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand-red)]"
-                        defaultValue={profile.role_key}
-                        name="role"
-                      >
-                        {roles.map((role) => (
-                          <option key={role.id} value={role.key}>
-                            {role.name}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className="h-9 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand-red)]"
-                        defaultValue={profile.is_active ? "1" : "0"}
-                        name="isActive"
-                      >
-                        <option value="1">Active</option>
-                        <option value="0">Deactivate</option>
-                      </select>
-                      <Button size="sm" type="submit" variant="outline">
-                        Save
-                      </Button>
-                    </form>
+                    <div className="grid gap-3">
+                      <form action={updateUserAccessAction} className="flex flex-wrap gap-2">
+                        <input name="userId" type="hidden" value={profile.user_id} />
+                        <select
+                          className="h-9 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand-red)]"
+                          defaultValue={profile.role_key}
+                          name="role"
+                        >
+                          {roles.map((role) => (
+                            <option key={role.id} value={role.key}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          className="h-9 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand-red)]"
+                          defaultValue={profile.is_active ? "1" : "0"}
+                          name="isActive"
+                        >
+                          <option value="1">Active</option>
+                          <option value="0">Deactivate</option>
+                        </select>
+                        <Button size="sm" type="submit" variant="outline">
+                          Save
+                        </Button>
+                      </form>
+                      <form action={resetUserPasswordAction} className="flex flex-wrap gap-2">
+                        <input name="userId" type="hidden" value={profile.user_id} />
+                        <input
+                          autoComplete="new-password"
+                          className="h-9 min-w-56 rounded-md border border-[var(--border)] bg-white px-3 text-sm outline-none focus:border-[var(--brand-red)]"
+                          name="password"
+                          minLength={8}
+                          placeholder="Temporary password"
+                          required
+                          type="password"
+                        />
+                        <Button size="sm" type="submit" variant="outline">
+                          Reset password
+                        </Button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))

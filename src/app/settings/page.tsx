@@ -40,6 +40,7 @@ const statusMessages: Record<string, string> = {
   "save-error": "The settings change could not be saved. Check the data and Supabase setup.",
   "self-lockout": "You cannot remove your own system admin access or deactivate your own profile.",
   "user-created": "User login created or refreshed.",
+  "user-password-reset": "User password reset.",
   "user-saved": "User access updated.",
   "branding-saved": "Report branding saved.",
   "asset-category-saved": "Asset category added.",

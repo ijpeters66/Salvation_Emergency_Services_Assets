@@ -127,6 +127,7 @@ describe("SettingsPage", () => {
 
     expect(markup).toContain("Create user");
     expect(markup).toContain("Search users");
+    expect(markup).toContain("Reset password");
     expect(markup).toContain("User management");
     expect(markup).toContain("Report branding");
     expect(markup).toContain("Movement reasons");

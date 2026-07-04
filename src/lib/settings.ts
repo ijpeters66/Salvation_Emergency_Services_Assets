@@ -52,6 +52,11 @@ export const userCreateFormSchema = z.object({
   isActive: z.boolean(),
 });
 
+export const userPasswordResetFormSchema = z.object({
+  userId: z.string().trim().min(1, "User is required."),
+  password: z.string().trim().min(8, "Password must be at least 8 characters."),
+});
+
 export function normaliseMovementReasonKey(label: string) {
   return label
     .trim()
@@ -95,6 +100,13 @@ export function parseUserCreateFormData(formData: FormData) {
     password: formData.get("password"),
     role: formData.get("role"),
     isActive: String(formData.get("isActive") ?? "1") === "1",
+  });
+}
+
+export function parseUserPasswordResetFormData(formData: FormData) {
+  return userPasswordResetFormSchema.safeParse({
+    userId: formData.get("userId"),
+    password: formData.get("password"),
   });
 }
 

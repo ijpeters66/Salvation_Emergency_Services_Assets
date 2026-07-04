@@ -40,7 +40,11 @@ vi.mock("@/lib/settings/server", () => ({
   getCurrentSupabaseUserId: getCurrentSupabaseUserIdMock,
 }));
 
-import { createUserAccessAction, updateUserAccessAction } from "@/app/settings/actions";
+import {
+  createUserAccessAction,
+  resetUserPasswordAction,
+  updateUserAccessAction,
+} from "@/app/settings/actions";
 
 function buildFormData(overrides?: {
   userId?: string;
@@ -219,6 +223,51 @@ describe("settings actions", () => {
       expect.objectContaining({
         actionType: "settings.user.create",
         recordId: "new-user",
+      }),
+    );
+    expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
+  });
+
+  it("resets an existing user password", async () => {
+    const authAdmin = {
+      listUsers: vi.fn(),
+      createUser: vi.fn(),
+      updateUserById: vi.fn().mockResolvedValue({ error: null }),
+    };
+    const writeAuditLog = vi.fn().mockResolvedValue({ ok: true });
+
+    getPublicEnvStatusMock.mockReturnValue({ configured: true, missing: [] });
+    getCurrentUserContextMock.mockResolvedValue({
+      email: "admin@example.com",
+      displayName: "Admin",
+      role: "system_admin",
+    });
+    getCurrentSupabaseUserIdMock.mockResolvedValue("admin-user");
+    createSupabaseAdminClientMock.mockReturnValue({
+      auth: { admin: authAdmin },
+      from: vi.fn(),
+    });
+    createSupabaseSettingsDependenciesMock.mockReturnValue({
+      getRoleIdByKey: vi.fn(),
+      updateUserProfile: vi.fn(),
+      writeAuditLog,
+    });
+
+    const formData = new FormData();
+    formData.set("userId", "target-user");
+    formData.set("password", "temporary123");
+
+    await expect(resetUserPasswordAction(formData)).rejects.toThrow(
+      "redirect:/settings?statusMessage=user-password-reset",
+    );
+
+    expect(authAdmin.updateUserById).toHaveBeenCalledWith("target-user", {
+      password: "temporary123",
+    });
+    expect(writeAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionType: "settings.user.password_reset",
+        recordId: "target-user",
       }),
     );
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
