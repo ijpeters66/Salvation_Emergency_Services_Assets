@@ -20,7 +20,7 @@ import { SettingsUserManagement } from "@/components/settings-user-management";
 import { Button } from "@/components/ui/button";
 import { getCurrentUserContext } from "@/lib/auth";
 import { getPublicEnvStatus, getSupabaseProjectRef } from "@/lib/env";
-import { filterSettingsUsers, getRoleOptions } from "@/lib/settings";
+import { getRoleOptions } from "@/lib/settings";
 import {
   getStoredReportBrandingSettings,
   listAssetCategoriesForSettings,
@@ -79,7 +79,6 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
       listMovementReasons(true, "system_admin"),
     ]);
   const roleOptions = getRoleOptions();
-  const visibleUsers = filterSettingsUsers(users, roleOptions, userSearch);
 
   return (
     <AppShell>
@@ -199,7 +198,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             initialSearch={userSearch}
             roleOptions={roleOptions}
             roles={roles}
-            users={visibleUsers}
+            users={users}
           />
 
           <aside className="panel-card-soft p-5">
